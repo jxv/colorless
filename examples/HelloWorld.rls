@@ -1,0 +1,59 @@
+u8, u16, u32, u64
+i8, i16, i32, i64
+f32, f64
+int
+str
+bool
+
+Option a
+Either a b
+List a
+NonEmpty # 
+Map a b
+
+# comment
+
+echo str: str
+
+Id a: str
+Name: str
+Years: int
+Years: Years
+
+Person
+  name: Name
+
+Parents
+  mother: Id Person
+  father: Id Person
+
+age (Id Person): Years
+parents (Id Person): Parents
+
+Color
+  Red
+  Blue
+  Yellow
+  Green
+
+Item
+  name: Name
+  color: Color
+
+Favorite
+  user: Id User
+  item: Id Item
+
+Circle
+  center: Point
+  radius: f64
+
+Point
+  x: i32
+  y: i32
+
+Shape
+  None
+  Point Point (List Point)
+  Rect Point Point
+  Circle Circle
