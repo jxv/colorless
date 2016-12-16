@@ -105,11 +105,8 @@ Shape
 // import hooks
 
 > Suit
+> Rank
 > #ImportedTag
-
-// spaces not required
-
->Rank
 
 Card
   suit: Suit
