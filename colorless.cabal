@@ -34,6 +34,7 @@ library
   build-depends:
       base >= 4.7 && < 5
     , pregame == 1.0.3.0
+    , megaparsec
   default-language:
     Haskell2010
   default-extensions:
