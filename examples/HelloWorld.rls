@@ -111,6 +111,8 @@ Shape a b
 Shoe Color
   size: natural
 
+shoeStock (Shoe Red): u32
+
 // import hooks
 
 > Suit
