@@ -1,24 +1,51 @@
+// single line comment
+
+/* 
+multi
+line
+comment
+*/
+
+// encoding types
 u8, u16, u32, u64
 i8, i16, i32, i64
 f32, f64
-int
-str
 bool
+char
+int
+uint
+rat
+str
+
+// builtin sum types and collections
 
 Option a
 Either a b
 List a
-NonEmpty # 
 Map a b
+Array (a: uint) b
+MinList (a: uint) b
 
-# comment
+// tags
+
+#Tag
+#AnotherTag
+
+// function declaration
 
 echo str: str
 
-Id a: str
+// type aliases
+
 Name: str
 Years: int
 Years: Years
+
+// type alias with a phantom type
+
+Id a: str
+
+// record types
 
 Person
   name: Name
@@ -27,8 +54,17 @@ Parents
   mother: Id Person
   father: Id Person
 
+// more function declarations
+
 age (Id Person): Years
 parents (Id Person): Parents
+
+// function declaration with minimally sized list, array of size 7, and a tag
+
+foo (MinList 2 str) bool char: Array 7 Person
+  #Tag
+
+// sum type
 
 Color
   Red
@@ -36,24 +72,48 @@ Color
   Yellow
   Green
 
+// record 
+
 Item
   name: Name
   color: Color
 
-Favorite
-  user: Id User
+// record with two phantom type as fields
+
+Ownership
+  person: Id Person
   item: Id Item
+
+// record with a tag
 
 Circle
   center: Point
   radius: f64
+  #AnotherTag
 
 Point
   x: i32
   y: i32
 
+// sum type
+
 Shape
-  None
-  Point Point (List Point)
-  Rect Point Point
   Circle Circle
+  Rect Point Point
+  Polygon (MinList 3 Point)
+
+// import hooks
+
+> Suit
+> #ImportedTag
+
+// spaces not required
+
+>Rank
+
+Card
+  suit: Suit
+  rank: Rank
+
+higherCard Card Card: Card
+  #YetAnotherTag
