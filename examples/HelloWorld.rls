@@ -10,12 +10,14 @@ comment
 u8, u16, u32, u64
 i8, i16, i32, i64
 f32, f64
-bool
-char
-int
-uint
-rat
-str
+boolean
+character
+integer
+negative
+nonnegative
+natural
+rational
+string
 
 // builtin sum types and collections
 
@@ -23,8 +25,8 @@ Option a
 Either a b
 List a
 Map a b
-Array (a: uint) b
-MinList (a: uint) b
+Array (a: natural) b
+MinimalList (a: natural) b
 
 // tags
 
@@ -33,17 +35,17 @@ MinList (a: uint) b
 
 // function declaration
 
-echo str: str
+echo string: string
 
 // type aliases
 
-Name: str
-Years: int
+Name: string
+Years: nonnegative
 Years: Years
 
 // type alias with a phantom type
 
-Id a: str
+Id a: string
 
 // record types
 
@@ -61,7 +63,7 @@ parents (Id Person): Parents
 
 // function declaration with minimally sized list, array of size 7, and a tag
 
-foo (MinList 2 str) bool char: Array 7 Person
+foo (MinimalList 2 string) boolean character: Array 7 Person
   #Tag
 
 // sum type
@@ -87,20 +89,27 @@ Ownership
 // record with a tag
 
 Circle
-  center: Point
+  center: Point f64
   radius: f64
   #AnotherTag
 
-Point
-  x: i32
-  y: i32
+// records can have polymorphic variables and be used before declaration
 
-// sum type
+Point a
+  x: a
+  y: a
 
-Shape
+// sum type with polymorphic variables
+
+Shape a b
   Circle Circle
-  Rect Point Point
-  Polygon (MinList 3 Point)
+  Rectangle (Point a) (Point a)
+  Polygon (MinimalList 3 (Point b))
+
+// something something kind
+
+Shoe Color
+  size: natural
 
 // import hooks
 
