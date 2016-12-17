@@ -1,0 +1,6 @@
+@version 0.1.0
+
+add f32 f32: f32
+subtract f32 f32: f32
+multiply f32 f32: f32
+divide f32 f32: Option f32
