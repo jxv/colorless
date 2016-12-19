@@ -42,8 +42,11 @@ echo str: str
 ;; type aliases
 
 Name: str
+
+; type alias with a tag
+
 Years: nonneg
-Years: Years
+  #Tag
 
 ; type alias with a phantom type
 
