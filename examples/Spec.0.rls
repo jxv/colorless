@@ -5,20 +5,21 @@
 ; colorless version
 @version 0.0.0
 
-;; encoding types
+;; encoding and primitive types
 
 unit
 u8, u16, u32, u64
 i8, i16, i32, i64
 f32, f64
-boolean
-character
-integer
-negative
-nonnegative
-natural
-rational
-string
+bool
+char
+str
+int
+neg
+nonneg
+nonzero
+nat
+rat
 
 ;; builtin sum types and collections
 
@@ -26,8 +27,8 @@ Option a
 Either a b
 List a
 Map key value
-Array (size: natural) b
-MinimalList (minSize: natural) b
+Array (size: nat) b
+MinList (minSize: nat) b
 
 ;; tags
 
@@ -36,17 +37,17 @@ MinimalList (minSize: natural) b
 
 ;; function declaration
 
-echo string: string
+echo str: str
 
 ;; type aliases
 
-Name: string
-Years: nonnegative
+Name: str
+Years: nonneg
 Years: Years
 
 ; type alias with a phantom type
 
-Id a: string
+Id a: str
 
 ;; product types
 
@@ -64,7 +65,7 @@ parents (Id Person): Parents
 
 ; function declaration with minimally sized list, array of size 7, and a tag
 
-foo (MinimalList 2 string) boolean character: Array 7 Person
+foo (MinList 2 str) bool char: Array 7 Person
   #Tag
 
 ;; types
@@ -103,7 +104,7 @@ Point a
   y: a
 
 ; encoding types can be used as constraints
-A (a: string)
+A (a: str)
   b: i32
   c: f32
 
@@ -116,7 +117,7 @@ D
 Shape a b
   Circle Circle
   Rectangle (Point a) (Point a)
-  Polygon (MinimalList 3 (Point b))
+  Polygon (MinList 3 (Point b))
 
 ;; import hooks
 
