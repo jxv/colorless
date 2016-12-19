@@ -25,9 +25,9 @@ string
 Option a
 Either a b
 List a
-Map a b
-Array (a: natural) b
-MinimalList (a: natural) b
+Map key value
+Array (size: natural) b
+MinimalList (minSize: natural) b
 
 ;; tags
 
@@ -102,6 +102,15 @@ Point a
   x: a
   y: a
 
+; encoding types can be used as constraints
+A (a: string)
+  b: i32
+  c: f32
+
+D
+  E (A "hello")
+  F (A "bye")
+
 ; sum type with polymorphic variables
 
 Shape a b
@@ -109,18 +118,12 @@ Shape a b
   Rectangle (Point a) (Point a)
   Polygon (MinimalList 3 (Point b))
 
-;; something something kind
-
-Shoe Color
-  size: natural
-
-shoeStock (Shoe Red): u32
-
 ;; import hooks
 
 ; opaque type
 
 > Suit
+> Rank
 
 ; tag
 
@@ -130,17 +133,7 @@ shoeStock (Shoe Red): u32
 
 > A, B, #C, D, E
 
-; sum type with constructors, which can be incomplete
-
-> Rank
->   Ace
->   R7
-
-; product type and its labels, which must be complete!
-
 > Example
->   a: i32
->   b: Option character
 
 ; imports used locally
 
@@ -150,10 +143,3 @@ Card
 
 higherCard Card Card: Card
   #ImportedTag
-
-;; product type and something something kind
-
-Hat Example
-  size: natural
-
-wearIt natural (Hat (Example a: 8 b: (Some 'f'))) boolean: unit
