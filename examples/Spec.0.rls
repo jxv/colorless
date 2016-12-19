@@ -1,17 +1,13 @@
-// single line comment
+;; single line comment
 
-/* 
-multi
-line
-comment
-*/
+;; meta information
 
-// meta information
-
-// colorless version
+; colorless version
 @version 0.0.0
 
-// encoding types
+;; encoding types
+
+unit
 u8, u16, u32, u64
 i8, i16, i32, i64
 f32, f64
@@ -24,7 +20,7 @@ natural
 rational
 string
 
-// builtin sum types and collections
+;; builtin sum types and collections
 
 Option a
 Either a b
@@ -33,26 +29,26 @@ Map a b
 Array (a: natural) b
 MinimalList (a: natural) b
 
-// tags
+;; tags
 
 #Tag
 #AnotherTag
 
-// function declaration
+;; function declaration
 
 echo string: string
 
-// type aliases
+;; type aliases
 
 Name: string
 Years: nonnegative
 Years: Years
 
-// type alias with a phantom type
+; type alias with a phantom type
 
 Id a: string
 
-// record types
+;; product types
 
 Person
   name: Name
@@ -61,17 +57,19 @@ Parents
   mother: Id Person
   father: Id Person
 
-// more function declarations
+;; more function declarations
 
 age (Id Person): Years
 parents (Id Person): Parents
 
-// function declaration with minimally sized list, array of size 7, and a tag
+; function declaration with minimally sized list, array of size 7, and a tag
 
 foo (MinimalList 2 string) boolean character: Array 7 Person
   #Tag
 
-// sum type
+;; types
+
+; sum type
 
 Color
   Red
@@ -79,54 +77,83 @@ Color
   Yellow
   Green
 
-// record 
+; product type
 
 Item
   name: Name
   color: Color
 
-// record with two phantom type as fields
+; product type with two phantom types
 
 Ownership
   person: Id Person
   item: Id Item
 
-// record with a tag
+; product type with a tag
 
 Circle
   center: Point f64
   radius: f64
   #AnotherTag
 
-// records can have polymorphic variables and be used before declaration
+; product types can have polymorphic variables and be used before declaration
 
 Point a
   x: a
   y: a
 
-// sum type with polymorphic variables
+; sum type with polymorphic variables
 
 Shape a b
   Circle Circle
   Rectangle (Point a) (Point a)
   Polygon (MinimalList 3 (Point b))
 
-// something something kind
+;; something something kind
 
 Shoe Color
   size: natural
 
 shoeStock (Shoe Red): u32
 
-// import hooks
+;; import hooks
+
+; opaque type
 
 > Suit
-> Rank
+
+; tag
+
 > #ImportedTag
+
+; opaque types and tags
+
+> A, B, #C, D, E
+
+; sum type with constructors, which can be incomplete
+
+> Rank
+>   Ace
+>   R7
+
+; product type and its labels, which must be complete!
+
+> Example
+>   a: i32
+>   b: Option character
+
+; imports used locally
 
 Card
   suit: Suit
   rank: Rank
 
 higherCard Card Card: Card
-  #YetAnotherTag
+  #ImportedTag
+
+;; product type and something something kind
+
+Hat Example
+  size: natural
+
+wearIt natural (Hat (Example a: 8 b: (Some 'f'))) boolean: unit
