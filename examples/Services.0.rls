@@ -6,19 +6,25 @@
 > %Calculator.1
 
 ; While self importing is elegant, it's not useful.
-; Below this module, 'Services.0',  is referenced as '%'.
+; Below is this module, 'Services.0', which is referenced as '%'.
 
 > %
 
-; Services
+;; Services
+
+; Simple service
+
+$Calculator
+  %Calculator ; all functions and required types
+
+; Hook in types from other modules
 
 $Example
   %Spec < %Imports
   %Spec < %Deck
   %Spec
 
-$Calculator
-  %Calculator
+; Service inside services
 
 $Combined
   $Example
