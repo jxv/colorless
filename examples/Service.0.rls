@@ -1,0 +1,33 @@
+@version 0.0.0
+
+> %Imports.0
+> %Spec.0
+> %Deck.0
+> %Calculator.1
+
+$Example
+  %Spec < %Imports
+  %Spec < %Deck
+  %Spec
+
+$Calculator
+  %Calculator
+
+$Combined
+  $Example
+  $Calculator
+
+!HTTP
+  directory: /
+  protocol: JSON
+  service: $Combined
+
+!HTTP
+  directory: /calculator
+  protocol: JSON
+  service: $Calculator
+
+!HTTP
+  directory: /example
+  protocol: JSON
+  service: $Example
