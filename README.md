@@ -1,2 +1,2 @@
 #colorless
-Yet another IDL with RPC
+Yet another IDL for RPC
