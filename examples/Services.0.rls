@@ -10,6 +10,8 @@
 
 > %
 
+; Services
+
 $Example
   %Spec < %Imports
   %Spec < %Deck
@@ -21,6 +23,8 @@ $Calculator
 $Combined
   $Example
   $Calculator
+
+; Service Implementations
 
 !HTTP
   directory: /
