@@ -35,14 +35,17 @@ $Combined
 !HTTP
   directory: /
   protocol: JSON
+  meta: Header
   service: $Combined
 
 !HTTP
   directory: /calculator
   protocol: JSON
+  meta: Header
   service: $Calculator
 
 !HTTP
   directory: /example
   protocol: JSON
+  meta: Header
   service: $Example
