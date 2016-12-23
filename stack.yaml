@@ -1,6 +1,7 @@
 resolver: lts-7.13
 packages:
 - colorless
+- colorless-server
 
 extra-deps:
 - pregame-1.0.3.0
