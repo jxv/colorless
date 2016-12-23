@@ -32,6 +32,8 @@ library
   exposed-modules:
     Colorless
     Colorless.Parser
+    Colorless.Parser.Atomic
+    Colorless.Parser.Types
   build-depends:
       base >= 4.7 && < 5
     , pregame == 1.0.3.0
@@ -64,6 +66,7 @@ test-suite colorless-test
     , colorless
     , hspec
     , pregame == 1.0.3.0
+    , megaparsec
     , fixie
   ghc-options:
     -threaded -rtsopts -with-rtsopts=-N
