@@ -1,4 +1,4 @@
-module Test.ColorlessSpec (spec) where
+module Test.Colorless.ParserSpec (spec) where
 
 import Pregame
 

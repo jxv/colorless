@@ -31,6 +31,7 @@ library
     src
   exposed-modules:
     Colorless
+    Colorless.Parser
   build-depends:
       base >= 4.7 && < 5
     , pregame == 1.0.3.0

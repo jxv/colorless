@@ -4,7 +4,6 @@ import Pregame
 
 import Test.Hspec
 import Test.Fixie
-import Test.Fixie.TH
 
 import Colorless.Server
 
