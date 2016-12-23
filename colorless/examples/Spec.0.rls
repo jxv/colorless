@@ -16,7 +16,7 @@
 ; str
 ; int
 ; neg
-; nonneg
+; pos
 ; nonzero
 ; nat
 ; rat
