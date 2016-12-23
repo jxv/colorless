@@ -17,7 +17,6 @@
 ; int
 ; neg
 ; pos
-; nonzero
 ; nat
 ; rat
 
@@ -27,8 +26,8 @@
 ; Either a b
 ; List a
 ; Map key value
-; Array (size: nat) b
-; MinList (minSize: nat) b
+; Array (size: pos) b
+; MinList (minSize: pos) b
 
 ;; tags
 
