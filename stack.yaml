@@ -5,6 +5,6 @@ packages:
 
 extra-deps:
 - pregame-1.0.3.0
-- test-fixture-0.5.0.0
+- fixie-0.0.0
 flags: {}
 extra-package-dbs: []

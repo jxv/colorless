@@ -3,8 +3,8 @@ module Test.Colorless.ServerSpec (spec) where
 import Pregame
 
 import Test.Hspec
-import Control.Monad.TestFixture
-import Control.Monad.TestFixture.TH
+import Test.Fixie
+import Test.Fixie.TH
 
 import Colorless.Server
 
@@ -14,9 +14,10 @@ spec :: Spec
 spec = do
   describe "main" $ do
     it "should print the banner" $ do
-      calls <- logTestFixtureT main def
-        { _writeLine = \msg -> do
-            lift $ msg `shouldBe` bannerMessage
-            log "print banner"
-        }
+      let fixture = def
+            { _writeLine = \msg -> do
+                lift $ msg `shouldBe` bannerMessage
+                note "print banner"
+            }
+      calls <- notesT fixture main
       calls `shouldBe` ["print banner"]
