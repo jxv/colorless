@@ -62,13 +62,14 @@ newtype SumTag = SumTag Text
 
 data TagDeclaration = TagDeclaration
   { _tag :: Tag
+  , _tags :: [Tag]
   } deriving (Show, Eq)
 
 data FunctionDeclaration = FunctionDeclaration
   { _function :: Function
   , _parameters :: [(Maybe Label, Type)]
   , _output :: Type
-  , _tag :: Tag
+  , _tags :: [Tag]
   } deriving (Show, Eq)
 
 data SumDeclaration = SumDeclaration
