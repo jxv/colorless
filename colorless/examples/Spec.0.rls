@@ -65,9 +65,9 @@ Parents
 age (Id Person): Years
 parents (Id Person): Parents
 
-; function declaration with minimally sized list, array of size 7, and a tag
+; function declaration with minimally sized list, array of size 7, a tag, and parameter names
 
-foo (MinList 2 str) bool char: Array 7 Person
+foo (MinList 2 str) (asd: bool) (jkl: char): Array 7 Person
   #Tag
 
 ;; types

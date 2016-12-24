@@ -1,8 +1,16 @@
 module Colorless.Parser.Types
   ( PrimitiveType(..)
-  , Function(..)
+  , OpaqueType(..)
   , Type(..)
-  , FunctionPrototype(..)
+  , Tag(..)
+  , Function(..)
+  , Label(..)
+  , SumTag(..)
+  , TagDeclaration(..)
+  , FunctionDeclaration(..)
+  , SumDeclaration(..)
+  , ProductDeclaration(..)
+  , Declaration(..)
   , ParserError
   , ParserState
   ) where
@@ -34,18 +42,57 @@ data PrimitiveType
   | PrimitiveTypeRat
   deriving (Show, Eq)
 
-newtype Function = Function Text
-  deriving (Show, Eq, IsString)
+newtype OpaqueType = OpaqueType Text
+  deriving (Show, Eq, Ord, IsString, ToText)
 
 data Type
   = TypePrimitive PrimitiveType
+  | TypeOpaque OpaqueType
   deriving (Show, Eq)
 
-data FunctionPrototype = FunctionPrototype
-  { _function :: Function
-  , _parameters :: [Type]
-  , _output :: Type
+newtype Tag = Tag Text
+  deriving (Show, Eq, IsString, ToText)
+
+newtype Function = Function Text
+  deriving (Show, Eq, IsString, ToText)
+
+newtype Label = Label Text
+  deriving (Show, Eq, Ord, IsString, ToText)
+
+newtype SumTag = SumTag Text
+  deriving (Show, Eq, Ord, IsString, ToText)
+
+data TagDeclaration = TagDeclaration
+  { _tag :: Tag
   } deriving (Show, Eq)
+
+data FunctionDeclaration = FunctionDeclaration
+  { _function :: Function
+  , _parameters :: [(Maybe Label, Type)]
+  , _output :: Type
+  , _tag :: Tag
+  } deriving (Show, Eq)
+
+data SumDeclaration = SumDeclaration
+  { _type :: OpaqueType
+  , _parameters :: [(Label, Maybe PrimitiveType)]
+  , _subtypes :: Map SumTag [Type]
+  , _tags :: [Tag]
+  } deriving (Show, Eq)
+
+data ProductDeclaration = ProductDeclaration
+  { _type :: OpaqueType
+  , _parameters :: [(Label, Maybe PrimitiveType)]
+  , _labels :: Map Label Type
+  , _tags :: [Tag]
+  } deriving (Show, Eq)
+
+data Declaration
+  = DeclarationTag TagDeclaration
+  | DeclarationFunction FunctionDeclaration
+  | DeclarationSum SumDeclaration
+  | DeclarationProduct ProductDeclaration
+  deriving (Show, Eq)
 
 type ParserError = Dec
 type ParserState = Text
