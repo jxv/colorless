@@ -16,9 +16,7 @@ module Colorless.Parser.Types
   ) where
 
 import Pregame
-import Data.Tuple (uncurry)
-import Text.Megaparsec (string, ParsecT, runParserT, Token, Dec, ParseError, choice)
-import Text.Megaparsec.Prim (MonadParsec)
+import Text.Megaparsec (Dec)
 
 data PrimitiveType
   = PrimitiveTypeUnit
