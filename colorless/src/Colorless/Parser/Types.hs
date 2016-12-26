@@ -45,8 +45,20 @@ newtype OpaqueType = OpaqueType Text
 
 data Type
   = TypePrimitive PrimitiveType
-  | TypeOpaque OpaqueType
+  | TypeOpaque OpaqueTypeReference
   deriving (Show, Eq)
+
+data Parameter
+  = ParameterLabel Label
+  | ParameterString Text
+  | ParameterInteger Integer
+  | ParameterRational Integer Integer
+  deriving (Show, Eq)
+
+data OpaqueTypeReference = OpaqueTypeReference
+  { _type :: OpaqueType
+  , _valueParameters :: [Parameter]
+  } deriving (Show, Eq)
 
 newtype Tag = Tag Text
   deriving (Show, Eq, IsString, ToText)
@@ -72,18 +84,25 @@ data FunctionDeclaration = FunctionDeclaration
   , _tags :: [Tag]
   } deriving (Show, Eq)
 
-data SumDeclaration = SumDeclaration
+data OpaqueDeclaration = OpaqueDeclaration
   { _type :: OpaqueType
   , _parameters :: [(Label, Maybe PrimitiveType)]
-  , _subtypes :: Map SumTag [Type]
+  } deriving (Show, Eq)
+
+data SumDeclaration = SumDeclaration
+  { _opaqueDeclaration :: OpaqueDeclaration
+  , _subtypes :: [(SumTag, [Type])]
   , _tags :: [Tag]
   } deriving (Show, Eq)
 
 data ProductDeclaration = ProductDeclaration
-  { _type :: OpaqueType
-  , _parameters :: [(Label, Maybe PrimitiveType)]
-  , _labels :: Map Label Type
+  { _opaqueDeclaration :: OpaqueDeclaration
+  , _labels ::  [(Label, Type)]
   , _tags :: [Tag]
+  } deriving (Show, Eq)
+
+data ImportDeclaration = ImportDeclaration
+  { _types :: NonEmpty OpaqueDeclaration
   } deriving (Show, Eq)
 
 data Declaration

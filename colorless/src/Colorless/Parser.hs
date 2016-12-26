@@ -18,6 +18,11 @@ newtype ParserM a = ParserM (ParsecT ParserError ParserState IO a)
 runParserM :: ParserM a -> Text -> IO (Either (ParseError (Token ParserState) ParserError) a)
 runParserM (ParserM m) input = runParserT m "" input
 
+instance Atomic ParserM where
+  literal = literal'
+  token = token'
+  match = match'
+
 primitiveType' :: Atomic m => m PrimitiveType
 primitiveType' = match $ fmap (uncurry token)
   [ ("unit", PrimitiveTypeUnit)
