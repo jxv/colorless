@@ -1,5 +1,6 @@
 module Colorless.Parser.Types
-  ( PrimitiveType(..)
+  ( LineNumber(..)
+  , PrimitiveType(..)
   , OpaqueType(..)
   , Type(..)
   , Tag(..)
@@ -17,6 +18,9 @@ module Colorless.Parser.Types
 
 import Pregame
 import Text.Megaparsec (Dec)
+
+newtype LineNumber = LineNumber Integer
+  deriving (Show, Eq, Num)
 
 data PrimitiveType
   = PrimitiveTypeUnit
