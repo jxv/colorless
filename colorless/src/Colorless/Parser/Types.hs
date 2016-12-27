@@ -1,16 +1,28 @@
 module Colorless.Parser.Types
-  ( LineNumber(..)
+  ( Line(..)
+  , Column(..)
+  , Position(..)
   , PrimitiveType(..)
   , OpaqueType(..)
-  , Type(..)
   , Tag(..)
   , Function(..)
   , Label(..)
-  , SumTag(..)
+  , Subtype(..)
+  , Type(..)
+  , ParameterReference(..)
+  , OpaqueTypeReference(..)
   , TagDeclaration(..)
+  , FunctionParameter(..)
   , FunctionDeclaration(..)
+  , TypeParameter(..)
+  , OpaqueDeclaration(..)
+  , SubtypeDeclaration(..)
   , SumDeclaration(..)
+  , LabelDeclaration(..)
   , ProductDeclaration(..)
+  , OpaqueImport(..)
+  , Import(..)
+  , ImportsDeclaration(..)
   , Declaration(..)
   , ParserError
   , ParserState
@@ -19,8 +31,16 @@ module Colorless.Parser.Types
 import Pregame
 import Text.Megaparsec (Dec)
 
-newtype LineNumber = LineNumber Integer
+newtype Line = Line Integer
   deriving (Show, Eq, Num)
+
+newtype Column = Column Integer
+  deriving (Show, Eq, Num)
+
+data Position = Position
+  { _line :: Line
+  , _column :: Column
+  } deriving (Show, Eq)
 
 data PrimitiveType
   = PrimitiveTypeUnit
@@ -47,23 +67,6 @@ data PrimitiveType
 newtype OpaqueType = OpaqueType Text
   deriving (Show, Eq, Ord, IsString, ToText)
 
-data Type
-  = TypePrimitive PrimitiveType
-  | TypeOpaque OpaqueTypeReference
-  deriving (Show, Eq)
-
-data Parameter
-  = ParameterLabel Label
-  | ParameterString Text
-  | ParameterInteger Integer
-  | ParameterRational Integer Integer
-  deriving (Show, Eq)
-
-data OpaqueTypeReference = OpaqueTypeReference
-  { _type :: OpaqueType
-  , _valueParameters :: [Parameter]
-  } deriving (Show, Eq)
-
 newtype Tag = Tag Text
   deriving (Show, Eq, IsString, ToText)
 
@@ -73,40 +76,87 @@ newtype Function = Function Text
 newtype Label = Label Text
   deriving (Show, Eq, Ord, IsString, ToText)
 
-newtype SumTag = SumTag Text
+newtype Subtype = Subtype Text
   deriving (Show, Eq, Ord, IsString, ToText)
+
+data Type
+  = TypePrimitive PrimitiveType
+  | TypeOpaque OpaqueTypeReference
+  deriving (Show, Eq)
+
+data ParameterReference
+  = ParameterReferenceLabel Label
+  | ParameterReferenceString Text
+  | ParameterReferenceInteger Integer
+  | ParameterReferenceRational Integer Integer
+  deriving (Show, Eq)
+
+data OpaqueTypeReference = OpaqueTypeReference
+  { _type :: OpaqueType
+  , _parameterReferences :: [ParameterReference]
+  } deriving (Show, Eq)
 
 data TagDeclaration = TagDeclaration
   { _tag :: Tag
   , _tags :: [Tag]
   } deriving (Show, Eq)
 
+data FunctionParameter = FunctionParameter
+  { _label :: Maybe Label
+  , _type :: Type
+  } deriving (Show, Eq)
+
 data FunctionDeclaration = FunctionDeclaration
   { _function :: Function
-  , _parameters :: [(Maybe Label, Type)]
+  , _parameters :: [FunctionParameter]
   , _output :: Type
   , _tags :: [Tag]
   } deriving (Show, Eq)
 
+data TypeParameter = TypeParameter
+  { _label :: Label
+  , _primitiveType :: Maybe PrimitiveType
+  } deriving (Show, Eq)
+
 data OpaqueDeclaration = OpaqueDeclaration
   { _type :: OpaqueType
-  , _parameters :: [(Label, Maybe PrimitiveType)]
+  , _typeParameters :: [TypeParameter]
+  } deriving (Show, Eq)
+
+data SubtypeDeclaration = SubtypeDeclaration
+  { _subtype :: Subtype
+  , _parameters :: [Type]
   } deriving (Show, Eq)
 
 data SumDeclaration = SumDeclaration
   { _opaqueDeclaration :: OpaqueDeclaration
-  , _subtypes :: [(SumTag, [Type])]
+  , _subtypes :: [SubtypeDeclaration]
   , _tags :: [Tag]
+  } deriving (Show, Eq)
+
+data LabelDeclaration = LabelDeclaration
+  { _label :: Label
+  , _type :: Type
   } deriving (Show, Eq)
 
 data ProductDeclaration = ProductDeclaration
   { _opaqueDeclaration :: OpaqueDeclaration
-  , _labels ::  [(Label, Type)]
+  , _labels ::  [LabelDeclaration]
   , _tags :: [Tag]
   } deriving (Show, Eq)
 
-data ImportDeclaration = ImportDeclaration
-  { _types :: NonEmpty OpaqueDeclaration
+data OpaqueImport = OpaqueImport
+  { _type :: OpaqueType
+  , _typeParameters :: [TypeParameter]
+  } deriving (Show, Eq)
+
+data Import
+  = ImportOpaque OpaqueImport
+  | ImportTag Tag
+  deriving (Show, Eq)
+
+data ImportsDeclaration = ImportsDeclaration
+  { _imports :: NonEmpty Import
   } deriving (Show, Eq)
 
 data Declaration
@@ -114,7 +164,9 @@ data Declaration
   | DeclarationFunction FunctionDeclaration
   | DeclarationSum SumDeclaration
   | DeclarationProduct ProductDeclaration
+  | DeclarationImports ImportsDeclaration
   deriving (Show, Eq)
 
 type ParserError = Dec
+
 type ParserState = Text
