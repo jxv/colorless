@@ -33,6 +33,7 @@ library
     Colorless
     Colorless.Parser
     Colorless.Parser.Atomic
+    Colorless.Parser.Primitive
     Colorless.Parser.Types
   build-depends:
       base >= 4.7 && < 5

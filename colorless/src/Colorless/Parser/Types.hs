@@ -84,11 +84,17 @@ data Type
   | TypeOpaque OpaqueTypeReference
   deriving (Show, Eq)
 
+data Decimal = Decimal
+  { _integer :: Integer
+  , _decimal :: Integer
+  , _decimalResolution :: Integer
+  } deriving (Show, Eq)
+
 data ParameterReference
   = ParameterReferenceLabel Label
   | ParameterReferenceString Text
   | ParameterReferenceInteger Integer
-  | ParameterReferenceRational Integer Integer
+  | ParameterReferenceDecimal Decimal
   deriving (Show, Eq)
 
 data OpaqueTypeReference = OpaqueTypeReference
