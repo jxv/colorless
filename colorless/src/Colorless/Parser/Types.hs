@@ -23,6 +23,11 @@ module Colorless.Parser.Types
   , OpaqueImport(..)
   , Import(..)
   , ImportsDeclaration(..)
+  , Directory(..)
+  , HttpProtocol(..)
+  , HttpMeta(..)
+  , ServiceReference(..)
+  , HttpServiceImplementationDeclaration(..)
   , Declaration(..)
   , ParserError
   , ParserState
@@ -165,12 +170,38 @@ data ImportsDeclaration = ImportsDeclaration
   { _imports :: NonEmpty Import
   } deriving (Show, Eq)
 
+newtype Directory = Directory Text
+  deriving (Show, Eq)
+
+data HttpProtocol
+  = HttpProtocolJson
+  deriving (Show, Eq)
+
+data HttpMeta
+  = HttpMetaHeader
+  deriving (Show, Eq)
+
+newtype ServiceReference = ServiceReference Text
+  deriving (Show, Eq)
+
+data HttpServiceImplementationDeclaration = HttpServiceImplementationDeclaration
+  { _directory :: Directory
+  , _protocol :: HttpProtocol
+  , _meta :: HttpMeta
+  , _service :: ServiceReference
+  } deriving (Show, Eq)
+
+data ServiceImplementationDeclaration
+  = ServiceImplementationDelcarationHttp HttpServiceImplementationDeclaration
+  deriving (Show, Eq)
+
 data Declaration
   = DeclarationTag TagDeclaration
   | DeclarationFunction FunctionDeclaration
   | DeclarationSum SumDeclaration
   | DeclarationProduct ProductDeclaration
   | DeclarationImports ImportsDeclaration
+  | DeclarationServiceImplementation ServiceImplementationDeclaration
   deriving (Show, Eq)
 
 type ParserError = Dec
