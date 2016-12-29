@@ -40,6 +40,7 @@ module Colorless.Parser.Types
   ) where
 
 import Pregame
+import Data.String (IsString(fromString))
 import Text.Megaparsec (Dec)
 
 newtype Line = Line Integer
@@ -206,8 +207,11 @@ data ServiceDeclaration = ServiceDeclaration
   , _instances :: [ServiceInstance]
   } deriving (Show, Eq)
 
-newtype Directory = Directory Text
-  deriving (Show, Eq)
+newtype Directory = Directory [Text]
+  deriving (Show, Eq, Monoid)
+
+instance IsString Directory where
+  fromString str = Directory [toText str]
 
 data HttpProtocol
   = HttpProtocolJson
