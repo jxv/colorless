@@ -21,12 +21,18 @@ module Colorless.Parser.Types
   , LabelDeclaration(..)
   , ProductDeclaration(..)
   , OpaqueImport(..)
+  , ModuleVersion(..)
+  , ModuleImport(..)
   , Import(..)
   , ImportsDeclaration(..)
   , Directory(..)
   , HttpProtocol(..)
   , HttpMeta(..)
+  , ModuleReference(..)
+  , ModuleHook(..)
   , ServiceReference(..)
+  , ServiceInstance(..)
+  , ServiceDeclaration(..)
   , HttpServiceImplementationDeclaration(..)
   , Declaration(..)
   , ParserError
@@ -161,13 +167,43 @@ data OpaqueImport = OpaqueImport
   , _typeParameters :: [TypeParameter]
   } deriving (Show, Eq)
 
+newtype ModuleVersion = ModuleVersion Integer
+  deriving (Show, Eq)
+
+data ModuleImport = ModuleImport
+  { _module :: ModuleReference
+  , _version :: ModuleVersion
+  } deriving (Show, Eq)
+
 data Import
   = ImportOpaque OpaqueImport
   | ImportTag Tag
+  | ImportModule ModuleImport
   deriving (Show, Eq)
 
 data ImportsDeclaration = ImportsDeclaration
   { _imports :: NonEmpty Import
+  } deriving (Show, Eq)
+
+newtype ModuleReference = ModuleReference Text
+  deriving (Show, Eq)
+
+data ModuleHook = ModuleHook
+  { _to :: ModuleReference
+  , _from :: ModuleReference
+  } deriving (Show, Eq)
+
+newtype ServiceReference = ServiceReference Text
+  deriving (Show, Eq)
+
+data ServiceInstance
+  = ServiceInstanceModule ModuleReference
+  | ServiceInstanceService ServiceReference
+  deriving (Show, Eq)
+
+data ServiceDeclaration = ServiceDeclaration
+  { _hooks :: [ModuleHook]
+  , _instances :: [ServiceInstance]
   } deriving (Show, Eq)
 
 newtype Directory = Directory Text
@@ -179,9 +215,6 @@ data HttpProtocol
 
 data HttpMeta
   = HttpMetaHeader
-  deriving (Show, Eq)
-
-newtype ServiceReference = ServiceReference Text
   deriving (Show, Eq)
 
 data HttpServiceImplementationDeclaration = HttpServiceImplementationDeclaration
@@ -201,6 +234,7 @@ data Declaration
   | DeclarationSum SumDeclaration
   | DeclarationProduct ProductDeclaration
   | DeclarationImports ImportsDeclaration
+  | DeclarationService ServiceDeclaration
   | DeclarationServiceImplementation ServiceImplementationDeclaration
   deriving (Show, Eq)
 
