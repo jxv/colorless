@@ -32,9 +32,11 @@ library
   exposed-modules:
     Colorless
     Colorless.Parser
+    Colorless.Parser.Declaration
     Colorless.Parser.Atomic
     Colorless.Parser.Primitive
     Colorless.Parser.Types
+    Colorless.Parser.Token
   build-depends:
       base >= 4.7 && < 5
     , pregame == 1.0.3.0

@@ -34,6 +34,7 @@ module Colorless.Parser.Types
   , ServiceInstance(..)
   , ServiceDeclaration(..)
   , HttpServiceImplementationDeclaration(..)
+  , ModuleOverrideDeclaration(..)
   , Declaration(..)
   , ParserError
   , ParserState
@@ -169,7 +170,7 @@ data OpaqueImport = OpaqueImport
   } deriving (Show, Eq)
 
 newtype ModuleVersion = ModuleVersion Integer
-  deriving (Show, Eq)
+  deriving (Show, Eq, Num)
 
 data ModuleImport = ModuleImport
   { _module :: ModuleReference
@@ -187,7 +188,7 @@ data ImportsDeclaration = ImportsDeclaration
   } deriving (Show, Eq)
 
 newtype ModuleReference = ModuleReference Text
-  deriving (Show, Eq)
+  deriving (Show, Eq, IsString)
 
 data ModuleHook = ModuleHook
   { _to :: ModuleReference
@@ -232,6 +233,11 @@ data ServiceImplementationDeclaration
   = ServiceImplementationDelcarationHttp HttpServiceImplementationDeclaration
   deriving (Show, Eq)
 
+data ModuleOverrideDeclaration = ModuleOverrideDeclaration
+  { _module :: ModuleReference
+  , _version :: ModuleVersion
+  } deriving (Show, Eq)
+
 data Declaration
   = DeclarationTag TagDeclaration
   | DeclarationFunction FunctionDeclaration
@@ -240,6 +246,7 @@ data Declaration
   | DeclarationImports ImportsDeclaration
   | DeclarationService ServiceDeclaration
   | DeclarationServiceImplementation ServiceImplementationDeclaration
+  | DeclarationModuleOverride ModuleOverrideDeclaration
   deriving (Show, Eq)
 
 type ParserError = Dec
