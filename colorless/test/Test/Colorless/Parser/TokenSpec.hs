@@ -1,4 +1,3 @@
-{-# LANGUAGE RankNTypes #-}
 module Test.Colorless.Parser.TokenSpec (spec) where
 
 import Pregame
@@ -11,6 +10,8 @@ import Colorless.Parser.Atomic
 import Colorless.Parser.Token
 import Colorless.Parser.Types
 
+import Control.Applicative (Alternative(..))
+
 mkFixture "Fixture" [ts|Atomic|]
 
 spec :: Spec
@@ -18,9 +19,7 @@ spec = do
   describe "module override" $ do
     it "initiateModuleOverride' happy path" $ do
       functions <- functionsT def
-        { _literal = \a -> do
-            lift $ a `shouldBe` "-"
-            return a
+        { _match = \a -> lift $ a `shouldBe` "-"
         }
         initiateModuleOverride'
-      functions `shouldBe` ["literal"]
+      functions `shouldBe` ["match"]

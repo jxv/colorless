@@ -1,3 +1,4 @@
+{-# LANGUAGE ConstraintKinds #-}
 module Colorless.Parser.Types
   ( Line(..)
   , Column(..)
@@ -38,11 +39,13 @@ module Colorless.Parser.Types
   , Declaration(..)
   , ParserError
   , ParserState
+  , MonadParser
   ) where
 
 import Pregame
 import Data.String (IsString(fromString))
 import Text.Megaparsec (Dec)
+import Text.Megaparsec.Prim (MonadParsec)
 
 newtype Line = Line Integer
   deriving (Show, Eq, Num)
@@ -252,3 +255,5 @@ data Declaration
 type ParserError = Dec
 
 type ParserState = Text
+
+type MonadParser a = MonadParsec ParserError ParserState a

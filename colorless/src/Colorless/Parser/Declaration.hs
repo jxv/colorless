@@ -5,20 +5,21 @@ module Colorless.Parser.Declaration
   , moduleOverrideDeclaration'
   ) where
 
-import Colorless.Parser.Atomic
-import Colorless.Parser.Types
+import Colorless.Parser.Combinator
 import Colorless.Parser.Token
+import Colorless.Parser.Types
 import Pregame
+import Control.Applicative ((*>))
 
 class Monad m => Declarations m where
-  moduleOverrideDeclaration :: m ModuleOverrideDeclaration
+  moduleOverrideDeclarationToken :: m ModuleOverrideDeclaration
 
-declaration :: (Atomic m, Declarations m) => m Declaration
-declaration = match
-  [ DeclarationModuleOverride <$> moduleOverrideDeclaration
+declaration :: (Combinator m, Declarations m) => m Declaration
+declaration = choice
+  [ DeclarationModuleOverride <$> moduleOverrideDeclarationToken
   ]
 
 moduleOverrideDeclaration' :: Token m => m ModuleOverrideDeclaration
 moduleOverrideDeclaration' = do
   initiateModuleOverride
-  ModuleOverrideDeclaration <$> moduleReference <*> moduleVersion
+  ModuleOverrideDeclaration <$> moduleReferenceToken <*> (moduleVersionSeparator *> moduleVersionToken)

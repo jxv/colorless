@@ -32,9 +32,9 @@ library
   exposed-modules:
     Colorless
     Colorless.Parser
-    Colorless.Parser.Declaration
     Colorless.Parser.Atomic
-    Colorless.Parser.Primitive
+    Colorless.Parser.Combinator
+    Colorless.Parser.Declaration
     Colorless.Parser.Types
     Colorless.Parser.Token
   build-depends:
@@ -91,6 +91,8 @@ test-suite colorless-test
     TupleSections
     TemplateHaskell
     QuasiQuotes
+    DuplicateRecordFields
+    RankNTypes
 
 source-repository head
   type:
