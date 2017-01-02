@@ -16,7 +16,7 @@ import Pregame
 
 class Monad m => Token m where
   primitiveTypeToken :: m PrimitiveType
-  --
+  tagToken :: m Tag
   initiateModuleOverride :: m ()
   moduleReferenceToken :: m ModuleReference
   moduleVersionToken :: m ModuleVersion
@@ -44,6 +44,11 @@ primitiveTypeToken' = choice $ fmap (uncurry token)
   , ("nat", PrimitiveTypeNat)
   , ("rat", PrimitiveTypeRat)
   ]
+
+tagToken' :: Atomic m => m Tag
+tagToken' = do
+  match "#"
+  Tag <$> upperCamelCase
 
 initiateModuleOverride' :: Atomic m => m ()
 initiateModuleOverride' = match "-"
