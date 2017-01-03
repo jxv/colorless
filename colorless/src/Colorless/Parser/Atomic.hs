@@ -1,13 +1,14 @@
 module Colorless.Parser.Atomic
   ( Atomic(..)
-  , token'
-  , match'
   , literal'
-  , newline'
-  , char'
+  , match'
+  , token'
+  , eol'
   , space'
+  , char'
   , satisfy'
   , integer'
+  , lowerCamelCase'
   , upperCamelCase'
   ) where
 
@@ -23,11 +24,12 @@ class Monad m => Atomic m where
   token :: Text -> a -> m a
   match :: Text -> m ()
   literal :: Text -> m Text
-  newline :: m ()
+  eol :: m ()
   space :: m ()
-  char :: Char -> m Char
+  char :: Char -> m ()
   satisfy :: (Char -> Bool) -> m Char
   integer :: m Integer
+  lowerCamelCase :: m Text
   upperCamelCase :: m Text
 
 token' :: MonadParser m => Text -> a -> m a
@@ -39,11 +41,11 @@ literal' lexeme = P.string (fromText lexeme) >> return lexeme
 match' :: MonadParser m => Text -> m ()
 match' lexeme = void $ P.string (fromText lexeme)
 
-newline' :: MonadParser m => m ()
-newline' = void P.newline
+eol' :: MonadParser m => m ()
+eol' = void P.eol
 
-char' :: MonadParser m => Char -> m Char
-char' = P.char
+char' :: MonadParser m => Char -> m ()
+char' = void . P.char
 
 space' :: MonadParser m => m ()
 space' = P.space
@@ -66,5 +68,14 @@ minus' = P.char '-' <:> number'
 integer' :: MonadParser m => m Integer
 integer' = fmap Prelude.read $ plus' <|> minus' <|> number'
 
+lowerCamelCase' :: MonadParser m => m Text
+lowerCamelCase' = do
+  ch <- P.lowerChar
+  chs <- P.many P.alphaNumChar
+  return $ toText (ch : chs)
+
 upperCamelCase' :: MonadParser m => m Text
-upperCamelCase' = literal' "fail"
+upperCamelCase' = do
+  ch <- P.upperChar
+  chs <- P.many P.alphaNumChar
+  return $ toText (ch : chs)

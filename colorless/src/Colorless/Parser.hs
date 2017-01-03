@@ -22,11 +22,12 @@ instance Atomic ParserM where
   literal = literal'
   token = token'
   match = match'
-  newline = newline'
+  eol = eol'
   char = char'
   satisfy = satisfy'
   space = space'
   integer = integer'
+  lowerCamelCase = lowerCamelCase'
   upperCamelCase = upperCamelCase'
 
 instance Combinator ParserM where

@@ -2,6 +2,9 @@
 module Colorless.Parser.Token
   ( Token(..)
   , primitiveTypeToken'
+  , functionToken'
+  , typeToken'
+  , tagToken'
   , initiateModuleOverride'
   , moduleReferenceToken'
   , moduleVersionToken'
@@ -16,6 +19,10 @@ import Pregame
 
 class Monad m => Token m where
   primitiveTypeToken :: m PrimitiveType
+  opaqueTypeReferenceToken :: m OpaqueTypeReference
+  opaqueTypeToken :: m OpaqueType
+  functionToken :: m Function
+  typeToken :: m Type
   tagToken :: m Tag
   initiateModuleOverride :: m ()
   moduleReferenceToken :: m ModuleReference
@@ -45,6 +52,15 @@ primitiveTypeToken' = choice $ fmap (uncurry token)
   , ("rat", PrimitiveTypeRat)
   ]
 
+opaqueTypeReferenceToken' :: (Atomic m, Token m) => m OpaqueTypeReference
+opaqueTypeReferenceToken' = OpaqueTypeReference <$> opaqueTypeToken <*> pure []
+
+functionToken' :: Atomic m => m Function
+functionToken' = Function <$> lowerCamelCase
+
+typeToken' :: (Atomic m, Token m, Combinator m) => m Type
+typeToken' = choice [TypePrimitive <$> primitiveTypeToken, TypeOpaque <$> opaqueTypeReferenceToken]
+
 tagToken' :: Atomic m => m Tag
 tagToken' = do
   match "#"
@@ -54,7 +70,9 @@ initiateModuleOverride' :: Atomic m => m ()
 initiateModuleOverride' = match "-"
 
 moduleReferenceToken' :: Atomic m => m ModuleReference
-moduleReferenceToken' = ModuleReference <$> upperCamelCase
+moduleReferenceToken' = do
+  match "%"
+  ModuleReference <$> upperCamelCase
 
 moduleVersionToken' :: Atomic m => m ModuleVersion
 moduleVersionToken' = ModuleVersion <$> integer

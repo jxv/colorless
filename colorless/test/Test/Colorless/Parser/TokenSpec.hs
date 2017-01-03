@@ -23,3 +23,13 @@ spec = do
         }
         initiateModuleOverride'
       functions `shouldBe` ["match"]
+
+  describe "tokens" $ do
+    it "moduleReferenceToken'" $ do
+      (value, functions) <- valueFunctionsT def
+        { _match = \a -> lift $ a `shouldBe` "%"
+        , _upperCamelCase = return "MyModule"
+        }
+        moduleReferenceToken'
+      functions `shouldBe` ["match","upperCamelCase"]
+      value `shouldBe` (ModuleReference "MyModule")
