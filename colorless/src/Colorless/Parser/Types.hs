@@ -18,8 +18,10 @@ module Colorless.Parser.Types
   , TypeParameter(..)
   , OpaqueDeclaration(..)
   , SubtypeDeclaration(..)
+  , SumFieldDeclaration(..)
   , SumDeclaration(..)
   , LabelDeclaration(..)
+  , ProductFieldDeclaration(..)
   , ProductDeclaration(..)
   , OpaqueImport(..)
   , ModuleVersion(..)
@@ -33,6 +35,7 @@ module Colorless.Parser.Types
   , ModuleHook(..)
   , ServiceReference(..)
   , ServiceInstance(..)
+  , ServiceFieldDeclaration(..)
   , ServiceDeclaration(..)
   , HttpServiceImplementationDeclaration(..)
   , ModuleOverrideDeclaration(..)
@@ -150,10 +153,14 @@ data SubtypeDeclaration = SubtypeDeclaration
   , _parameters :: [Type]
   } deriving (Show, Eq)
 
+data SumFieldDeclaration
+  = SumFieldDeclarationSubtype SubtypeDeclaration
+  | SumFieldDeclarationTag Tag
+  deriving (Show, Eq)
+
 data SumDeclaration = SumDeclaration
   { _opaqueDeclaration :: OpaqueDeclaration
-  , _subtypes :: [SubtypeDeclaration]
-  , _tags :: [Tag]
+  , _fields :: [SumFieldDeclaration]
   } deriving (Show, Eq)
 
 data LabelDeclaration = LabelDeclaration
@@ -161,10 +168,14 @@ data LabelDeclaration = LabelDeclaration
   , _type :: Type
   } deriving (Show, Eq)
 
+data ProductFieldDeclaration
+  = ProductFieldDeclarationLabel LabelDeclaration
+  | ProductFieldDeclarationTag Tag
+  deriving (Show, Eq)
+
 data ProductDeclaration = ProductDeclaration
   { _opaqueDeclaration :: OpaqueDeclaration
-  , _labels ::  [LabelDeclaration]
-  , _tags :: [Tag]
+  , _fields ::  [ProductFieldDeclaration]
   } deriving (Show, Eq)
 
 data OpaqueImport = OpaqueImport
@@ -206,9 +217,13 @@ data ServiceInstance
   | ServiceInstanceService ServiceReference
   deriving (Show, Eq)
 
+data ServiceFieldDeclaration
+  = ServiceFieldDeclarationModuleHook ModuleHook
+  | ServiceFieldDeclarationServiceInstance ServiceInstance
+  deriving (Show, Eq)
+
 data ServiceDeclaration = ServiceDeclaration
-  { _hooks :: [ModuleHook]
-  , _instances :: [ServiceInstance]
+  { _fields :: [ServiceFieldDeclaration]
   } deriving (Show, Eq)
 
 newtype Directory = Directory [Text]
