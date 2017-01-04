@@ -1,9 +1,17 @@
-@version 0.0.0
+@colorless 0.0.0
+
+;; Imports
+; Import with version
 
 > %Imports.0
 > %Spec.0
 > %Deck.0
 > %Calculator.1
+
+; Imports without version
+; The version must be specified elsewhere
+
+> %Calculator
 
 ; While self importing is elegant, it's not useful.
 ; Below is this module, 'Services.0', which is referenced as '%'.
@@ -34,18 +42,18 @@ $Combined
 
 !HTTP
   directory: /
-  protocol: JSON
+  format: JSON
   meta: Header
   service: $Combined
 
 !HTTP
   directory: calculator
-  protocol: JSON
+  format: JSON
   meta: Header
   service: $Calculator
 
 !HTTP
   directory: /example/example
-  protocol: JSON
+  format: JSON
   meta: Header
   service: $Example

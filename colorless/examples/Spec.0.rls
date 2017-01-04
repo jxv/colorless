@@ -3,7 +3,7 @@
 ;; meta information
 
 ; colorless version
-@version 0.0.0
+@colorless 0.0.0
 
 ;; encoding and primitive types
 

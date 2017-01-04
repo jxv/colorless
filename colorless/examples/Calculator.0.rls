@@ -1,4 +1,4 @@
-@version 0.0.0
+@colorless 0.0.0
 
 add f32 f32: f32
 subtract f32 f32: f32
