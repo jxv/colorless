@@ -15,6 +15,6 @@ spec :: Spec
 spec = do
   describe "choice'" $
     it "should parse \"ghi\" as \"ghi\" from a list of other potential parsers" $ do
-      let alphabet = literal "abc" :| [literal "def", literal "ghi"]
+      let alphabet = [literal "abc", literal "def", literal "ghi"]
       actual <- liftIO $ runParserM (choice' alphabet) "ghi"
       actual `shouldBe` Right "ghi"

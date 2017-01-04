@@ -56,6 +56,7 @@ library
     TypeFamilies
     TupleSections
     DuplicateRecordFields
+    OverloadedLists
 
 test-suite colorless-test
   type:
@@ -92,6 +93,7 @@ test-suite colorless-test
     QuasiQuotes
     DuplicateRecordFields
     RankNTypes
+    OverloadedLists
 
 source-repository head
   type:

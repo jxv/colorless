@@ -40,7 +40,7 @@ spec = do
       actual <- liftIO $ runParserM (char' 'c') "c"
       actual `shouldBe` Right ()
   describe "satisfy'" $ do
-    let test ch = ch `elem` ['a'..'f'] || ch `elem` ['0'..'9']
+    let test ch = ch `elem` (['a'..'f'] ++ ['0'..'9'])
     context "should parse any characters between a-f and 0-9" $ do
       it "a" $ do
         actual <- liftIO $ runParserM (satisfy' test) "a"

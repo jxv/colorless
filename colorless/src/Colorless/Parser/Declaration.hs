@@ -1,4 +1,3 @@
-{-# LANGUAGE OverloadedLists #-}
 module Colorless.Parser.Declaration
   ( Declarations(..)
   , declaration
