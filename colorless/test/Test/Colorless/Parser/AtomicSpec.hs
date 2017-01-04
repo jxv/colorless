@@ -63,3 +63,10 @@ spec = do
     it "should parse \"AbcDefGhiJKLMnOp1234\"" $ do
       actual <- liftIO $ runParserM upperCamelCase' "AbcDefGhiJKLMnOp1234"
       actual `shouldBe` Right "AbcDefGhiJKLMnOp1234"
+  describe "parens'" $ do
+    it "parse a \"(c)\" as \"c\"" $ do
+      actual <- liftIO $ runParserM (parens' (literal "c")) "(c)"
+      actual `shouldBe` Right "c"
+    it "parse a \"(((abc)))\" as \"abc\"" $ do
+      actual <- liftIO $ runParserM (parens' $ parens' $ parens' (literal "abc")) "(((abc)))"
+      actual `shouldBe` Right "abc"

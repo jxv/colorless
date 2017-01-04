@@ -10,6 +10,7 @@ module Colorless.Parser.Atomic
   , integer'
   , lowerCamelCase'
   , upperCamelCase'
+  , parens'
   ) where
 
 import Pregame
@@ -31,6 +32,7 @@ class Monad m => Atomic m where
   integer :: m Integer
   lowerCamelCase :: m Text
   upperCamelCase :: m Text
+  parens :: m a -> m a
 
 token' :: MonadParser m => Text -> a -> m a
 token' lexeme tkn = P.string (fromText lexeme) >> pure tkn
@@ -79,3 +81,6 @@ upperCamelCase' = do
   ch <- P.upperChar
   chs <- P.many P.alphaNumChar
   return $ toText (ch : chs)
+
+parens' :: MonadParser m => m a -> m a
+parens' = P.between (P.char '(') (P.char ')')

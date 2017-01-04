@@ -8,7 +8,7 @@ module Colorless.Parser.Combinator
   ) where
 
 import Pregame
-import qualified Text.Megaparsec as P (string, choice, optional, some, many)
+import qualified Text.Megaparsec as P
 
 import Colorless.Parser.Types
 

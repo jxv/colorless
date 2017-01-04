@@ -29,6 +29,7 @@ instance Atomic ParserM where
   integer = integer'
   lowerCamelCase = lowerCamelCase'
   upperCamelCase = upperCamelCase'
+  parens = parens'
 
 instance Combinator ParserM where
   choice = choice'
