@@ -37,7 +37,10 @@ module Colorless.Parser.Types
   , ServiceInstance(..)
   , ServiceFieldDeclaration(..)
   , ServiceDeclaration(..)
-  , HttpServiceImplementationDeclaration(..)
+  , ServiceImplementation(..)
+  , ServiceImplementationDeclaration(..)
+  , ProtocolImplementationDeclaration(..)
+  , HttpProtocolImplementationDeclaration(..)
   , ModuleOverrideDeclaration(..)
   , Declaration(..)
   , ParserError
@@ -240,16 +243,24 @@ data HttpMeta
   = HttpMetaHeader
   deriving (Show, Eq)
 
-data HttpServiceImplementationDeclaration = HttpServiceImplementationDeclaration
+data HttpProtocolImplementationDeclaration = HttpProtocolImplementationDeclaration
   { _directory :: Directory
   , _protocol :: HttpProtocol
   , _meta :: HttpMeta
   , _service :: ServiceReference
   } deriving (Show, Eq)
 
-data ServiceImplementationDeclaration
-  = ServiceImplementationDelcarationHttp HttpServiceImplementationDeclaration
+newtype ServiceImplementation = ServiceImplementation Text
   deriving (Show, Eq)
+
+data ProtocolImplementationDeclaration
+  = ProtocolImplementationDeclarationHttp HttpProtocolImplementationDeclaration
+  deriving (Show, Eq)
+
+data ServiceImplementationDeclaration = ServiceImplementationDeclaration
+  { _serviceImplementation :: ServiceImplementation
+  , _protocolImplementation :: ProtocolImplementationDeclaration
+  } deriving (Show, Eq)
 
 data ModuleOverrideDeclaration = ModuleOverrideDeclaration
   { _module :: ModuleReference

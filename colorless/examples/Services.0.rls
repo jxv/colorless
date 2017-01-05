@@ -40,19 +40,19 @@ $Combined
 
 ; Service Implementations
 
-!HTTP
+!Root HTTP
   directory: /
   format: JSON
   meta: Header
   service: $Combined
 
-!HTTP
+!Calculator HTTP
   directory: calculator
   format: JSON
   meta: Header
   service: $Calculator
 
-!HTTP
+!Example HTTP
   directory: /example/example
   format: JSON
   meta: Header
