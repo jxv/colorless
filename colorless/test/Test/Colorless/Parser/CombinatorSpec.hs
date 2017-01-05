@@ -8,7 +8,7 @@ import Text.Megaparsec.Prim
 
 import Colorless.Parser.Atomic
 import Colorless.Parser.Combinator
-import Colorless.Parser.Types
+import Colorless.Parser.Prototypes
 import Colorless.Parser
 
 spec :: Spec

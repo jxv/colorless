@@ -34,7 +34,7 @@ library
     Colorless.Parser.Atomic
     Colorless.Parser.Combinator
     Colorless.Parser.Declaration
-    Colorless.Parser.Types
+    Colorless.Parser.Prototypes
     Colorless.Parser.Token
   build-depends:
       base >= 4.7 && < 5

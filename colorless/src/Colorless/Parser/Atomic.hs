@@ -19,7 +19,7 @@ import Data.Tuple (uncurry)
 import Control.Applicative
 import qualified Text.Megaparsec as P
 
-import Colorless.Parser.Types
+import Colorless.Parser.Prototypes
 
 class Monad m => Atomic m where
   token :: Text -> a -> m a

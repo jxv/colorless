@@ -8,7 +8,7 @@ module Colorless.Parser.Declaration
 
 import Colorless.Parser.Combinator
 import Colorless.Parser.Token
-import Colorless.Parser.Types
+import Colorless.Parser.Prototypes
 import Pregame
 import Control.Applicative ((*>))
 

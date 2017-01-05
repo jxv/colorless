@@ -12,7 +12,7 @@ module Colorless.Parser.Token
 
 import Colorless.Parser.Atomic
 import Colorless.Parser.Combinator
-import Colorless.Parser.Types
+import Colorless.Parser.Prototypes
 import Data.Tuple (uncurry)
 import Pregame
 

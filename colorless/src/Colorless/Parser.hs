@@ -9,7 +9,7 @@ import Text.Megaparsec.Prim (MonadParsec)
 
 import Colorless.Parser.Atomic
 import Colorless.Parser.Combinator
-import Colorless.Parser.Types
+import Colorless.Parser.Prototypes
 
 newtype ParserM a = ParserM (ParsecT ParserError ParserState IO a)
   deriving (Functor, Applicative, Monad, MonadIO, Alternative, MonadPlus, MonadParsec ParserError ParserState)

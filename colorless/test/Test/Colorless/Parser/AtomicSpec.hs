@@ -7,7 +7,7 @@ import Test.Fixie
 import Text.Megaparsec.Prim
 
 import Colorless.Parser.Atomic
-import Colorless.Parser.Types
+import Colorless.Parser.Prototypes
 import Colorless.Parser
 
 spec :: Spec

@@ -1,5 +1,5 @@
 {-# LANGUAGE ConstraintKinds #-}
-module Colorless.Parser.Types
+module Colorless.Parser.Prototypes
   ( Line(..)
   , Column(..)
   , Position(..)
@@ -37,7 +37,7 @@ module Colorless.Parser.Types
   , ServiceInstance(..)
   , ServiceFieldDeclaration(..)
   , ServiceDeclaration(..)
-  , ServiceImplementation(..)
+  , ServiceImplementationReference(..)
   , ServiceImplementationDeclaration(..)
   , ProtocolImplementationDeclaration(..)
   , HttpProtocolImplementationDeclaration(..)
@@ -197,7 +197,10 @@ data ModuleImport = ModuleImport
 data Import
   = ImportOpaque OpaqueImport
   | ImportTag Tag
-  | ImportModule ModuleImport
+  | ImportModuleVersion ModuleImport
+  | ImportModuleNoVersion ModuleReference
+  | ImportService ServiceReference
+  | ImportServiceImplementation ServiceImplementationReference
   deriving (Show, Eq)
 
 data ImportsDeclaration = ImportsDeclaration
@@ -250,7 +253,7 @@ data HttpProtocolImplementationDeclaration = HttpProtocolImplementationDeclarati
   , _service :: ServiceReference
   } deriving (Show, Eq)
 
-newtype ServiceImplementation = ServiceImplementation Text
+newtype ServiceImplementationReference = ServiceImplementationReference Text
   deriving (Show, Eq)
 
 data ProtocolImplementationDeclaration
@@ -258,7 +261,7 @@ data ProtocolImplementationDeclaration
   deriving (Show, Eq)
 
 data ServiceImplementationDeclaration = ServiceImplementationDeclaration
-  { _serviceImplementation :: ServiceImplementation
+  { _serviceImplementation :: ServiceImplementationReference
   , _protocolImplementation :: ProtocolImplementationDeclaration
   } deriving (Show, Eq)
 

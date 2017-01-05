@@ -8,7 +8,7 @@ import Text.Megaparsec.Prim
 
 import Colorless.Parser.Atomic
 import Colorless.Parser.Token
-import Colorless.Parser.Types
+import Colorless.Parser.Prototypes
 
 import Control.Applicative (Alternative(..))
 

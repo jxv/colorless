@@ -5,7 +5,7 @@ import Pregame
 import Test.Hspec
 import Test.Fixie
 
-import Colorless.Parser.Types
+import Colorless.Parser.Prototypes
 import Colorless.Parser.Declaration
 import Colorless.Parser.Token
 

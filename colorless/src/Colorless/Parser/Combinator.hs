@@ -10,7 +10,7 @@ module Colorless.Parser.Combinator
 import Pregame
 import qualified Text.Megaparsec as P
 
-import Colorless.Parser.Types
+import Colorless.Parser.Prototypes
 
 class Monad m => Combinator m where
   choice :: NonEmpty (m a) -> m a
