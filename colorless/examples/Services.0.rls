@@ -44,16 +44,19 @@ $Combined
   directory: /
   format: JSON
   meta: Header
+  port: 80
   service: $Combined
 
 !Calculator HTTP
   directory: calculator
   format: JSON
   meta: Header
+  port: 80
   service: $Calculator
 
 !Example HTTP
   directory: /example/example
   format: JSON
   meta: Header
+  port: 80
   service: $Example

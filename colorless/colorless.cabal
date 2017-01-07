@@ -30,6 +30,7 @@ library
   hs-source-dirs:
     src
   exposed-modules:
+    Colorless.CodeGen.Types
     Colorless.Parser
     Colorless.Parser.Atomic
     Colorless.Parser.Combinator
