@@ -1,5 +1,5 @@
 module Colorless.CodeGen.Types
-  ( FuncName(..)
+  ( FnName(..)
   , ArgName(..)
   , Tag(..)
   , SubtypeName(..)
@@ -21,7 +21,7 @@ module Colorless.CodeGen.Types
   , TypeMonoRef(..)
   , TypeMonoParamRef(..)
   , OpaqueMonoRef(..)
-  , FuncDef(..)
+  , FnDef(..)
   , TypePolyRef(..)
   , TypePolyParamRef(..)
   , TypePolyParam(..)
@@ -43,7 +43,7 @@ module Colorless.CodeGen.Types
 
 import Pregame
 
-newtype FuncName = FuncName Text
+newtype FnName = FnName Text
   deriving (Show, Eq, Ord, IsString)
 
 newtype ArgName = ArgName Text
@@ -157,7 +157,7 @@ data OpaqueMonoRef = OpaqueMonoRef
   , _params :: [TypeMonoParamRef]
   } deriving (Show, Eq)
 
-data FuncDef = FuncDef
+data FnDef = FnDef
   { _args :: [(ArgName, TypeMonoRef)]
   , _tags :: Set Tag
   } deriving (Show, Eq)
@@ -215,7 +215,7 @@ data TagDef = TagDef
 data Domain = Domain
   { _name :: DomainName
   , _opaques :: Map OpaqueName OpaqueDef
-  , _funcs :: Map FuncName FuncDef
+  , _fns :: Map FnName FnDef
   , _tags :: Map Tag TagDef
   } deriving (Show, Eq)
 
