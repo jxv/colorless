@@ -2,7 +2,6 @@ module Colorless.CodeGen.Types
   ( FuncName(..)
   , ArgName(..)
   , Tag(..)
-  , SumName(..)
   , SubtypeName(..)
   , FieldName(..)
   , OpaqueName(..)
@@ -50,9 +49,6 @@ newtype ArgName = ArgName Text
   deriving (Show, Eq, Ord, IsString)
 
 newtype Tag = Tag Text
-  deriving (Show, Eq, Ord, IsString)
-
-newtype SumName = SumName Text
   deriving (Show, Eq, Ord, IsString)
 
 newtype SubtypeName = SubtypeName Text
