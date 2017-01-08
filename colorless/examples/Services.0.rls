@@ -18,45 +18,45 @@
 
 > %
 
-;; Services
+;; Domains
 
-; Simple service
+; Simple domain
 
-$Calculator
+!Calculator
   %Calculator ; all functions and required types
 
 ; Hook in types from other modules
 
-$Example
+!Example
   %Spec < %Imports
   %Spec < %Deck
   %Spec
 
-; Service inside services
+; Domains inside domain
 
-$Combined
-  $Example
-  $Calculator
+!Combined
+  !Example
+  !Calculator
 
-; Service Implementations
+; Service
 
-!Root HTTP
+$Root HTTP
   dir: /
   format: JSON
   meta: Header
   port: 80
-  service: $Combined
+  domain: !Combined
 
-!Calculator HTTP
+$Calculator HTTP
   dir: calculator
   format: JSON
   meta: Header
   port: 80
-  service: $Calculator
+  domain: !Calculator
 
-!Example HTTP
+$Example HTTP
   dir: /example/example
   format: JSON
   meta: Header
   port: 80
-  service: $Example
+  domain: !Example
