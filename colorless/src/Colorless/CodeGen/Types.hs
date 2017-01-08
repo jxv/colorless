@@ -113,6 +113,7 @@ data OpaquePolyRef = OpaquePolyRef
 data AliasDef = AliasDef
   { _params :: [TypePolyParam]
   , _ref :: TypePolyRef
+  , _tags :: Set Tag
   } deriving (Show, Eq)
 
 data SumDef = SumDef
@@ -133,10 +134,14 @@ data OpaqueDef
   | OpaqueDefProduct ProductDef
   deriving (Show, Eq)
 
+data TagDef = TagDef
+  { _tags :: Set Tag
+  } deriving (Show, Eq)
+
 data ServiceDef = ServiceDef
   { _opaques :: Map OpaqueName OpaqueDef
   , _funcs :: Map FuncName FuncDef
-  , _tags :: Set Tag
+  , _tags :: Map Tag TagDef
   } deriving (Show, Eq)
 
 data HttpFormat
