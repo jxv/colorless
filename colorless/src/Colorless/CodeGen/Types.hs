@@ -67,52 +67,63 @@ data PrimRef
   | PrimRefRat Rational
   deriving (Show, Eq)
 
-data Type
-  = TypePrim PrimType
-  | TypeOpaque OpaqueName
+data TypeMonomorphRef
+  = TypeMonomorphRefPrimType PrimType
+  | TypeMonomorphRefOpaque OpaqueMonomorphRef
   deriving (Show, Eq)
 
-data TypeRef
-  = TypeRefPrimType PrimType
-  | TypeRefOpaque OpaqueRef
+data TypeMonomorphParamRef
+  = TypeMonomorphParamRefPrimRef PrimRef
+  | TypeMonomorphParamRefPrimType PrimType
+  | TypeMonomorphParamRefOpaqueRef OpaqueMonomorphRef
   deriving (Show, Eq)
 
-data TypeParamRef
-  = TypeParamRefPrimRef PrimRef
-  | TypeParamRefPrimType PrimType
-  | TypeParamRefOpaqueRef OpaqueRef
-  | TypeParamRefPolymorphic Polymorphic
-  deriving (Show, Eq)
-
-data TypeParam = TypeParam
-  { _name :: TypeParamName
-  , _ref :: TypeParamRef
-  } deriving (Show, Eq)
-
-data OpaqueRef = OpaqueRef
+data OpaqueMonomorphRef = OpaqueMonomorphRef
   { _name :: OpaqueName
-  , _params :: [TypeParam]
+  , _params :: [TypeMonomorphParamRef]
   } deriving (Show, Eq)
 
 data FuncDef = FuncDef
-  { _args :: [(ArgName, TypeRef)]
+  { _args :: [(ArgName, TypeMonomorphRef)]
   , _tags :: Set Tag
   } deriving (Show, Eq)
 
+data TypePolymorphRef
+  = TypePolymorphRefPrimType PrimType
+  | TypePolymorphRefOpaque OpaquePolymorphRef
+  deriving (Show, Eq)
+
+data TypePolymorphParamRef
+  = TypePolymorphParamRefPrimRef PrimRef
+  | TypePolymorphParamRefPrimType PrimType
+  | TypePolymorphParamRefOpaqueRef OpaquePolymorphRef
+  | TypePolymorphParamRefPolymorphic Polymorphic
+  deriving (Show, Eq)
+
+data TypePolymorphParam = TypePolymorphParam
+  { _name :: TypeParamName
+  , _ref :: TypePolymorphParamRef
+  } deriving (Show, Eq)
+
+data OpaquePolymorphRef = OpaquePolymorphRef
+  { _name :: OpaqueName
+  , _params :: [TypePolymorphParamRef]
+  } deriving (Show, Eq)
+
 data AliasDef = AliasDef
-  { _params :: [TypeParam]
-  , _ref :: TypeRef
+  { _params :: [TypePolymorphParam]
+  , _ref :: TypePolymorphRef
   } deriving (Show, Eq)
 
 data SumDef = SumDef
-  { _params :: [TypeParam]
-  , _subtypes :: Map SubtypeName [TypeRef]
+  { _params :: [TypePolymorphParam]
+  , _subtypes :: Map SubtypeName [TypePolymorphRef]
   , _tags :: Set Tag
   } deriving (Show, Eq)
 
 data ProductDef = ProductDef
-  { _params :: [TypeParam]
-  , _fields :: Map FieldName TypeRef
+  { _params :: [TypePolymorphParam]
+  , _fields :: Map FieldName TypePolymorphRef
   , _tags :: Set Tag
   } deriving (Show, Eq)
 
