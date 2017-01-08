@@ -1,4 +1,4 @@
-resolver: lts-7.13
+resolver: nightly-2017-01-07
 packages:
 - colorless
 - colorless-bin

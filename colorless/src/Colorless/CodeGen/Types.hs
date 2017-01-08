@@ -158,7 +158,7 @@ data OpaqueMonoRef = OpaqueMonoRef
   } deriving (Show, Eq)
 
 data FnDef = FnDef
-  { _args :: [(ArgName, TypeMonoRef)]
+  { _args :: [(Maybe ArgName, TypeMonoRef)]
   , _tags :: Set Tag
   } deriving (Show, Eq)
 
