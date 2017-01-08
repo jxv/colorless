@@ -12,6 +12,7 @@ newtype SubtypeName = SubtypeName Text deriving (Show, Eq, Ord, IsString)
 newtype FieldName = FieldName Text deriving (Show, Eq, Ord, IsString)
 newtype OpaqueName = OpaqueName Text deriving (Show, Eq, Ord, IsString)
 newtype TypeParamName = TypeParamName Text deriving (Show, Eq, Ord, IsString)
+newtype Polymorphic = Polymorphic Text deriving (Show, Eq, Ord, IsString)
 newtype Negative = Negative Integer deriving (Show, Eq, Num)
 newtype Positive = Positive Integer deriving (Show, Eq, Num)
 newtype Natural = Natural Integer deriving (Show, Eq, Num)
@@ -80,6 +81,7 @@ data TypeParamRef
   = TypeParamRefPrimRef PrimRef
   | TypeParamRefPrimType PrimType
   | TypeParamRefOpaqueRef OpaqueRef
+  | TypeParamRefPolymorphic Polymorphic
   deriving (Show, Eq)
 
 data TypeParam = TypeParam
@@ -89,7 +91,7 @@ data TypeParam = TypeParam
 
 data OpaqueRef = OpaqueRef
   { _name :: OpaqueName
-  , _params :: [TypeParamRef]
+  , _params :: [TypeParam]
   } deriving (Show, Eq)
 
 data FuncDef = FuncDef
@@ -97,20 +99,26 @@ data FuncDef = FuncDef
   , _tags :: Set Tag
   } deriving (Show, Eq)
 
+data AliasDef = AliasDef
+  { _params :: [TypeParam]
+  , _ref :: TypeRef
+  } deriving (Show, Eq)
+
 data SumDef = SumDef
-  { _params :: [TypeParamRef]
+  { _params :: [TypeParam]
   , _subtypes :: Map SubtypeName [TypeRef]
   , _tags :: Set Tag
   } deriving (Show, Eq)
 
 data ProductDef = ProductDef
-  { _params :: [TypeParamRef]
+  { _params :: [TypeParam]
   , _fields :: Map FieldName TypeRef
   , _tags :: Set Tag
   } deriving (Show, Eq)
 
 data OpaqueDef
-  = OpaqueDefSum SumDef
+  = OpaqueDefAlias AliasDef
+  | OpaqueDefSum SumDef
   | OpaqueDefProduct ProductDef
   deriving (Show, Eq)
 
