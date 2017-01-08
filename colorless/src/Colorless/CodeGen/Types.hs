@@ -1,6 +1,46 @@
 module Colorless.CodeGen.Types
-  (
+  ( FuncName(..)
+  , ArgName(..)
+  , Tag(..)
+  , SumName(..)
+  , SubtypeName(..)
+  , FieldName(..)
+  , OpaqueName(..)
+  , TypeParamName(..)
+  , PolyVar(..)
+  , Neg(..)
+  , Pos(..)
+  , Nat(..)
+  , Rat(..)
+  , Version(..)
+  , HttpDirectory(..)
+  , HttpPort(..)
+  , SpecName(..)
+  , DomainName(..)
+  , PrimRef(..)
+  , TypeMonoRef(..)
+  , TypeMonoParamRef(..)
+  , OpaqueMonoRef(..)
+  , FuncDef(..)
+  , TypePolyRef(..)
+  , TypePolyParamRef(..)
+  , TypePolyParam(..)
+  , OpaquePolyRef(..)
+  , AliasDef(..)
+  , SumDef(..)
+  , ProductDef(..)
+  , OpaqueDef(..)
+  , TagDef(..)
+  , ServiceDef(..)
+  , HttpFormat(..)
+  , HttpMeta(..)
+  , HttpImpl(..)
+  , Impl(..)
+  , Domain(..)
+  , SpecDef(..)
+  , Specs(..)
   ) where
+
 
 import Pregame
 
@@ -13,10 +53,10 @@ newtype FieldName = FieldName Text deriving (Show, Eq, Ord, IsString)
 newtype OpaqueName = OpaqueName Text deriving (Show, Eq, Ord, IsString)
 newtype TypeParamName = TypeParamName Text deriving (Show, Eq, Ord, IsString)
 newtype PolyVar = PolyVar Text deriving (Show, Eq, Ord, IsString)
-newtype Negative = Negative Integer deriving (Show, Eq, Num)
-newtype Positive = Positive Integer deriving (Show, Eq, Num)
-newtype Natural = Natural Integer deriving (Show, Eq, Num)
-newtype Rational = Rational (Integer, Integer) deriving (Show, Eq)
+newtype Neg = Neg Integer deriving (Show, Eq, Num)
+newtype Pos = Pos Integer deriving (Show, Eq, Num)
+newtype Nat = Nat Integer deriving (Show, Eq, Num)
+newtype Rat = Rat (Integer, Integer) deriving (Show, Eq)
 newtype Version = Version (Integer, Integer, Integer) deriving (Show, Eq, Ord)
 newtype HttpDirectory = HttpDirectory [Text] deriving (Show, Eq, Monoid)
 newtype HttpPort = HttpPort Int deriving (Show, Eq)
@@ -61,10 +101,10 @@ data PrimRef
   | PrimRefChar Char
   | PrimRefStr Text
   | PrimRefInt Integer
-  | PrimRefNeg Negative
-  | PrimRefPos Positive
-  | PrimRefNat Natural
-  | PrimRefRat Rational
+  | PrimRefNeg Neg
+  | PrimRefPos Pos
+  | PrimRefNat Nat
+  | PrimRefRat Rat
   deriving (Show, Eq)
 
 data TypeMonoRef
