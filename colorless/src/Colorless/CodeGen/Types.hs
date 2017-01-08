@@ -5,7 +5,7 @@ module Colorless.CodeGen.Types
   , SubtypeName(..)
   , FieldName(..)
   , OpaqueName(..)
-  , TypeParamName(..)
+  , TyParamName(..)
   , PolyVar(..)
   , Neg(..)
   , Pos(..)
@@ -18,13 +18,13 @@ module Colorless.CodeGen.Types
   , ServiceName(..)
   , DomainName(..)
   , PrimRef(..)
-  , TypeMonoRef(..)
-  , TypeMonoParamRef(..)
+  , MonoTyRef(..)
+  , MonoTyParamRef(..)
   , OpaqueMonoRef(..)
   , FnDef(..)
-  , TypePolyRef(..)
-  , TypePolyParamRef(..)
-  , TypePolyParam(..)
+  , PolyTyRef(..)
+  , PolyTyParamRef(..)
+  , PolyTyParam(..)
   , OpaquePolyRef(..)
   , AliasDef(..)
   , SumDef(..)
@@ -61,7 +61,7 @@ newtype FieldName = FieldName Text
 newtype OpaqueName = OpaqueName Text
   deriving (Show, Eq, Ord, IsString)
 
-newtype TypeParamName = TypeParamName Text
+newtype TyParamName = TyParamName Text
   deriving (Show, Eq, Ord, IsString)
 
 newtype PolyVar = PolyVar Text
@@ -97,26 +97,26 @@ newtype ServiceName = ServiceName Text
 newtype DomainName = DomainName Text
   deriving (Show, Eq, IsString)
 
-data PrimType
-  = PrimTypeUnit
-  | PrimTypeU8
-  | PrimTypeU16
-  | PrimTypeU32
-  | PrimTypeU64
-  | PrimTypeI8
-  | PrimTypeI16
-  | PrimTypeI32
-  | PrimTypeI64
-  | PrimTypeF32
-  | PrimTypeF64
-  | PrimTypeBool
-  | PrimTypeChar
-  | PrimTypeStr
-  | PrimTypeInt
-  | PrimTypeNeg
-  | PrimTypePos
-  | PrimTypeNat
-  | PrimTypeRat
+data PrimTy
+  = PrimTyUnit
+  | PrimTyU8
+  | PrimTyU16
+  | PrimTyU32
+  | PrimTyU64
+  | PrimTyI8
+  | PrimTyI16
+  | PrimTyI32
+  | PrimTyI64
+  | PrimTyF32
+  | PrimTyF64
+  | PrimTyBool
+  | PrimTyChar
+  | PrimTyStr
+  | PrimTyInt
+  | PrimTyNeg
+  | PrimTyPos
+  | PrimTyNat
+  | PrimTyRat
   deriving (Show, Eq)
 
 data PrimRef
@@ -141,64 +141,64 @@ data PrimRef
   | PrimRefRat Rat
   deriving (Show, Eq)
 
-data TypeMonoRef
-  = TypeMonoRefPrimType PrimType
-  | TypeMonoRefOpaque OpaqueMonoRef
+data MonoTyRef
+  = MonoTyRefPrimTy PrimTy
+  | MonoTyRefOpaque OpaqueMonoRef
   deriving (Show, Eq)
 
-data TypeMonoParamRef
-  = TypeMonoParamRefPrimRef PrimRef
-  | TypeMonoParamRefPrimType PrimType
-  | TypeMonoParamRefOpaqueRef OpaqueMonoRef
+data MonoTyParamRef
+  = MonoTyParamRefPrimRef PrimRef
+  | MonoTyParamRefPrimTy PrimTy
+  | MonoTyParamRefOpaqueRef OpaqueMonoRef
   deriving (Show, Eq)
 
 data OpaqueMonoRef = OpaqueMonoRef
   { _name :: OpaqueName
-  , _params :: [TypeMonoParamRef]
+  , _params :: [MonoTyParamRef]
   } deriving (Show, Eq)
 
 data FnDef = FnDef
-  { _args :: [(Maybe ArgName, TypeMonoRef)]
+  { _args :: [(Maybe ArgName, MonoTyRef)]
   , _tags :: Set Tag
   } deriving (Show, Eq)
 
-data TypePolyRef
-  = TypePolyRefPrimType PrimType
-  | TypePolyRefOpaque OpaquePolyRef
+data PolyTyRef
+  = PolyTyRefPrimTy PrimTy
+  | PolyTyRefOpaque OpaquePolyRef
   deriving (Show, Eq)
 
-data TypePolyParamRef
-  = TypePolyParamRefPrimRef PrimRef
-  | TypePolyParamRefPrimType PrimType
-  | TypePolyParamRefOpaqueRef OpaquePolyRef
-  | TypePolyParamRefPolyVar PolyVar
+data PolyTyParamRef
+  = PolyTyParamRefPrimRef PrimRef
+  | PolyTyParamRefPrimTy PrimTy
+  | PolyTyParamRefOpaqueRef OpaquePolyRef
+  | PolyTyParamRefPolyVar PolyVar
   deriving (Show, Eq)
 
-data TypePolyParam = TypePolyParam
-  { _name :: TypeParamName
-  , _ref :: TypePolyParamRef
+data PolyTyParam = PolyTyParam
+  { _name :: TyParamName
+  , _ref :: PolyTyParamRef
   } deriving (Show, Eq)
 
 data OpaquePolyRef = OpaquePolyRef
   { _name :: OpaqueName
-  , _params :: [TypePolyParamRef]
+  , _params :: [PolyTyParamRef]
   } deriving (Show, Eq)
 
 data AliasDef = AliasDef
-  { _params :: [TypePolyParam]
-  , _ref :: TypePolyRef
+  { _params :: [PolyTyParam]
+  , _ref :: PolyTyRef
   , _tags :: Set Tag
   } deriving (Show, Eq)
 
 data SumDef = SumDef
-  { _params :: [TypePolyParam]
-  , _subtypes :: Map SubtypeName [TypePolyRef]
+  { _params :: [PolyTyParam]
+  , _subtypes :: Map SubtypeName [PolyTyRef]
   , _tags :: Set Tag
   } deriving (Show, Eq)
 
 data ProductDef = ProductDef
-  { _params :: [TypePolyParam]
-  , _fields :: Map FieldName TypePolyRef
+  { _params :: [PolyTyParam]
+  , _fields :: Map FieldName PolyTyRef
   , _tags :: Set Tag
   } deriving (Show, Eq)
 

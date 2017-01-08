@@ -112,7 +112,7 @@ foo (Either int str): bool
 
 -- Json
 {
-  "fn": "enemy",
+  "fn": "foo",
   "args": {
     "either": {
       "ty": "Left",
