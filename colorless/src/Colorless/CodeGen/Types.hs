@@ -12,7 +12,7 @@ module Colorless.CodeGen.Types
   , Nat(..)
   , Rat(..)
   , Version(..)
-  , HttpDirectory(..)
+  , HttpDir(..)
   , HttpPort(..)
   , SpecName(..)
   , ServiceName(..)
@@ -82,7 +82,7 @@ newtype Rat = Rat (Integer, Integer, Integer)
 newtype Version = Version (Integer, Integer, Integer)
   deriving (Show, Eq, Ord)
 
-newtype HttpDirectory = HttpDirectory [Text]
+newtype HttpDir = HttpDir [Text]
   deriving (Show, Eq, Monoid)
 
 newtype HttpPort = HttpPort Int
@@ -228,7 +228,7 @@ data HttpMeta
   deriving (Show, Eq)
 
 data HttpImpl = HttpImpl
-  { _directory :: HttpDirectory
+  { _dir :: HttpDir
   , _port :: HttpPort
   , _meta :: HttpMeta
   , _format :: HttpFormat

@@ -41,21 +41,21 @@ $Combined
 ; Service Implementations
 
 !Root HTTP
-  directory: /
+  dir: /
   format: JSON
   meta: Header
   port: 80
   service: $Combined
 
 !Calculator HTTP
-  directory: calculator
+  dir: calculator
   format: JSON
   meta: Header
   port: 80
   service: $Calculator
 
 !Example HTTP
-  directory: /example/example
+  dir: /example/example
   format: JSON
   meta: Header
   port: 80
