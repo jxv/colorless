@@ -15,7 +15,7 @@ module Colorless.CodeGen.Types
   , HttpDirectory(..)
   , HttpPort(..)
   , SpecName(..)
-  , DomainName(..)
+  , ServiceName(..)
   , PrimRef(..)
   , TypeMonoRef(..)
   , TypeMonoParamRef(..)
@@ -30,12 +30,12 @@ module Colorless.CodeGen.Types
   , ProductDef(..)
   , OpaqueDef(..)
   , TagDef(..)
-  , ServiceDef(..)
+  , DomainDef(..)
   , HttpFormat(..)
   , HttpMeta(..)
   , HttpImpl(..)
   , Impl(..)
-  , Domain(..)
+  , Service(..)
   , SpecDef(..)
   , Specs(..)
   ) where
@@ -90,7 +90,7 @@ newtype HttpPort = HttpPort Int
 newtype SpecName = SpecName Text
   deriving (Show, Eq, IsString)
 
-newtype DomainName = DomainName Text
+newtype ServiceName = ServiceName Text
   deriving (Show, Eq, IsString)
 
 data PrimType
@@ -208,7 +208,7 @@ data TagDef = TagDef
   { _tags :: Set Tag
   } deriving (Show, Eq)
 
-data ServiceDef = ServiceDef
+data DomainDef = DomainDef
   { _opaques :: Map OpaqueName OpaqueDef
   , _funcs :: Map FuncName FuncDef
   , _tags :: Map Tag TagDef
@@ -233,15 +233,15 @@ data Impl
   = ImplHttp HttpImpl
   deriving (Show, Eq)
 
-data Domain = Domain
-  { _name :: DomainName
-  , _service :: ServiceDef
+data Service = Service
+  { _name :: ServiceName
+  , _domain :: DomainDef
   , _impl :: Impl
   } deriving (Show, Eq)
 
 data SpecDef = SpecDef
   { _name :: SpecName
-  , _domains :: [Domain]
+  , _services :: [Service]
   } deriving (Show, Eq)
 
 data Specs = Specs
