@@ -41,27 +41,61 @@ module Colorless.CodeGen.Types
   , Specs(..)
   ) where
 
-
 import Pregame
 
-newtype FuncName = FuncName Text deriving (Show, Eq, Ord, IsString)
-newtype ArgName = ArgName Text deriving (Show, Eq, Ord, IsString)
-newtype Tag = Tag Text deriving (Show, Eq, Ord, IsString)
-newtype SumName = SumName Text deriving (Show, Eq, Ord, IsString)
-newtype SubtypeName = SubtypeName Text deriving (Show, Eq, Ord, IsString)
-newtype FieldName = FieldName Text deriving (Show, Eq, Ord, IsString)
-newtype OpaqueName = OpaqueName Text deriving (Show, Eq, Ord, IsString)
-newtype TypeParamName = TypeParamName Text deriving (Show, Eq, Ord, IsString)
-newtype PolyVar = PolyVar Text deriving (Show, Eq, Ord, IsString)
-newtype Neg = Neg Integer deriving (Show, Eq, Num)
-newtype Pos = Pos Integer deriving (Show, Eq, Num)
-newtype Nat = Nat Integer deriving (Show, Eq, Num)
-newtype Rat = Rat (Integer, Integer) deriving (Show, Eq)
-newtype Version = Version (Integer, Integer, Integer) deriving (Show, Eq, Ord)
-newtype HttpDirectory = HttpDirectory [Text] deriving (Show, Eq, Monoid)
-newtype HttpPort = HttpPort Int deriving (Show, Eq)
-newtype SpecName = SpecName Text deriving (Show, Eq, IsString)
-newtype DomainName = DomainName Text deriving (Show, Eq, IsString)
+newtype FuncName = FuncName Text
+  deriving (Show, Eq, Ord, IsString)
+
+newtype ArgName = ArgName Text
+  deriving (Show, Eq, Ord, IsString)
+
+newtype Tag = Tag Text
+  deriving (Show, Eq, Ord, IsString)
+
+newtype SumName = SumName Text
+  deriving (Show, Eq, Ord, IsString)
+
+newtype SubtypeName = SubtypeName Text
+  deriving (Show, Eq, Ord, IsString)
+
+newtype FieldName = FieldName Text
+  deriving (Show, Eq, Ord, IsString)
+
+newtype OpaqueName = OpaqueName Text
+  deriving (Show, Eq, Ord, IsString)
+
+newtype TypeParamName = TypeParamName Text
+  deriving (Show, Eq, Ord, IsString)
+
+newtype PolyVar = PolyVar Text
+  deriving (Show, Eq, Ord, IsString)
+
+newtype Neg = Neg Integer
+  deriving (Show, Eq, Num)
+
+newtype Pos = Pos Integer
+  deriving (Show, Eq, Num)
+
+newtype Nat = Nat Integer
+  deriving (Show, Eq, Num)
+
+newtype Rat = Rat (Integer, Integer, Integer)
+  deriving (Show, Eq)
+
+newtype Version = Version (Integer, Integer, Integer)
+  deriving (Show, Eq, Ord)
+
+newtype HttpDirectory = HttpDirectory [Text]
+  deriving (Show, Eq, Monoid)
+
+newtype HttpPort = HttpPort Int
+  deriving (Show, Eq)
+
+newtype SpecName = SpecName Text
+  deriving (Show, Eq, IsString)
+
+newtype DomainName = DomainName Text
+  deriving (Show, Eq, IsString)
 
 data PrimType
   = PrimTypeUnit
