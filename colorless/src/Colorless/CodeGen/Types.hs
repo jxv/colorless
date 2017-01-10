@@ -17,6 +17,7 @@ module Colorless.CodeGen.Types
   , SpecName(..)
   , ServiceName(..)
   , DomainName(..)
+  , PrimTy(..)
   , PrimRef(..)
   , MonoTyRef(..)
   , MonoTyParamRef(..)
@@ -44,28 +45,28 @@ module Colorless.CodeGen.Types
 import Pregame
 
 newtype FnName = FnName Text
-  deriving (Show, Eq, Ord, IsString)
+  deriving (Show, Eq, Ord, IsString, ToText)
 
 newtype ArgName = ArgName Text
-  deriving (Show, Eq, Ord, IsString)
+  deriving (Show, Eq, Ord, IsString, ToText)
 
 newtype Tag = Tag Text
-  deriving (Show, Eq, Ord, IsString)
+  deriving (Show, Eq, Ord, IsString, ToText)
 
 newtype SubtypeName = SubtypeName Text
-  deriving (Show, Eq, Ord, IsString)
+  deriving (Show, Eq, Ord, IsString, ToText)
 
 newtype FieldName = FieldName Text
-  deriving (Show, Eq, Ord, IsString)
+  deriving (Show, Eq, Ord, IsString, ToText)
 
 newtype OpaqueName = OpaqueName Text
-  deriving (Show, Eq, Ord, IsString)
+  deriving (Show, Eq, Ord, IsString, ToText)
 
 newtype TyParamName = TyParamName Text
-  deriving (Show, Eq, Ord, IsString)
+  deriving (Show, Eq, Ord, IsString, ToText)
 
 newtype PolyVar = PolyVar Text
-  deriving (Show, Eq, Ord, IsString)
+  deriving (Show, Eq, Ord, IsString, ToText)
 
 newtype Neg = Neg Integer
   deriving (Show, Eq, Num)
@@ -89,13 +90,13 @@ newtype HttpPort = HttpPort Int
   deriving (Show, Eq)
 
 newtype SpecName = SpecName Text
-  deriving (Show, Eq, IsString)
+  deriving (Show, Eq, IsString, ToText)
 
 newtype ServiceName = ServiceName Text
-  deriving (Show, Eq, IsString)
+  deriving (Show, Eq, IsString, ToText)
 
 newtype DomainName = DomainName Text
-  deriving (Show, Eq, IsString)
+  deriving (Show, Eq, IsString, ToText)
 
 data PrimTy
   = PrimTyUnit
@@ -158,7 +159,8 @@ data OpaqueMonoRef = OpaqueMonoRef
   } deriving (Show, Eq)
 
 data FnDef = FnDef
-  { _args :: [(Maybe ArgName, MonoTyRef)]
+  { _args :: [(ArgName, MonoTyRef)]
+  , _output :: MonoTyRef
   , _tags :: Set Tag
   } deriving (Show, Eq)
 
