@@ -42,6 +42,7 @@ library
     Colorless.Parser.Declaration
     Colorless.Parser.Prototypes
     Colorless.Parser.Token
+    Colorless.Parser.Semantic
   build-depends:
       base >= 4.7 && < 5
     , pregame == 1.0.3.0
