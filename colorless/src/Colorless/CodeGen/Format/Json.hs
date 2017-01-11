@@ -96,13 +96,13 @@ enemy (you: Color): Color
   "fn": "enemy",
   "args": {
     "you": {
-      "ty": "Red"
+      "ctor": "Red"
     }
   }
 }
 
 {
-  "ty": "Blue"
+  "ctor": "Blue"
 }
 
 ----------------
@@ -115,8 +115,8 @@ foo (Either int str): bool
   "fn": "foo",
   "args": {
     "either": {
-      "ty": "Left",
-      "d": [
+      "ctor": "Left",
+      "args": [
         100
       ]
     }

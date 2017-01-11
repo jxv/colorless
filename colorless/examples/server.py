@@ -1,43 +1,132 @@
-from flask import Flask, request
+from flask import Flask, request, abort
 from flask_restful import Resource, Api
 
-# json
+# generated alias
 
-def to_color(json):
-    ty = json['subtype']
-    if ty == 'Red':
-        return Color.Red()
-    elif ty == 'Blue':
-        return Color.Blue()
-    elif ty == 'Yellow':
-        return Color.Yellow()
-    elif ty == 'Green':
-        return Color.Green()
+class Years():
+    def __init__(self, value):
+        assert(type(value) == int)
+        self.value = value
 
-def from_color(color):
-    if color.subtype == 'Red':
-        return {'subtype': 'Red'}
-    elif color.subtype == 'Blue':
-        return {'subtype': 'Blue'}
-    elif color.subtype == 'Green':
-        return {'subtype': 'Green'}
-    elif color.subtype == 'Yellow':
-        return {'subtype': 'Yellow'}
+class Id_Person():
+    def __init__(self, value):
+        assert(type(value) == str)
+        self.value = value
 
 # generated sum type
 
-class Color():
-    def __init__(self, subtype, args):
-        self.subtype = subtype
+class Either_int_str():
+    def __init__(self, ctor, args):
+        self.ctor = ctor
         self.args = args
+    def Left(t0):
+        assert(type(t0) == int)
+        return Either_int_str('Left', [t0])
+    def Right(t0):
+        assert(type(t0) == str)
+        return Either_int_str('Right', [t0])
+
+class Color():
+    def __init__(self, ctor):
+        assert(type(ctor) == str)
+        self.ctor = ctor
     def Red():
-        return Color('Red', None)
+        return Color('Red')
     def Blue():
-        return Color('Blue', None)
+        return Color('Blue')
     def Yellow():
-        return Color('Yellow', None)
+        return Color('Yellow')
     def Green():
-        return Color('Green', None)
+        return Color('Green')
+
+# generated product types
+
+class Point_f64():
+    def __init__(self, x, y):
+        assert(type(x) == float)
+        assert(type(y) == float)
+        self.x = x
+        self.y = y
+
+class Circle():
+    def __init__(self, center, radius):
+        assert(type(center) == Point_f64)
+        assert(type(radius) == float)
+        self.center = center
+        self.radius = radius
+
+# generated json converter for alias
+
+def json_to_years(json):
+    return Years(json)
+
+def years_to_json(years):
+    assert(type(years) == Years)
+    assert(type(years.value) == int)
+    return years.value
+
+def json_to_id_person(json):
+    return Id_Person(json)
+
+def id_person_to_json(id_):
+    assert(type(id_) == Id_Person)
+    assert(type(id_.value) == str)
+    return id_.value
+
+# generated json converter for sum type
+
+def json_to_color(json):
+    ctor = json['ctor']
+    if ctor == 'Red':
+        return Color.Red()
+    elif ctor == 'Blue':
+        return Color.Blue()
+    elif ctor == 'Yellow':
+        return Color.Yellow()
+    elif ctor == 'Green':
+        return Color.Green()
+
+def color_to_json(color):
+    ctor = color.ctor
+    if ctor == 'Red':
+        return {'ctor': 'Red'}
+    elif ctor == 'Blue':
+        return {'ctor': 'Blue'}
+    elif ctor == 'Green':
+        return {'ctor': 'Green'}
+    elif ctor == 'Yellow':
+        return {'ctor': 'Yellow'}
+
+# generated json converter for product type
+
+def json_to_point_f64(json):
+    return Point_f64(
+        x = json['x'],
+        y = json['y'])
+
+def point_f64_to_json(point_f64):
+    return {
+        'x': point_f64.x,
+        'y': point_f64.y,
+    }
+
+def json_to_circle(json):
+    return Circle(
+        center = json_to_point_f64(json['center']),
+        radius = json['radius'])
+
+def circle_to_json(circle):
+    return {
+        'center': point_f64_to_json(circle.center),
+        'radius': circle.radius,
+    }
+
+def json_to_either_int_str(json):
+    ctor = json['ctor']
+    if ctor == 'Left':
+        return Either_int_str.Left(json['args'][0])
+    elif ctor == 'Right':
+        return Either_int_str.Right(json['args'][0])
 
 # generated service
 
@@ -52,19 +141,21 @@ class Service(Resource):
         fn = body.get('fn')
         args = body.get('args', {})
 
-        if fn == 'reverse':
-            return str(self.domain.reverse(a=str(args['a'])))
-        elif fn == 'age':
-            return self.domain.age(**args)
-        elif fn == 'different':
-            return self.domain.different(**args)
-        elif fn == 'circleArea':
-            return self.domain.circleArea(**args)
-        elif fn == 'enemy':
-            return from_color(self.domain.enemy(you=to_color(args['you'])))
-        elif fn == 'foo':
-            return self.domain.foo(**args)
-        return {}
+        try:
+            if fn == 'reverse':
+                return str(self.domain.reverse(a=str(args['a'])))
+            elif fn == 'age':
+                return years_to_json(self.domain.age(id_ = json_to_id_person(args['id'])))
+            elif fn == 'different':
+                return self.domain.different(a = json_to_id_person(args['a']), b = json_to_id_person(args['b']))
+            elif fn == 'circleArea':
+                return self.domain.circleArea(circle = json_to_circle(args['circle']))
+            elif fn == 'enemy':
+                return color_to_json(self.domain.enemy(you = json_to_color(args['you'])))
+            elif fn == 'foo':
+                return self.domain.foo(either = json_to_either_int_str(args['either']))
+        except AssertionError:
+            abort(500)
 
 # generated domain interface
 
@@ -90,27 +181,28 @@ class DomainImpl(Domain):
     def age(self, id_):
         return 80
     def different(self, a, b):
-        return {}
+        return a.value != b.value
     def circleArea(self, circle):
-        return {}
+        return circle.radius * circle.radius * 3.14
     def enemy(self, you):
         return {
             'Blue': Color.Red(),
             'Red': Color.Blue(),
             'Yellow': Color.Green(),
             'Green': Color.Yellow(),
-        }[you.subtype]
+        }[you.ctor]
     def foo(self, either):
-        return {}
+        return True
 
 # generated server runner
 
-def run_server():
+def run_server(domains):
     app = Flask(__name__)
     api = Api(app)
-    api.add_resource(Service, '/', resource_class_kwargs={'domain': DomainImpl()})
+    api.add_resource(Service, '/', resource_class_kwargs={'domain': domains['Root']})
     app.run(debug=True)
 
 if __name__ == '__main__':
     pass
-    run_server()
+    domains = { "Root": DomainImpl() }
+    run_server(domains)
