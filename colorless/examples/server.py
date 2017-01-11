@@ -4,18 +4,40 @@ from flask_restful import Resource, Api
 # json
 
 def to_color(json):
-    ty = json['ty']
-    return (ty,)
+    ty = json['subtype']
+    if ty == 'Red':
+        return Color.Red()
+    elif ty == 'Blue':
+        return Color.Blue()
+    elif ty == 'Yellow':
+        return Color.Yellow()
+    elif ty == 'Green':
+        return Color.Green()
 
 def from_color(color):
-    if color[0] == 'Red':
-        return {'ty': 'Red'}
-    elif color[0] == 'Blue':
-        return {'ty': 'Blue'}
-    elif color[0] == 'Green':
-        return {'ty': 'Green'}
-    elif color[0] == 'Yellow':
-        return {'ty': 'Yellow'}
+    if color.subtype == 'Red':
+        return {'subtype': 'Red'}
+    elif color.subtype == 'Blue':
+        return {'subtype': 'Blue'}
+    elif color.subtype == 'Green':
+        return {'subtype': 'Green'}
+    elif color.subtype == 'Yellow':
+        return {'subtype': 'Yellow'}
+
+# generated sum type
+
+class Color():
+    def __init__(self, subtype, args):
+        self.subtype = subtype
+        self.args = args
+    def Red():
+        return Color('Red', None)
+    def Blue():
+        return Color('Blue', None)
+    def Yellow():
+        return Color('Yellow', None)
+    def Green():
+        return Color('Green', None)
 
 # generated service
 
@@ -24,14 +46,14 @@ class Service(Resource):
         self.domain = domain
 
     def post(self):
-        body = request.get_json() 
+        body = request.get_json()
         # meta = request.get_headers()
-        
+
         fn = body.get('fn')
         args = body.get('args', {})
 
         if fn == 'reverse':
-            return self.domain.reverse(**args)
+            return str(self.domain.reverse(a=str(args['a'])))
         elif fn == 'age':
             return self.domain.age(**args)
         elif fn == 'different':
@@ -47,7 +69,7 @@ class Service(Resource):
 # generated domain interface
 
 class Domain():
-    def reverse(self, str_):
+    def reverse(self, a):
         pass
     def age(self, id_):
         pass
@@ -63,21 +85,21 @@ class Domain():
 # user's domain implementation
 
 class DomainImpl(Domain):
-    def reverse(self, str_):
-        return '1' + str(str_)
+    def reverse(self, a):
+        return a[::-1]
     def age(self, id_):
-        return {}
+        return 80
     def different(self, a, b):
         return {}
     def circleArea(self, circle):
         return {}
     def enemy(self, you):
         return {
-            'Blue': ('Red',),
-            'Red': ('Blue',),
-            'Yellow': ('Green',),
-            'Green': ('Yellow',)
-        }[you[0]]
+            'Blue': Color.Red(),
+            'Red': Color.Blue(),
+            'Yellow': Color.Green(),
+            'Green': Color.Yellow(),
+        }[you.subtype]
     def foo(self, either):
         return {}
 
@@ -90,4 +112,5 @@ def run_server():
     app.run(debug=True)
 
 if __name__ == '__main__':
+    pass
     run_server()
