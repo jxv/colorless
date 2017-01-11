@@ -32,10 +32,26 @@ library
   exposed-modules:
     Colorless.CodeGen.Types
     Colorless.CodeGen.Format.Json
+    Colorless.CodeGen.Target.Clojure.Server
+    Colorless.CodeGen.Target.Clojure.Client
+    Colorless.CodeGen.Target.Go.Server
+    Colorless.CodeGen.Target.Go.Client
     Colorless.CodeGen.Target.Haskell.Server
     Colorless.CodeGen.Target.Haskell.Client
+    Colorless.CodeGen.Target.Java.Server
+    Colorless.CodeGen.Target.Java.Client
+    Colorless.CodeGen.Target.JavaScript.Server
+    Colorless.CodeGen.Target.JavaScript.Client
     Colorless.CodeGen.Target.Python.Server
     Colorless.CodeGen.Target.Python.Client
+    Colorless.CodeGen.Target.Ruby.Server
+    Colorless.CodeGen.Target.Ruby.Client
+    Colorless.CodeGen.Target.Rust.Server
+    Colorless.CodeGen.Target.Rust.Client
+    Colorless.CodeGen.Target.Scala.Server
+    Colorless.CodeGen.Target.Scala.Client
+    Colorless.CodeGen.Target.Swift.Server
+    Colorless.CodeGen.Target.Swift.Client
     Colorless.Parser
     Colorless.Parser.Atomic
     Colorless.Parser.Combinator
