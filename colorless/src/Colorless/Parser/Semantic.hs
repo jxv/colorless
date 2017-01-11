@@ -2,7 +2,7 @@ module Colorless.Parser.Semantic
   ( FnName(..)
   , ArgName(..)
   , Tag(..)
-  , SubtypeName(..)
+  , CtorName(..)
   , FieldName(..)
   , OpaqueName(..)
   , TyParamName(..)
@@ -52,7 +52,7 @@ newtype ArgName = ArgName Text
 newtype Tag = Tag Text
   deriving (Show, Eq, Ord, IsString)
 
-newtype SubtypeName = SubtypeName Text
+newtype CtorName = CtorName Text
   deriving (Show, Eq, Ord, IsString)
 
 newtype FieldName = FieldName Text
@@ -192,7 +192,7 @@ data AliasDef = AliasDef
 
 data SumDef = SumDef
   { _params :: [PolyTyParam]
-  , _subtypes :: Map SubtypeName [PolyTyRef]
+  , _ctors :: Map CtorName [PolyTyRef]
   , _tags :: Set Tag
   } deriving (Show, Eq)
 
