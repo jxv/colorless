@@ -3,46 +3,46 @@ module Colorless.Syntax.Types
   ( Line(..)
   , Column(..)
   , Position(..)
-  , PrimitiveType(..)
-  , OpaqueType(..)
+  , PrimTy(..)
+  , OpaqueTy(..)
   , Tag(..)
-  , Function(..)
-  , Label(..)
-  , Subtype(..)
-  , Type(..)
-  , ParameterReference(..)
-  , OpaqueTypeReference(..)
-  , TagDeclaration(..)
-  , FunctionParameter(..)
-  , FunctionDeclaration(..)
-  , TypeParameter(..)
-  , OpaqueDeclaration(..)
-  , SubtypeDeclaration(..)
-  , SumFieldDeclaration(..)
-  , SumDeclaration(..)
-  , LabelDeclaration(..)
-  , ProductFieldDeclaration(..)
-  , ProductDeclaration(..)
+  , Fn(..)
+  , Field(..)
+  , Ctor(..)
+  , Ty(..)
+  , ParamRef(..)
+  , OpaqueTyRef(..)
+  , TagDecl(..)
+  , FnParam(..)
+  , FnDecl(..)
+  , TyParam(..)
+  , OpaqueDecl(..)
+  , CtorDecl(..)
+  , SumFieldDecl(..)
+  , SumDecl(..)
+  , FieldDecl(..)
+  , ProductFieldDecl(..)
+  , ProductDecl(..)
   , OpaqueImport(..)
   , ModuleVersion(..)
   , ModuleImport(..)
   , Import(..)
-  , ImportsDeclaration(..)
+  , ImportsDecl(..)
   , Directory(..)
-  , HttpProtocol(..)
+  , HttpDecl(..)
   , HttpMeta(..)
-  , ModuleReference(..)
+  , ModuleRef(..)
   , ModuleHook(..)
-  , ServiceReference(..)
-  , ServiceInstance(..)
-  , ServiceFieldDeclaration(..)
-  , ServiceDeclaration(..)
-  , ServiceImplementationReference(..)
-  , ServiceImplementationDeclaration(..)
-  , ProtocolImplementationDeclaration(..)
-  , HttpProtocolImplementationDeclaration(..)
-  , ModuleOverrideDeclaration(..)
-  , Declaration(..)
+  , DomainRef(..)
+  , DomainInstance(..)
+  , DomainFieldDecl(..)
+  , DomainDecl(..)
+  , ServiceRef(..)
+  , ServiceDecl(..)
+  , ProtocolDecl(..)
+  , HttpFormat(..)
+  , ModuleOverrideDecl(..)
+  , Decl(..)
   , ParserError
   , ParserState
   , MonadParser
@@ -64,46 +64,46 @@ data Position = Position
   , _column :: Column
   } deriving (Show, Eq)
 
-data PrimitiveType
-  = PrimitiveTypeUnit
-  | PrimitiveTypeU8
-  | PrimitiveTypeU16
-  | PrimitiveTypeU32
-  | PrimitiveTypeU64
-  | PrimitiveTypeI8
-  | PrimitiveTypeI16
-  | PrimitiveTypeI32
-  | PrimitiveTypeI64
-  | PrimitiveTypeF32
-  | PrimitiveTypeF64
-  | PrimitiveTypeBool
-  | PrimitiveTypeChar
-  | PrimitiveTypeStr
-  | PrimitiveTypeInt
-  | PrimitiveTypeNeg
-  | PrimitiveTypePos
-  | PrimitiveTypeNat
-  | PrimitiveTypeRat
+data PrimTy
+  = PrimTyUnit
+  | PrimTyU8
+  | PrimTyU16
+  | PrimTyU32
+  | PrimTyU64
+  | PrimTyI8
+  | PrimTyI16
+  | PrimTyI32
+  | PrimTyI64
+  | PrimTyF32
+  | PrimTyF64
+  | PrimTyBool
+  | PrimTyChar
+  | PrimTyStr
+  | PrimTyInt
+  | PrimTyNeg
+  | PrimTyPos
+  | PrimTyNat
+  | PrimTyRat
   deriving (Show, Eq)
 
-newtype OpaqueType = OpaqueType Text
+newtype OpaqueTy = OpaqueTy Text
   deriving (Show, Eq, Ord, IsString, ToText)
 
 newtype Tag = Tag Text
   deriving (Show, Eq, IsString, ToText)
 
-newtype Function = Function Text
+newtype Fn = Fn Text
   deriving (Show, Eq, IsString, ToText)
 
-newtype Label = Label Text
+newtype Field = Field Text
   deriving (Show, Eq, Ord, IsString, ToText)
 
-newtype Subtype = Subtype Text
+newtype Ctor = Ctor Text
   deriving (Show, Eq, Ord, IsString, ToText)
 
-data Type
-  = TypePrimitive PrimitiveType
-  | TypeOpaque OpaqueTypeReference
+data Ty
+  = TyPrim PrimTy
+  | TyOpaque OpaqueTyRef
   deriving (Show, Eq)
 
 data Decimal = Decimal
@@ -112,85 +112,85 @@ data Decimal = Decimal
   , _decimalResolution :: Integer
   } deriving (Show, Eq)
 
-data ParameterReference
-  = ParameterReferenceLabel Label
-  | ParameterReferenceString Text
-  | ParameterReferenceInteger Integer
-  | ParameterReferenceDecimal Decimal
+data ParamRef
+  = ParamRefField Field
+  | ParamRefString Text
+  | ParamRefInteger Integer
+  | ParamRefDecimal Decimal
   deriving (Show, Eq)
 
-data OpaqueTypeReference = OpaqueTypeReference
-  { _type :: OpaqueType
-  , _parameterReferences :: [ParameterReference]
+data OpaqueTyRef = OpaqueTyRef
+  { _ty :: OpaqueTy
+  , _paramRefs :: [ParamRef]
   } deriving (Show, Eq)
 
-data TagDeclaration = TagDeclaration
+data TagDecl = TagDecl
   { _tag :: Tag
   , _tags :: [Tag]
   } deriving (Show, Eq)
 
-data FunctionParameter = FunctionParameter
-  { _label :: Maybe Label
-  , _type :: Type
+data FnParam = FnParam
+  { _field :: Maybe Field
+  , _ty :: Ty
   } deriving (Show, Eq)
 
-data FunctionDeclaration = FunctionDeclaration
-  { _function :: Function
-  , _parameters :: [FunctionParameter]
-  , _output :: Type
+data FnDecl = FnDecl
+  { _fn :: Fn
+  , _params :: [FnParam]
+  , _output :: Ty
   , _tags :: [Tag]
   } deriving (Show, Eq)
 
-data TypeParameter = TypeParameter
-  { _label :: Label
-  , _primitiveType :: Maybe PrimitiveType
+data TyParam = TyParam
+  { _field :: Field
+  , _primTy :: Maybe PrimTy
   } deriving (Show, Eq)
 
-data OpaqueDeclaration = OpaqueDeclaration
-  { _type :: OpaqueType
-  , _typeParameters :: [TypeParameter]
+data OpaqueDecl = OpaqueDecl
+  { _ty :: OpaqueTy
+  , _tyParams :: [TyParam]
   } deriving (Show, Eq)
 
-data SubtypeDeclaration = SubtypeDeclaration
-  { _subtype :: Subtype
-  , _parameters :: [Type]
+data CtorDecl = CtorDecl
+  { _subtype :: Ctor
+  , _params :: [Ty]
   } deriving (Show, Eq)
 
-data SumFieldDeclaration
-  = SumFieldDeclarationSubtype SubtypeDeclaration
-  | SumFieldDeclarationTag Tag
+data SumFieldDecl
+  = SumFieldDeclCtor CtorDecl
+  | SumFieldDeclTag Tag
   deriving (Show, Eq)
 
-data SumDeclaration = SumDeclaration
-  { _opaqueDeclaration :: OpaqueDeclaration
-  , _fields :: [SumFieldDeclaration]
+data SumDecl = SumDecl
+  { _opaqueDecl :: OpaqueDecl
+  , _fields :: [SumFieldDecl]
   } deriving (Show, Eq)
 
-data LabelDeclaration = LabelDeclaration
-  { _label :: Label
-  , _type :: Type
+data FieldDecl = FieldDecl
+  { _field :: Field
+  , _ty :: Ty
   } deriving (Show, Eq)
 
-data ProductFieldDeclaration
-  = ProductFieldDeclarationLabel LabelDeclaration
-  | ProductFieldDeclarationTag Tag
+data ProductFieldDecl
+  = ProductFieldDeclField FieldDecl
+  | ProductFieldDeclTag Tag
   deriving (Show, Eq)
 
-data ProductDeclaration = ProductDeclaration
-  { _opaqueDeclaration :: OpaqueDeclaration
-  , _fields ::  [ProductFieldDeclaration]
+data ProductDecl = ProductDecl
+  { _opaqueDecl :: OpaqueDecl
+  , _fields ::  [ProductFieldDecl]
   } deriving (Show, Eq)
 
 data OpaqueImport = OpaqueImport
-  { _type :: OpaqueType
-  , _typeParameters :: [TypeParameter]
+  { _ty :: OpaqueTy
+  , _tyParams :: [TyParam]
   } deriving (Show, Eq)
 
 newtype ModuleVersion = ModuleVersion Integer
   deriving (Show, Eq, Num)
 
 data ModuleImport = ModuleImport
-  { _module :: ModuleReference
+  { _module :: ModuleRef
   , _version :: ModuleVersion
   } deriving (Show, Eq)
 
@@ -198,38 +198,38 @@ data Import
   = ImportOpaque OpaqueImport
   | ImportTag Tag
   | ImportModuleVersion ModuleImport
-  | ImportModuleNoVersion ModuleReference
-  | ImportService ServiceReference
-  | ImportServiceImplementation ServiceImplementationReference
+  | ImportModuleNoVersion ModuleRef
+  | ImportDomain DomainRef
+  | ImportService ServiceRef
   deriving (Show, Eq)
 
-data ImportsDeclaration = ImportsDeclaration
+data ImportsDecl = ImportsDecl
   { _imports :: NonEmpty Import
   } deriving (Show, Eq)
 
-newtype ModuleReference = ModuleReference Text
+newtype ModuleRef = ModuleRef Text
   deriving (Show, Eq, IsString)
 
 data ModuleHook = ModuleHook
-  { _to :: ModuleReference
-  , _from :: ModuleReference
+  { _to :: ModuleRef
+  , _from :: ModuleRef
   } deriving (Show, Eq)
 
-newtype ServiceReference = ServiceReference Text
+newtype DomainRef = DomainRef Text
   deriving (Show, Eq)
 
-data ServiceInstance
-  = ServiceInstanceModule ModuleReference
-  | ServiceInstanceService ServiceReference
+data DomainInstance
+  = DomainInstanceModule ModuleRef
+  | DomainInstanceDomain DomainRef
   deriving (Show, Eq)
 
-data ServiceFieldDeclaration
-  = ServiceFieldDeclarationModuleHook ModuleHook
-  | ServiceFieldDeclarationServiceInstance ServiceInstance
+data DomainFieldDecl
+  = DomainFieldDeclModuleHook ModuleHook
+  | DomainFieldDeclDomainInstance DomainInstance
   deriving (Show, Eq)
 
-data ServiceDeclaration = ServiceDeclaration
-  { _fields :: [ServiceFieldDeclaration]
+data DomainDecl = DomainDecl
+  { _fields :: [DomainFieldDecl]
   } deriving (Show, Eq)
 
 newtype Directory = Directory [Text]
@@ -238,47 +238,47 @@ newtype Directory = Directory [Text]
 instance IsString Directory where
   fromString str = Directory [toText str]
 
-data HttpProtocol
-  = HttpProtocolJson
+data HttpFormat
+  = HttpFormatJson
   deriving (Show, Eq)
 
 data HttpMeta
   = HttpMetaHeader
   deriving (Show, Eq)
 
-data HttpProtocolImplementationDeclaration = HttpProtocolImplementationDeclaration
+data HttpDecl = HttpDecl
   { _directory :: Directory
-  , _protocol :: HttpProtocol
+  , _format :: HttpFormat
   , _meta :: HttpMeta
-  , _service :: ServiceReference
+  , _domain :: DomainRef
   } deriving (Show, Eq)
 
-newtype ServiceImplementationReference = ServiceImplementationReference Text
+newtype ServiceRef = ServiceRef Text
   deriving (Show, Eq)
 
-data ProtocolImplementationDeclaration
-  = ProtocolImplementationDeclarationHttp HttpProtocolImplementationDeclaration
+data ProtocolDecl
+  = ProtocolDeclHttp HttpDecl
   deriving (Show, Eq)
 
-data ServiceImplementationDeclaration = ServiceImplementationDeclaration
-  { _serviceImplementation :: ServiceImplementationReference
-  , _protocolImplementation :: ProtocolImplementationDeclaration
+data ServiceDecl = ServiceDecl
+  { _service :: ServiceRef
+  , _protocolDecl :: ProtocolDecl
   } deriving (Show, Eq)
 
-data ModuleOverrideDeclaration = ModuleOverrideDeclaration
-  { _module :: ModuleReference
+data ModuleOverrideDecl = ModuleOverrideDecl
+  { _module :: ModuleRef
   , _version :: ModuleVersion
   } deriving (Show, Eq)
 
-data Declaration
-  = DeclarationTag TagDeclaration
-  | DeclarationFunction FunctionDeclaration
-  | DeclarationSum SumDeclaration
-  | DeclarationProduct ProductDeclaration
-  | DeclarationImports ImportsDeclaration
-  | DeclarationService ServiceDeclaration
-  | DeclarationServiceImplementation ServiceImplementationDeclaration
-  | DeclarationModuleOverride ModuleOverrideDeclaration
+data Decl
+  = DeclTag TagDecl
+  | DeclFn FnDecl
+  | DeclSum SumDecl
+  | DeclProduct ProductDecl
+  | DeclImports ImportsDecl
+  | DeclDomain DomainDecl
+  | DeclService ServiceDecl
+  | DeclModuleOverride ModuleOverrideDecl
   deriving (Show, Eq)
 
 type ParserError = Dec

@@ -30,6 +30,6 @@ spec = do
         { _match = \a -> lift $ a `shouldBe` "%"
         , _upperCamelCase = return "MyModule"
         }
-        moduleReferenceToken'
+        moduleRefToken'
       functions `shouldBe` ["match","upperCamelCase"]
-      value `shouldBe` (ModuleReference "MyModule")
+      value `shouldBe` (ModuleRef "MyModule")

@@ -1,11 +1,11 @@
 module Colorless.Syntax.Token
   ( Token(..)
-  , primitiveTypeToken'
-  , functionToken'
-  , typeToken'
+  , primTyToken'
+  , fnToken'
+  , tyToken'
   , tagToken'
   , initiateModuleOverride'
-  , moduleReferenceToken'
+  , moduleRefToken'
   , moduleVersionToken'
   , moduleVersionSeparator'
   ) where
@@ -17,48 +17,48 @@ import Data.Tuple (uncurry)
 import Pregame
 
 class Monad m => Token m where
-  primitiveTypeToken :: m PrimitiveType
-  opaqueTypeReferenceToken :: m OpaqueTypeReference
-  opaqueTypeToken :: m OpaqueType
-  functionToken :: m Function
-  typeToken :: m Type
+  primTyToken :: m PrimTy
+  opaqueTyRefToken :: m OpaqueTyRef
+  opaqueTyToken :: m OpaqueTy
+  fnToken :: m Fn
+  tyToken :: m Ty
   tagToken :: m Tag
   initiateModuleOverride :: m ()
-  moduleReferenceToken :: m ModuleReference
+  moduleRefToken :: m ModuleRef
   moduleVersionToken :: m ModuleVersion
   moduleVersionSeparator :: m ()
 
-primitiveTypeToken' :: (Atomic m, Combinator m) => m PrimitiveType
-primitiveTypeToken' = choice $ fmap (uncurry token)
-  [ ("unit", PrimitiveTypeUnit)
-  , ("u8", PrimitiveTypeU8)
-  , ("u16", PrimitiveTypeU16)
-  , ("u32", PrimitiveTypeU32)
-  , ("u64", PrimitiveTypeU64)
-  , ("i8", PrimitiveTypeI8)
-  , ("i16", PrimitiveTypeI16)
-  , ("i32", PrimitiveTypeI32)
-  , ("i64", PrimitiveTypeI64)
-  , ("f32", PrimitiveTypeF32)
-  , ("f64", PrimitiveTypeF64)
-  , ("bool", PrimitiveTypeBool)
-  , ("char", PrimitiveTypeChar)
-  , ("str", PrimitiveTypeStr)
-  , ("int", PrimitiveTypeInt)
-  , ("neg", PrimitiveTypeNeg)
-  , ("pos", PrimitiveTypePos)
-  , ("nat", PrimitiveTypeNat)
-  , ("rat", PrimitiveTypeRat)
+primTyToken' :: (Atomic m, Combinator m) => m PrimTy
+primTyToken' = choice $ fmap (uncurry token)
+  [ ("unit", PrimTyUnit)
+  , ("u8", PrimTyU8)
+  , ("u16", PrimTyU16)
+  , ("u32", PrimTyU32)
+  , ("u64", PrimTyU64)
+  , ("i8", PrimTyI8)
+  , ("i16", PrimTyI16)
+  , ("i32", PrimTyI32)
+  , ("i64", PrimTyI64)
+  , ("f32", PrimTyF32)
+  , ("f64", PrimTyF64)
+  , ("bool", PrimTyBool)
+  , ("char", PrimTyChar)
+  , ("str", PrimTyStr)
+  , ("int", PrimTyInt)
+  , ("neg", PrimTyNeg)
+  , ("pos", PrimTyPos)
+  , ("nat", PrimTyNat)
+  , ("rat", PrimTyRat)
   ]
 
-opaqueTypeReferenceToken' :: (Atomic m, Token m) => m OpaqueTypeReference
-opaqueTypeReferenceToken' = OpaqueTypeReference <$> opaqueTypeToken <*> pure []
+opaqueTyRefToken' :: (Atomic m, Token m) => m OpaqueTyRef
+opaqueTyRefToken' = OpaqueTyRef <$> opaqueTyToken <*> pure []
 
-functionToken' :: Atomic m => m Function
-functionToken' = Function <$> lowerCamelCase
+fnToken' :: Atomic m => m Fn
+fnToken' = Fn <$> lowerCamelCase
 
-typeToken' :: (Atomic m, Token m, Combinator m) => m Type
-typeToken' = choice [TypePrimitive <$> primitiveTypeToken, TypeOpaque <$> opaqueTypeReferenceToken]
+tyToken' :: (Atomic m, Token m, Combinator m) => m Ty
+tyToken' = choice [TyPrim <$> primTyToken, TyOpaque <$> opaqueTyRefToken]
 
 tagToken' :: Atomic m => m Tag
 tagToken' = do
@@ -68,10 +68,10 @@ tagToken' = do
 initiateModuleOverride' :: Atomic m => m ()
 initiateModuleOverride' = match "-"
 
-moduleReferenceToken' :: Atomic m => m ModuleReference
-moduleReferenceToken' = do
+moduleRefToken' :: Atomic m => m ModuleRef
+moduleRefToken' = do
   match "%"
-  ModuleReference <$> upperCamelCase
+  ModuleRef <$> upperCamelCase
 
 moduleVersionToken' :: Atomic m => m ModuleVersion
 moduleVersionToken' = ModuleVersion <$> integer

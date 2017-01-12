@@ -17,10 +17,10 @@ spec = do
     it "moduleOverrideDeclaration' happy path" $ do
       (functions, value) <- functionsValueT def
         { _initiateModuleOverride = return ()
-        , _moduleReferenceToken = return "MyModule"
+        , _moduleRefToken = return "MyModule"
         , _moduleVersionToken = return 10
         , _moduleVersionSeparator = return ()
         }
-        moduleOverrideDeclaration'
-      functions `shouldBe` ["initiateModuleOverride","moduleReferenceToken","moduleVersionSeparator","moduleVersionToken"]
-      value `shouldBe` ModuleOverrideDeclaration "MyModule" 10
+        moduleOverrideDecl'
+      functions `shouldBe` ["initiateModuleOverride","moduleRefToken","moduleVersionSeparator","moduleVersionToken"]
+      value `shouldBe` ModuleOverrideDecl "MyModule" 10

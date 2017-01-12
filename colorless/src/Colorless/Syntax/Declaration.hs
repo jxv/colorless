@@ -1,9 +1,9 @@
 module Colorless.Syntax.Declaration
-  ( Declarations(..)
+  ( Decls(..)
   , declaration
-  , tagDeclarationToken'
-  , functionDeclarationToken'
-  , moduleOverrideDeclaration'
+  , tagDeclToken'
+  , fnDeclToken'
+  , moduleOverrideDecl'
   ) where
 
 import Pregame
@@ -12,41 +12,41 @@ import Colorless.Syntax.Token
 import Colorless.Syntax.Types
 import Control.Applicative ((*>))
 
-class Monad m => Declarations m where
-  tagDeclarationToken :: m TagDeclaration
-  functionDeclarationToken :: m FunctionDeclaration
-  moduleOverrideDeclarationToken :: m ModuleOverrideDeclaration
+class Monad m => Decls m where
+  tagDeclToken :: m TagDecl
+  fnDeclToken :: m FnDecl
+  moduleOverrideDeclToken :: m ModuleOverrideDecl
 
-declaration :: (Combinator m, Declarations m) => m Declaration
+declaration :: (Combinator m, Decls m) => m Decl
 declaration = choice
-  [ DeclarationTag <$> tagDeclarationToken
-  , DeclarationFunction <$> functionDeclarationToken
-  , DeclarationModuleOverride <$> moduleOverrideDeclarationToken
+  [ DeclTag <$> tagDeclToken
+  , DeclFn <$> fnDeclToken
+  , DeclModuleOverride <$> moduleOverrideDeclToken
   ]
 
-tagDeclarationToken' :: Token m => m TagDeclaration
-tagDeclarationToken' = do
+tagDeclToken' :: Token m => m TagDecl
+tagDeclToken' = do
   tag <- tagToken
   tags <- pure []
-  return TagDeclaration
+  return TagDecl
     { _tag = tag
     , _tags = tags
     }
 
-functionDeclarationToken' :: Token m => m FunctionDeclaration
-functionDeclarationToken' = do
-  function <- functionToken
-  functionParameters <- pure []
-  output <- typeToken
+fnDeclToken' :: Token m => m FnDecl
+fnDeclToken' = do
+  fn <- fnToken
+  fnParams <- pure []
+  output <- tyToken
   tags <- pure []
-  return FunctionDeclaration
-    { _function = function
-    , _parameters = functionParameters
+  return FnDecl
+    { _fn = fn
+    , _params = fnParams
     , _output = output
     , _tags = tags
     }
 
-moduleOverrideDeclaration' :: Token m => m ModuleOverrideDeclaration
-moduleOverrideDeclaration' = do
+moduleOverrideDecl' :: Token m => m ModuleOverrideDecl
+moduleOverrideDecl' = do
   initiateModuleOverride
-  ModuleOverrideDeclaration <$> moduleReferenceToken <*> (moduleVersionSeparator *> moduleVersionToken)
+  ModuleOverrideDecl <$> moduleRefToken <*> (moduleVersionSeparator *> moduleVersionToken)
