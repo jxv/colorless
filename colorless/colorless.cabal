@@ -59,7 +59,6 @@ library
     Colorless.Syntax.Monad
     Colorless.Syntax.Token
     Colorless.Syntax.Types
-    Colorless.Syntax.Semantic
   build-depends:
       base >= 4.7 && < 5
     , pregame == 1.0.3.0

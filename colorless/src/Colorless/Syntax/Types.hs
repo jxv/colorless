@@ -46,6 +46,7 @@ module Colorless.Syntax.Types
   , ParserError
   , ParserState
   , MonadParser
+  , reverseDecl
   ) where
 
 import Pregame
@@ -286,3 +287,6 @@ type ParserError = Dec
 type ParserState = Text
 
 type MonadParser a = MonadParsec ParserError ParserState a
+
+reverseDecl :: Decl
+reverseDecl = DeclFn $ FnDecl "reverse" [FnArg Nothing (TyPrim PrimTyStr)] (TyPrim PrimTyStr) []
