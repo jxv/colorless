@@ -35,7 +35,7 @@ module Colorless.Semantic.Types
   , Domain(..)
   , HttpFormat(..)
   , HttpMeta(..)
-  , HttpService(..)
+  , HttpServiceDef(..)
   , Service(..)
   , ServiceDef(..)
   , SpecDef(..)
@@ -229,20 +229,20 @@ data HttpMeta
   = HttpMetaHeader
   deriving (Show, Eq)
 
-data HttpService = HttpService
+data HttpServiceDef = HttpServiceDef
   { _dir :: HttpDir
   , _port :: HttpPort
   , _meta :: HttpMeta
   , _format :: HttpFormat
+  , _domain :: Domain
   } deriving (Show, Eq)
 
 data ServiceDef
-  = ServiceDefHttp HttpService
+  = ServiceDefHttp HttpServiceDef
   deriving (Show, Eq)
 
 data Service = Service
   { _name :: ServiceName
-  , _domain :: Domain
   , _serviceDef :: ServiceDef
   } deriving (Show, Eq)
 
