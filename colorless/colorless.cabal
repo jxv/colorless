@@ -52,6 +52,8 @@ library
     Colorless.CodeGen.Target.Scala.Client
     Colorless.CodeGen.Target.Swift.Server
     Colorless.CodeGen.Target.Swift.Client
+    Colorless.Lexical.Types
+    Colorless.Semantic.Types
     Colorless.Syntax.Atomic
     Colorless.Syntax.Combinator
     Colorless.Syntax.Declaration
