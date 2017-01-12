@@ -86,8 +86,8 @@ monoTyParamRef (MonoTyParamRefOpaqueRef x) = opaqueMonoRef x
 fnSignature :: FnDef -> Text
 fnSignature FnDef{ _args, _output } = mconcat $ intersperse " -> " $ map (flip monoTyRef TopLevel . snd) _args ++ ["m " <> monoTyRef _output Nested]
 
-tcDeclFn :: FnName -> FnDef -> Text
-tcDeclFn name fd = "  " <> toText name <> " :: " <> fnSignature fd
+tcDeclFn :: Fn -> FnDef -> Text
+tcDeclFn fn fnDef = "  " <> toText fn <> " :: " <> fnSignature fnDef
 
 fnDefVal :: FnDef
 fnDefVal = FnDef

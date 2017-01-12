@@ -1,11 +1,11 @@
 module Colorless.Semantic.Types
-  ( FnName(..)
-  , ArgName(..)
+  ( Fn(..)
+  , Arg(..)
   , Tag(..)
-  , CtorName(..)
-  , FieldName(..)
-  , OpaqueName(..)
-  , TyParamName(..)
+  , Ctor(..)
+  , Field(..)
+  , Opaque(..)
+  , TyParam(..)
   , PolyVar(..)
   , Neg(..)
   , Pos(..)
@@ -44,25 +44,25 @@ module Colorless.Semantic.Types
 
 import Pregame
 
-newtype FnName = FnName Text
+newtype Fn = Fn Text
   deriving (Show, Eq, Ord, IsString, ToText)
 
-newtype ArgName = ArgName Text
+newtype Arg = Arg Text
   deriving (Show, Eq, Ord, IsString, ToText)
 
 newtype Tag = Tag Text
   deriving (Show, Eq, Ord, IsString, ToText)
 
-newtype CtorName = CtorName Text
+newtype Ctor = Ctor Text
   deriving (Show, Eq, Ord, IsString, ToText)
 
-newtype FieldName = FieldName Text
+newtype Field = Field Text
   deriving (Show, Eq, Ord, IsString, ToText)
 
-newtype OpaqueName = OpaqueName Text
+newtype Opaque = Opaque Text
   deriving (Show, Eq, Ord, IsString, ToText)
 
-newtype TyParamName = TyParamName Text
+newtype TyParam = TyParam Text
   deriving (Show, Eq, Ord, IsString, ToText)
 
 newtype PolyVar = PolyVar Text
@@ -154,12 +154,12 @@ data MonoTyParamRef
   deriving (Show, Eq)
 
 data OpaqueMonoRef = OpaqueMonoRef
-  { _name :: OpaqueName
+  { _name :: Opaque
   , _params :: [MonoTyParamRef]
   } deriving (Show, Eq)
 
 data FnDef = FnDef
-  { _args :: [(ArgName, MonoTyRef)]
+  { _args :: [(Arg, MonoTyRef)]
   , _output :: MonoTyRef
   , _tags :: Set Tag
   } deriving (Show, Eq)
@@ -177,12 +177,12 @@ data PolyTyParamRef
   deriving (Show, Eq)
 
 data PolyTyParam = PolyTyParam
-  { _name :: TyParamName
+  { _name :: TyParam
   , _ref :: PolyTyParamRef
   } deriving (Show, Eq)
 
 data OpaquePolyRef = OpaquePolyRef
-  { _name :: OpaqueName
+  { _name :: Opaque
   , _params :: [PolyTyParamRef]
   } deriving (Show, Eq)
 
@@ -194,13 +194,13 @@ data AliasDef = AliasDef
 
 data SumDef = SumDef
   { _params :: [PolyTyParam]
-  , _ctors :: Map CtorName [PolyTyRef]
+  , _ctors :: Map Ctor [PolyTyRef]
   , _tags :: Set Tag
   } deriving (Show, Eq)
 
 data ProductDef = ProductDef
   { _params :: [PolyTyParam]
-  , _fields :: Map FieldName PolyTyRef
+  , _fields :: Map Field PolyTyRef
   , _tags :: Set Tag
   } deriving (Show, Eq)
 
@@ -216,8 +216,8 @@ data TagDef = TagDef
 
 data Domain = Domain
   { _name :: DomainName
-  , _opaques :: Map OpaqueName OpaqueDef
-  , _fns :: Map FnName FnDef
+  , _opaques :: Map Opaque OpaqueDef
+  , _fns :: Map Fn FnDef
   , _tags :: Map Tag TagDef
   } deriving (Show, Eq)
 
