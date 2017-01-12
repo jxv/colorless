@@ -6,7 +6,7 @@ module Colorless.CodeGen.Target.Haskell.Client
 
 import Pregame
 import Data.List (intersperse)
-import Colorless.CodeGen.Types
+import Colorless.Semantic.Types
 
 showText :: Show a => a -> Text
 showText = toText . show
@@ -96,5 +96,3 @@ fnDefVal = FnDef
   ]
   (MonoTyRefOpaque $ OpaqueMonoRef "Either" [MonoTyParamRefPrimTy PrimTyStr, MonoTyParamRefOpaqueRef (OpaqueMonoRef "Color" [])])
   mempty
-
-

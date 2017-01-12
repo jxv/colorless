@@ -30,7 +30,6 @@ library
   hs-source-dirs:
     src
   exposed-modules:
-    Colorless.CodeGen.Types
     Colorless.CodeGen.Format.Json
     Colorless.CodeGen.Target.Clojure.Server
     Colorless.CodeGen.Target.Clojure.Client
