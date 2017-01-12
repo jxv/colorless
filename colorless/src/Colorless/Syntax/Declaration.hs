@@ -1,4 +1,4 @@
-module Colorless.Parser.Declaration
+module Colorless.Syntax.Declaration
   ( Declarations(..)
   , declaration
   , tagDeclarationToken'
@@ -6,10 +6,10 @@ module Colorless.Parser.Declaration
   , moduleOverrideDeclaration'
   ) where
 
-import Colorless.Parser.Combinator
-import Colorless.Parser.Token
-import Colorless.Parser.Prototypes
 import Pregame
+import Colorless.Syntax.Combinator
+import Colorless.Syntax.Token
+import Colorless.Syntax.Types
 import Control.Applicative ((*>))
 
 class Monad m => Declarations m where

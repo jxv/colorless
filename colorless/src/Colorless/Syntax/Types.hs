@@ -1,5 +1,5 @@
 {-# LANGUAGE ConstraintKinds #-}
-module Colorless.Parser.Prototypes
+module Colorless.Syntax.Types
   ( Line(..)
   , Column(..)
   , Position(..)

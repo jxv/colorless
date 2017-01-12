@@ -1,13 +1,13 @@
-module Test.Colorless.Parser.DeclarationSpec (spec) where
+module Test.Colorless.Syntax.DeclarationSpec (spec) where
 
 import Pregame
 
 import Test.Hspec
 import Test.Fixie
 
-import Colorless.Parser.Prototypes
-import Colorless.Parser.Declaration
-import Colorless.Parser.Token
+import Colorless.Syntax.Types
+import Colorless.Syntax.Declaration
+import Colorless.Syntax.Token
 
 mkFixture "Fixture" [ts|Token|]
 

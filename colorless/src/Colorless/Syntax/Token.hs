@@ -1,4 +1,4 @@
-module Colorless.Parser.Token
+module Colorless.Syntax.Token
   ( Token(..)
   , primitiveTypeToken'
   , functionToken'
@@ -10,9 +10,9 @@ module Colorless.Parser.Token
   , moduleVersionSeparator'
   ) where
 
-import Colorless.Parser.Atomic
-import Colorless.Parser.Combinator
-import Colorless.Parser.Prototypes
+import Colorless.Syntax.Atomic
+import Colorless.Syntax.Combinator
+import Colorless.Syntax.Types
 import Data.Tuple (uncurry)
 import Pregame
 

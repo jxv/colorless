@@ -1,4 +1,4 @@
-module Colorless.Parser.Atomic
+module Colorless.Syntax.Atomic
   ( Atomic(..)
   , literal'
   , match'
@@ -19,7 +19,7 @@ import Data.Tuple (uncurry)
 import Control.Applicative
 import qualified Text.Megaparsec as P
 
-import Colorless.Parser.Prototypes
+import Colorless.Syntax.Types
 
 class Monad m => Atomic m where
   token :: Text -> a -> m a

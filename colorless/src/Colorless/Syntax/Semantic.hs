@@ -1,4 +1,4 @@
-module Colorless.Parser.Semantic
+module Colorless.Syntax.Semantic
   ( FnName(..)
   , ArgName(..)
   , Tag(..)

@@ -1,4 +1,4 @@
-module Colorless.Parser.Combinator
+module Colorless.Syntax.Combinator
   ( Combinator(..)
   , choice'
   , assoc'
@@ -10,7 +10,7 @@ module Colorless.Parser.Combinator
 import Pregame
 import qualified Text.Megaparsec as P
 
-import Colorless.Parser.Prototypes
+import Colorless.Syntax.Types
 
 class Monad m => Combinator m where
   choice :: NonEmpty (m a) -> m a

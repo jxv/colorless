@@ -52,13 +52,13 @@ library
     Colorless.CodeGen.Target.Scala.Client
     Colorless.CodeGen.Target.Swift.Server
     Colorless.CodeGen.Target.Swift.Client
-    Colorless.Parser
-    Colorless.Parser.Atomic
-    Colorless.Parser.Combinator
-    Colorless.Parser.Declaration
-    Colorless.Parser.Prototypes
-    Colorless.Parser.Token
-    Colorless.Parser.Semantic
+    Colorless.Syntax.Atomic
+    Colorless.Syntax.Combinator
+    Colorless.Syntax.Declaration
+    Colorless.Syntax.Monad
+    Colorless.Syntax.Token
+    Colorless.Syntax.Types
+    Colorless.Syntax.Semantic
   build-depends:
       base >= 4.7 && < 5
     , pregame == 1.0.3.0

@@ -1,23 +1,23 @@
-module Colorless.Parser
-  ( ParserM
-  , runParserM
+module Colorless.Syntax.Monad
+  ( SyntaxM
+  , runSyntaxM
   ) where
 
 import Pregame
 import Text.Megaparsec (string, ParsecT, runParserT, Token, Dec, ParseError, choice)
 import Text.Megaparsec.Prim (MonadParsec)
 
-import Colorless.Parser.Atomic
-import Colorless.Parser.Combinator
-import Colorless.Parser.Prototypes
+import Colorless.Syntax.Atomic
+import Colorless.Syntax.Combinator
+import Colorless.Syntax.Types
 
-newtype ParserM a = ParserM (ParsecT ParserError ParserState IO a)
+newtype SyntaxM a = SyntaxM (ParsecT ParserError ParserState IO a)
   deriving (Functor, Applicative, Monad, MonadIO, Alternative, MonadPlus, MonadParsec ParserError ParserState)
 
-runParserM :: ParserM a -> Text -> IO (Either (ParseError (Token ParserState) ParserError) a)
-runParserM (ParserM m) input = runParserT m "" input
+runSyntaxM :: SyntaxM a -> Text -> IO (Either (ParseError (Token ParserState) ParserError) a)
+runSyntaxM (SyntaxM m) input = runParserT m "" input
 
-instance Atomic ParserM where
+instance Atomic SyntaxM where
   literal = literal'
   token = token'
   match = match'
@@ -30,7 +30,7 @@ instance Atomic ParserM where
   upperCamelCase = upperCamelCase'
   parens = parens'
 
-instance Combinator ParserM where
+instance Combinator SyntaxM where
   choice = choice'
   assoc = assoc'
   many = many'

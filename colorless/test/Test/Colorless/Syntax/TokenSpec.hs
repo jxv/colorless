@@ -1,4 +1,4 @@
-module Test.Colorless.Parser.TokenSpec (spec) where
+module Test.Colorless.Syntax.TokenSpec (spec) where
 
 import Pregame
 
@@ -6,9 +6,9 @@ import Test.Hspec
 import Test.Fixie
 import Text.Megaparsec.Prim
 
-import Colorless.Parser.Atomic
-import Colorless.Parser.Token
-import Colorless.Parser.Prototypes
+import Colorless.Syntax.Atomic
+import Colorless.Syntax.Token
+import Colorless.Syntax.Types
 
 import Control.Applicative (Alternative(..))
 
