@@ -3,6 +3,7 @@ module Colorless.Lexical.Types
   , Column(..)
   , TokenVal(..)
   , Token(..)
+  , reverseTokenVals
   ) where
 
 import Pregame
@@ -43,3 +44,13 @@ data Token
   | TokenForwardSlash
   | TokenPound
   deriving (Show, Eq)
+
+reverseTokenVals :: [TokenVal]
+reverseTokenVals =
+    [ TokenVal loc (TokenLowerCamelCase "reverse")
+    , TokenVal loc (TokenLowerCamelCase "str")
+    , TokenVal loc TokenColon
+    , TokenVal loc (TokenLowerCamelCase "str")
+    ]
+    where
+      loc = Loc 0 0

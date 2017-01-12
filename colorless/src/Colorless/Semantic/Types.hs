@@ -40,6 +40,8 @@ module Colorless.Semantic.Types
   , ServiceDef(..)
   , SpecDef(..)
   , Specs(..)
+  , reverseFn
+  , reverseDef
   ) where
 
 import Pregame
