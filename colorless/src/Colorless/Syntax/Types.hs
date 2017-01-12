@@ -288,5 +288,5 @@ type ParserState = Text
 
 type MonadParser a = MonadParsec ParserError ParserState a
 
-reverseDecl :: Decl
-reverseDecl = DeclFn $ FnDecl "reverse" [FnArg Nothing (TyPrim PrimTyStr)] (TyPrim PrimTyStr) []
+reverseDecl :: FnDecl
+reverseDecl = FnDecl "reverse" [FnArg Nothing (TyPrim PrimTyStr)] (TyPrim PrimTyStr) []

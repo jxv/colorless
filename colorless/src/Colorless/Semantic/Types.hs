@@ -254,3 +254,12 @@ data SpecDef = SpecDef
 data Specs = Specs
   { _defs :: Map Version SpecDef
   } deriving (Show, Eq)
+
+reverseFn :: Fn
+reverseFn = "reverse"
+
+reverseDef :: FnDef
+reverseDef = FnDef
+  [ ("str", MonoTyRefPrimTy PrimTyStr) ]
+  (MonoTyRefPrimTy PrimTyStr)
+  mempty
