@@ -13,7 +13,7 @@ module Colorless.Syntax.Types
   , ParamRef(..)
   , OpaqueTyRef(..)
   , TagDecl(..)
-  , FnParam(..)
+  , FnArg(..)
   , FnDecl(..)
   , TyParam(..)
   , OpaqueDecl(..)
@@ -129,14 +129,14 @@ data TagDecl = TagDecl
   , _tags :: [Tag]
   } deriving (Show, Eq)
 
-data FnParam = FnParam
+data FnArg = FnArg
   { _field :: Maybe Field
   , _ty :: Ty
   } deriving (Show, Eq)
 
 data FnDecl = FnDecl
   { _fn :: Fn
-  , _params :: [FnParam]
+  , _args :: [FnArg]
   , _output :: Ty
   , _tags :: [Tag]
   } deriving (Show, Eq)

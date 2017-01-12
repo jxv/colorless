@@ -36,12 +36,12 @@ tagDeclToken' = do
 fnDeclToken' :: Token m => m FnDecl
 fnDeclToken' = do
   fn <- fnToken
-  fnParams <- pure []
+  fnArgs <- pure []
   output <- tyToken
   tags <- pure []
   return FnDecl
     { _fn = fn
-    , _params = fnParams
+    , _args = fnArgs
     , _output = output
     , _tags = tags
     }
