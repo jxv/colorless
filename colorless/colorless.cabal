@@ -33,16 +33,55 @@ library
     Colorless.CodeGen.Format.Json
     Colorless.CodeGen.Target.Clojure.Server
     Colorless.CodeGen.Target.Clojure.Client
+    Colorless.CodeGen.Target.CommonLisp.Server
+    Colorless.CodeGen.Target.CommonLisp.Client
+    Colorless.CodeGen.Target.Cpp.Server
+    Colorless.CodeGen.Target.Cpp.Client
+    Colorless.CodeGen.Target.CSharp.Server
+    Colorless.CodeGen.Target.CSharp.Client
+    Colorless.CodeGen.Target.Crystal.Server
+    Colorless.CodeGen.Target.Crystal.Client
+    Colorless.CodeGen.Target.D.Server
+    Colorless.CodeGen.Target.D.Client
+    Colorless.CodeGen.Target.Dart.Client
+    Colorless.CodeGen.Target.Elixir.Server
+    Colorless.CodeGen.Target.Elixir.Client
+    Colorless.CodeGen.Target.Elm.Client
+    Colorless.CodeGen.Target.Erlang.Server
+    Colorless.CodeGen.Target.Erlang.Client
+    Colorless.CodeGen.Target.FSharp.Server
+    Colorless.CodeGen.Target.FSharp.Client
     Colorless.CodeGen.Target.Go.Server
     Colorless.CodeGen.Target.Go.Client
+    Colorless.CodeGen.Target.Hackett.Server
+    Colorless.CodeGen.Target.Hackett.Client
     Colorless.CodeGen.Target.Haskell.Server
     Colorless.CodeGen.Target.Haskell.Client
+    Colorless.CodeGen.Target.Haxe.Server
+    Colorless.CodeGen.Target.Haxe.Client
     Colorless.CodeGen.Target.Java.Server
     Colorless.CodeGen.Target.Java.Client
-    Colorless.CodeGen.Target.JavaScript.Server
     Colorless.CodeGen.Target.JavaScript.Client
+    Colorless.CodeGen.Target.Julia.Server
+    Colorless.CodeGen.Target.Julia.Client
+    Colorless.CodeGen.Target.Kotlin.Server
+    Colorless.CodeGen.Target.Kotlin.Client
+    Colorless.CodeGen.Target.Node.Server
+    Colorless.CodeGen.Target.Node.Client
+    Colorless.CodeGen.Target.OCaml.Server
+    Colorless.CodeGen.Target.OCaml.Client
+    Colorless.CodeGen.Target.Perl.Server
+    Colorless.CodeGen.Target.Perl.Client
+    Colorless.CodeGen.Target.PHP.Server
+    Colorless.CodeGen.Target.PHP.Client
+    Colorless.CodeGen.Target.PureScript.Server
+    Colorless.CodeGen.Target.PureScript.Client
     Colorless.CodeGen.Target.Python.Server
     Colorless.CodeGen.Target.Python.Client
+    Colorless.CodeGen.Target.R.Server
+    Colorless.CodeGen.Target.R.Client
+    Colorless.CodeGen.Target.Racket.Server
+    Colorless.CodeGen.Target.Racket.Client
     Colorless.CodeGen.Target.Ruby.Server
     Colorless.CodeGen.Target.Ruby.Client
     Colorless.CodeGen.Target.Rust.Server
@@ -51,6 +90,7 @@ library
     Colorless.CodeGen.Target.Scala.Client
     Colorless.CodeGen.Target.Swift.Server
     Colorless.CodeGen.Target.Swift.Client
+    Colorless.CodeGen.Target.TypeScript.Client
     Colorless.Lexical.Types
     Colorless.Semantic.Types
     Colorless.Syntax.Atomic
