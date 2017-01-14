@@ -25,14 +25,17 @@
 !Calculator
   %Calculator ; all functions and required types
 
+
 ; Hook in types from other modules
 
 !Example
+  %Imports > Error
   %Spec < %Imports
   %Spec < %Deck
   %Spec
 
 ; Domains inside domain
+
 
 !Combined
   !Example
@@ -46,6 +49,7 @@ $Root HTTP
   meta: Header
   port: 80
   domain: !Combined
+  error: Error
 
 $Calculator HTTP
   dir: calculator
@@ -53,6 +57,7 @@ $Calculator HTTP
   meta: Header
   port: 80
   domain: !Calculator
+  error: unit
 
 $Example HTTP
   dir: /example/example
@@ -60,3 +65,4 @@ $Example HTTP
   meta: Header
   port: 80
   domain: !Example
+  error: Error
