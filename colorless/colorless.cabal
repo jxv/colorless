@@ -70,6 +70,8 @@ library
     Colorless.CodeGen.Target.Node.Client
     Colorless.CodeGen.Target.OCaml.Server
     Colorless.CodeGen.Target.OCaml.Client
+    Colorless.CodeGen.Target.ObjectiveC.Server
+    Colorless.CodeGen.Target.ObjectiveC.Client
     Colorless.CodeGen.Target.Perl.Server
     Colorless.CodeGen.Target.Perl.Client
     Colorless.CodeGen.Target.PHP.Server
