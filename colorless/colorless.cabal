@@ -31,6 +31,10 @@ library
     src
   exposed-modules:
     Colorless.CodeGen.Format.Json
+    Colorless.CodeGen.Target.ActionScript.ClientHttpJson
+    Colorless.CodeGen.Target.ActionScript.ServerHttpJson
+    Colorless.CodeGen.Target.C.ClientHttpJson
+    Colorless.CodeGen.Target.C.ServerHttpJson
     Colorless.CodeGen.Target.ChickenScheme.ClientHttpJson
     Colorless.CodeGen.Target.ChickenScheme.ServerHttpJson
     Colorless.CodeGen.Target.Clojure.ClientHttpJson
@@ -47,6 +51,8 @@ library
     Colorless.CodeGen.Target.CSharp.ServerHttpJson
     Colorless.CodeGen.Target.D.ClientHttpJson
     Colorless.CodeGen.Target.D.ServerHttpJson
+    Colorless.CodeGen.Target.Delphi.ClientHttpJson
+    Colorless.CodeGen.Target.Delphi.ServerHttpJson
     Colorless.CodeGen.Target.Dart.ClientHttpJson
     Colorless.CodeGen.Target.Dart.ServerHttpJson
     Colorless.CodeGen.Target.Elixir.ClientHttpJson
@@ -71,6 +77,8 @@ library
     Colorless.CodeGen.Target.Haskell.ServerHttpJson
     Colorless.CodeGen.Target.Haxe.ClientHttpJson
     Colorless.CodeGen.Target.Haxe.ServerHttpJson
+    Colorless.CodeGen.Target.Hy.ClientHttpJson
+    Colorless.CodeGen.Target.Hy.ServerHttpJson
     Colorless.CodeGen.Target.Idris.ClientHttpJson
     Colorless.CodeGen.Target.Idris.ServerHttpJson
     Colorless.CodeGen.Target.Io.ClientHttpJson
@@ -84,6 +92,8 @@ library
     Colorless.CodeGen.Target.Julia.ServerHttpJson
     Colorless.CodeGen.Target.Kotlin.ClientHttpJson
     Colorless.CodeGen.Target.Kotlin.ServerHttpJson
+    Colorless.CodeGen.Target.LabVIEW.ClientHttpJson
+    Colorless.CodeGen.Target.LabVIEW.ServerHttpJson
     Colorless.CodeGen.Target.Lua.ClientHttpJson
     Colorless.CodeGen.Target.Lua.ServerHttpJson
     Colorless.CodeGen.Target.Nim.ClientHttpJson
@@ -98,6 +108,8 @@ library
     Colorless.CodeGen.Target.Perl.ServerHttpJson
     Colorless.CodeGen.Target.PHP.ClientHttpJson
     Colorless.CodeGen.Target.PHP.ServerHttpJson
+    Colorless.CodeGen.Target.Prolog.ClientHttpJson
+    Colorless.CodeGen.Target.Prolog.ServerHttpJson
     Colorless.CodeGen.Target.PureScript.ClientHttpJson
     Colorless.CodeGen.Target.PureScript.ServerHttpJson
     Colorless.CodeGen.Target.Python.ClientHttpJson
