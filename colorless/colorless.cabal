@@ -33,8 +33,6 @@ library
     Colorless.CodeGen.Format.Json
     Colorless.CodeGen.Target.ActionScript.ClientHttpJson
     Colorless.CodeGen.Target.ActionScript.ServerHttpJson
-    Colorless.CodeGen.Target.C.ClientHttpJson
-    Colorless.CodeGen.Target.C.ServerHttpJson
     Colorless.CodeGen.Target.ChickenScheme.ClientHttpJson
     Colorless.CodeGen.Target.ChickenScheme.ServerHttpJson
     Colorless.CodeGen.Target.Clojure.ClientHttpJson
@@ -71,6 +69,8 @@ library
     Colorless.CodeGen.Target.Go.ServerHttpJson
     Colorless.CodeGen.Target.Groovy.ClientHttpJson
     Colorless.CodeGen.Target.Groovy.ServerHttpJson
+    Colorless.CodeGen.Target.GuileScheme.ClientHttpJson
+    Colorless.CodeGen.Target.GuileScheme.ServerHttpJson
     Colorless.CodeGen.Target.Hackett.ClientHttpJson
     Colorless.CodeGen.Target.Hackett.ServerHttpJson
     Colorless.CodeGen.Target.Haskell.ClientHttpJson
