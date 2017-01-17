@@ -3,7 +3,7 @@ module Colorless.CodeGen.Format.Json
   ) where
 
 import Pregame
-import Colorless.Semantic.Types
+import Colorless.Parser.Types
 
 {-
 

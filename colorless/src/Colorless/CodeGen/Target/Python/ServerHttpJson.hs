@@ -3,5 +3,5 @@ module Colorless.CodeGen.Target.Python.ServerHttpJson
   ) where
 
 import Pregame
-import Colorless.Semantic.Types
+import Colorless.Parser.Types
 import Language.Python.Common

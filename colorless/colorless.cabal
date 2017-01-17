@@ -132,9 +132,7 @@ library
     Colorless.CodeGen.Target.TypeScript.ServerHttpJson
     Colorless.CodeGen.Target.Vala.ClientHttpJson
     Colorless.CodeGen.Target.Vala.ServerHttpJson
-    Colorless.Lexical.Types
-    Colorless.Semantic.Types
-    Colorless.Syntax.Types
+    Colorless.Parser.Types
   build-depends:
       base >= 4.7 && < 5
     , pregame == 1.0.3.0
