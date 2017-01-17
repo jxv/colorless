@@ -8,6 +8,9 @@ import Pregame
 import Data.List (intersperse)
 import Colorless.Semantic.Types
 
+import Language.Haskell.Exts
+import Language.Haskell.Exts.Pretty
+
 showText :: Show a => a -> Text
 showText = toText . show
 

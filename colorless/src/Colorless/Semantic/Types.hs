@@ -237,6 +237,7 @@ data HttpServiceDef = HttpServiceDef
   , _meta :: HttpMeta
   , _format :: HttpFormat
   , _domain :: Domain
+  , _error :: MonoTyRef
   } deriving (Show, Eq)
 
 data ServiceDef

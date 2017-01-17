@@ -252,6 +252,7 @@ data HttpDecl = HttpDecl
   , _format :: HttpFormat
   , _meta :: HttpMeta
   , _domain :: DomainRef
+  , _error :: Ty
   } deriving (Show, Eq)
 
 newtype ServiceRef = ServiceRef Text

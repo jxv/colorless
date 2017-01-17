@@ -1,9 +1,9 @@
 module Colorless.Lexical.Types
   ( Line(..)
   , Column(..)
-  , TokenVal(..)
-  , Token(..)
-  , reverseTokenVals
+  , LexToken(..)
+  , Lex(..)
+  , reverseLex
   ) where
 
 import Pregame
@@ -19,38 +19,38 @@ data Loc = Loc
   , _column :: Column
   } deriving (Show, Eq)
 
-data TokenVal = TokenVal
+data LexToken = LexToken
   { _loc :: Loc
-  , _val :: Token
+  , _lex:: Lex
   } deriving (Show, Eq)
 
-data Token
-  = TokenLowerCamelCase Text
-  | TokenUpperCamelCase Text
-  | TokenNumber Integer
-  | TokenNest
-  | TokenPeriod
-  | TokenMinus
-  | TokenNewline
-  | TokenOpenParen
-  | TokenCloseParen
-  | TokenColon
-  | TokenEar
-  | TokenPercent
-  | TokenLeftAngle
-  | TokenRightAngle
-  | TokenBang
-  | TokenDollar
-  | TokenForwardSlash
-  | TokenPound
+data Lex
+  = LexLowerCamelCase Text
+  | LexUpperCamelCase Text
+  | LexNumber Integer
+  | LexNest
+  | LexPeriod
+  | LexMinus
+  | LexNewline
+  | LexOpenParen
+  | LexCloseParen
+  | LexColon
+  | LexEar
+  | LexPercent
+  | LexLeftAngle
+  | LexRightAngle
+  | LexBang
+  | LexDollar
+  | LexForwardSlash
+  | LexPound
   deriving (Show, Eq)
 
-reverseTokenVals :: [TokenVal]
-reverseTokenVals =
-    [ TokenVal loc (TokenLowerCamelCase "reverse")
-    , TokenVal loc (TokenLowerCamelCase "str")
-    , TokenVal loc TokenColon
-    , TokenVal loc (TokenLowerCamelCase "str")
+reverseLex :: [LexToken]
+reverseLex =
+    [ LexToken loc (LexLowerCamelCase "reverse")
+    , LexToken loc (LexLowerCamelCase "str")
+    , LexToken loc LexColon
+    , LexToken loc (LexLowerCamelCase "str")
     ]
     where
       loc = Loc 0 0
