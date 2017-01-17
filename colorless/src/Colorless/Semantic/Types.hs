@@ -18,15 +18,15 @@ module Colorless.Semantic.Types
   , ServiceName(..)
   , DomainName(..)
   , PrimTy(..)
-  , PrimRef(..)
-  , MonoTyRef(..)
-  , MonoTyParamRef(..)
-  , OpaqueMonoRef(..)
+  , PrimDeref(..)
+  , MonoTyDeref(..)
+  , MonoTyParamDeref(..)
+  , OpaqueMonoDeref(..)
   , FnDef(..)
-  , PolyTyRef(..)
-  , PolyTyParamRef(..)
+  , PolyTyDeref(..)
+  , PolyTyParamDeref(..)
   , PolyTyParam(..)
-  , OpaquePolyRef(..)
+  , OpaquePolyDeref(..)
   , AliasDef(..)
   , SumDef(..)
   , ProductDef(..)
@@ -122,87 +122,87 @@ data PrimTy
   | PrimTyRat
   deriving (Show, Eq)
 
-data PrimRef
-  = PrimRefUnit
-  | PrimRefU8 Word8
-  | PrimRefU16 Word16
-  | PrimRefU32 Word32
-  | PrimRefU64 Word64
-  | PrimRefI8 Int8
-  | PrimRefI16 Int16
-  | PrimRefI32 Int32
-  | PrimRefI64 Int64
-  | PrimRefF32 Float
-  | PrimRefF64 Double
-  | PrimRefBool Bool
-  | PrimRefChar Char
-  | PrimRefStr Text
-  | PrimRefInt Integer
-  | PrimRefNeg Neg
-  | PrimRefPos Pos
-  | PrimRefNat Nat
-  | PrimRefRat Rat
+data PrimDeref
+  = PrimDerefUnit
+  | PrimDerefU8 Word8
+  | PrimDerefU16 Word16
+  | PrimDerefU32 Word32
+  | PrimDerefU64 Word64
+  | PrimDerefI8 Int8
+  | PrimDerefI16 Int16
+  | PrimDerefI32 Int32
+  | PrimDerefI64 Int64
+  | PrimDerefF32 Float
+  | PrimDerefF64 Double
+  | PrimDerefBool Bool
+  | PrimDerefChar Char
+  | PrimDerefStr Text
+  | PrimDerefInt Integer
+  | PrimDerefNeg Neg
+  | PrimDerefPos Pos
+  | PrimDerefNat Nat
+  | PrimDerefRat Rat
   deriving (Show, Eq)
 
-data MonoTyRef
-  = MonoTyRefPrimTy PrimTy
-  | MonoTyRefOpaque OpaqueMonoRef
+data MonoTyDeref
+  = MonoTyDerefPrimTy PrimTy
+  | MonoTyDerefOpaque OpaqueMonoDeref
   deriving (Show, Eq)
 
-data MonoTyParamRef
-  = MonoTyParamRefPrimRef PrimRef
-  | MonoTyParamRefPrimTy PrimTy
-  | MonoTyParamRefOpaqueRef OpaqueMonoRef
+data MonoTyParamDeref
+  = MonoTyParamDerefPrimDeref PrimDeref
+  | MonoTyParamDerefPrimTy PrimTy
+  | MonoTyParamDerefOpaqueDeref OpaqueMonoDeref
   deriving (Show, Eq)
 
-data OpaqueMonoRef = OpaqueMonoRef
+data OpaqueMonoDeref = OpaqueMonoDeref
   { _name :: Opaque
-  , _params :: [MonoTyParamRef]
+  , _params :: [MonoTyParamDeref]
   } deriving (Show, Eq)
 
 data FnDef = FnDef
-  { _args :: [(Arg, MonoTyRef)]
-  , _output :: MonoTyRef
+  { _args :: [(Arg, MonoTyDeref)]
+  , _output :: MonoTyDeref
   , _tags :: Set Tag
   } deriving (Show, Eq)
 
-data PolyTyRef
-  = PolyTyRefPrimTy PrimTy
-  | PolyTyRefOpaque OpaquePolyRef
+data PolyTyDeref
+  = PolyTyDerefPrimTy PrimTy
+  | PolyTyDerefOpaque OpaquePolyDeref
   deriving (Show, Eq)
 
-data PolyTyParamRef
-  = PolyTyParamRefPrimRef PrimRef
-  | PolyTyParamRefPrimTy PrimTy
-  | PolyTyParamRefOpaqueRef OpaquePolyRef
-  | PolyTyParamRefPolyVar PolyVar
+data PolyTyParamDeref
+  = PolyTyParamDerefPrimDeref PrimDeref
+  | PolyTyParamDerefPrimTy PrimTy
+  | PolyTyParamDerefOpaqueDeref OpaquePolyDeref
+  | PolyTyParamDerefPolyVar PolyVar
   deriving (Show, Eq)
 
 data PolyTyParam = PolyTyParam
   { _name :: TyParam
-  , _ref :: PolyTyParamRef
+  , _ref :: PolyTyParamDeref
   } deriving (Show, Eq)
 
-data OpaquePolyRef = OpaquePolyRef
+data OpaquePolyDeref = OpaquePolyDeref
   { _name :: Opaque
-  , _params :: [PolyTyParamRef]
+  , _params :: [PolyTyParamDeref]
   } deriving (Show, Eq)
 
 data AliasDef = AliasDef
   { _params :: [PolyTyParam]
-  , _ref :: PolyTyRef
+  , _ref :: PolyTyDeref
   , _tags :: Set Tag
   } deriving (Show, Eq)
 
 data SumDef = SumDef
   { _params :: [PolyTyParam]
-  , _ctors :: Map Ctor [PolyTyRef]
+  , _ctors :: Map Ctor [PolyTyDeref]
   , _tags :: Set Tag
   } deriving (Show, Eq)
 
 data ProductDef = ProductDef
   { _params :: [PolyTyParam]
-  , _fields :: Map Field PolyTyRef
+  , _fields :: Map Field PolyTyDeref
   , _tags :: Set Tag
   } deriving (Show, Eq)
 
@@ -237,7 +237,7 @@ data HttpServiceDef = HttpServiceDef
   , _meta :: HttpMeta
   , _format :: HttpFormat
   , _domain :: Domain
-  , _error :: MonoTyRef
+  , _error :: MonoTyDeref
   } deriving (Show, Eq)
 
 data ServiceDef
@@ -263,6 +263,6 @@ reverseFn = "reverse"
 
 reverseDef :: FnDef
 reverseDef = FnDef
-  [ ("str", MonoTyRefPrimTy PrimTyStr) ]
-  (MonoTyRefPrimTy PrimTyStr)
+  [ ("str", MonoTyDerefPrimTy PrimTyStr) ]
+  (MonoTyDerefPrimTy PrimTyStr)
   mempty

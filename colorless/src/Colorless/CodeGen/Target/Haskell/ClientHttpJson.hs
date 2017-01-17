@@ -47,55 +47,55 @@ primTy = \case
   PrimTyNat -> "Nat"
   PrimTyRat -> "Rat"
 
-primRef :: PrimRef -> Text
-primRef = \case
-  PrimRefUnit -> "()"
-  PrimRefU8 x -> showText x
-  PrimRefU16 x -> showText x
-  PrimRefU32 x -> showText x
-  PrimRefU64 x -> showText x
-  PrimRefI8 x -> showText x
-  PrimRefI16 x -> showText x
-  PrimRefI32 x -> showText x
-  PrimRefI64 x -> showText x
-  PrimRefF32 x -> showText x
-  PrimRefF64 x -> showText x
-  PrimRefBool x -> showText x
-  PrimRefChar x -> showText x
-  PrimRefStr x -> showText x
-  PrimRefInt x -> showText x
-  PrimRefNeg (Neg x) -> showText x
-  PrimRefPos (Pos x) -> showText x
-  PrimRefNat (Nat x) -> showText x
-  PrimRefRat (Rat x) -> showText x
+primDeref :: PrimDeref -> Text
+primDeref = \case
+  PrimDerefUnit -> "()"
+  PrimDerefU8 x -> showText x
+  PrimDerefU16 x -> showText x
+  PrimDerefU32 x -> showText x
+  PrimDerefU64 x -> showText x
+  PrimDerefI8 x -> showText x
+  PrimDerefI16 x -> showText x
+  PrimDerefI32 x -> showText x
+  PrimDerefI64 x -> showText x
+  PrimDerefF32 x -> showText x
+  PrimDerefF64 x -> showText x
+  PrimDerefBool x -> showText x
+  PrimDerefChar x -> showText x
+  PrimDerefStr x -> showText x
+  PrimDerefInt x -> showText x
+  PrimDerefNeg (Neg x) -> showText x
+  PrimDerefPos (Pos x) -> showText x
+  PrimDerefNat (Nat x) -> showText x
+  PrimDerefRat (Rat x) -> showText x
 
-opaqueMonoRef :: OpaqueMonoRef -> Level -> Text
-opaqueMonoRef OpaqueMonoRef{ _name, _params } = \case
+opaqueMonoDeref :: OpaqueMonoDeref -> Level -> Text
+opaqueMonoDeref OpaqueMonoDeref{ _name, _params } = \case
   TopLevel -> out
   Nested -> parensate _params out
   where
     preParamSpace = if null _params then "" else " "
-    out = toText _name <> preParamSpace <> mconcat (intersperse " " (map (\param -> monoTyParamRef param Nested) _params))
+    out = toText _name <> preParamSpace <> mconcat (intersperse " " (map (\param -> monoTyParamDeref param Nested) _params))
 
-monoTyRef :: MonoTyRef -> Level -> Text
-monoTyRef (MonoTyRefPrimTy x) = const (primTy x)
-monoTyRef (MonoTyRefOpaque x) = opaqueMonoRef x
+monoTyDeref :: MonoTyDeref -> Level -> Text
+monoTyDeref (MonoTyDerefPrimTy x) = const (primTy x)
+monoTyDeref (MonoTyDerefOpaque x) = opaqueMonoDeref x
 
-monoTyParamRef :: MonoTyParamRef -> Level -> Text
-monoTyParamRef (MonoTyParamRefPrimRef x) = const (primRef x)
-monoTyParamRef (MonoTyParamRefPrimTy x) = const (primTy x)
-monoTyParamRef (MonoTyParamRefOpaqueRef x) = opaqueMonoRef x
+monoTyParamDeref :: MonoTyParamDeref -> Level -> Text
+monoTyParamDeref (MonoTyParamDerefPrimDeref x) = const (primDeref x)
+monoTyParamDeref (MonoTyParamDerefPrimTy x) = const (primTy x)
+monoTyParamDeref (MonoTyParamDerefOpaqueDeref x) = opaqueMonoDeref x
 
 fnSignature :: FnDef -> Text
-fnSignature FnDef{ _args, _output } = mconcat $ intersperse " -> " $ map (flip monoTyRef TopLevel . snd) _args ++ ["m " <> monoTyRef _output Nested]
+fnSignature FnDef{ _args, _output } = mconcat $ intersperse " -> " $ map (flip monoTyDeref TopLevel . snd) _args ++ ["m " <> monoTyDeref _output Nested]
 
 tcDeclFn :: Fn -> FnDef -> Text
 tcDeclFn fn fnDef = "  " <> toText fn <> " :: " <> fnSignature fnDef
 
 fnDefVal :: FnDef
 fnDefVal = FnDef
-  [ ("a", MonoTyRefPrimTy PrimTyInt)
-  , ("b", MonoTyRefOpaque (OpaqueMonoRef "Either" [MonoTyParamRefPrimTy PrimTyInt, MonoTyParamRefOpaqueRef (OpaqueMonoRef "Color" [])]))
+  [ ("a", MonoTyDerefPrimTy PrimTyInt)
+  , ("b", MonoTyDerefOpaque (OpaqueMonoDeref "Either" [MonoTyParamDerefPrimTy PrimTyInt, MonoTyParamDerefOpaqueDeref (OpaqueMonoDeref "Color" [])]))
   ]
-  (MonoTyRefOpaque $ OpaqueMonoRef "Either" [MonoTyParamRefPrimTy PrimTyStr, MonoTyParamRefOpaqueRef (OpaqueMonoRef "Color" [])])
+  (MonoTyDerefOpaque $ OpaqueMonoDeref "Either" [MonoTyParamDerefPrimTy PrimTyStr, MonoTyParamDerefOpaqueDeref (OpaqueMonoDeref "Color" [])])
   mempty

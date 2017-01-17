@@ -134,11 +134,6 @@ library
     Colorless.CodeGen.Target.Vala.ServerHttpJson
     Colorless.Lexical.Types
     Colorless.Semantic.Types
-    Colorless.Syntax.Atomic
-    Colorless.Syntax.Combinator
-    Colorless.Syntax.Declaration
-    Colorless.Syntax.Monad
-    Colorless.Syntax.Token
     Colorless.Syntax.Types
   build-depends:
       base >= 4.7 && < 5
