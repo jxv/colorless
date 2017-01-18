@@ -6,7 +6,6 @@ module Colorless.Parser.Types
   --
   , Lex(..)
   , LexToken(..)
-  , reverseLex
   --
   , FnName(..)
   , ArgName(..)
@@ -136,17 +135,6 @@ data Lex
   | LexForwardSlash
   | LexPound
   deriving (Show, Eq)
-
-reverseLex :: [LexToken]
-reverseLex =
-    [ LexToken l (LexLowerCamelCase "reverse")
-    , LexToken l (LexLowerCamelCase "str")
-    , LexToken l LexColon
-    , LexToken l (LexLowerCamelCase "str")
-    ]
-    where
-      l = Loc 0 0
-
 
 --- Syntax + Semantic
 

@@ -132,10 +132,14 @@ library
     Colorless.CodeGen.Target.TypeScript.ServerHttpJson
     Colorless.CodeGen.Target.Vala.ClientHttpJson
     Colorless.CodeGen.Target.Vala.ServerHttpJson
+    Colorless.Parser.Lexer
+    Colorless.Parser.Semantic
+    Colorless.Parser.Syntax
     Colorless.Parser.Types
   build-depends:
       base >= 4.7 && < 5
     , pregame == 1.0.3.0
+    , either
     , megaparsec
     , language-python
     , haskell-src-exts
@@ -168,6 +172,7 @@ test-suite colorless-test
       base
     , colorless
     , hspec
+    , either
     , pregame == 1.0.3.0
     , megaparsec
     , fixie
