@@ -89,6 +89,8 @@ module Colorless.Parser.Types
   , ServiceDef(..)
   , SpecDef(..)
   , Specs(..)
+  , reverseFnName
+  , reverseDef
   ) where
 
 import Pregame
@@ -562,3 +564,12 @@ data SpecDef = SpecDef
 data Specs = Specs
   { _defs :: Map Version SpecDef
   } deriving (Show, Eq)
+
+reverseFnName :: FnName
+reverseFnName = "reverse"
+
+reverseDef :: FnDef
+reverseDef = FnDef
+  [ ("str", MonoTyRefPrimTy PrimTyStr) ]
+  (MonoTyRefPrimTy PrimTyStr)
+  mempty
