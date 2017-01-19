@@ -141,6 +141,7 @@ library
     , pregame == 1.0.3.0
     , either
     , megaparsec
+    , containers
     , language-python
     , haskell-src-exts
   default-language:

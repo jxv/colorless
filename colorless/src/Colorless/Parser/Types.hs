@@ -96,24 +96,45 @@ import Pregame
 import Data.String (IsString(fromString))
 import Text.Megaparsec (Dec)
 import Text.Megaparsec.Prim (MonadParsec)
+import qualified Text.Megaparsec as P
 
 newtype Line = Line Integer
-  deriving (Show, Eq, Num)
+  deriving (Show, Eq, Num, Ord)
 
 newtype Column = Column Integer
-  deriving (Show, Eq, Num)
+  deriving (Show, Eq, Num, Ord)
 
-data Loc = Loc
-  { _line :: Line
-  , _column :: Column
-  } deriving (Show, Eq)
+data Loc
+  = NoLoc
+  | Loc Line Column
+  deriving (Show, Eq, Ord)
 
 --- Lexical
 
 data LexToken = LexToken
   { _loc :: Loc
   , _lex:: Lex
-  } deriving (Show, Eq)
+  } deriving (Show, Eq, Ord)
+
+instance P.Stream [LexToken] where
+  type Token [LexToken] = LexToken
+  uncons [] = Nothing
+  uncons (x:xs) = Just (x, xs)
+  updatePos _ width apos@(P.SourcePos n l c) token = (apos, npos)
+    where
+      u = P.unsafePos 1
+      w = P.unPos width
+      c' = P.unPos c
+      npos = case token of
+        LexToken{ _lex = LexNewline } -> P.SourcePos n (l <> u) u
+        LexToken{ _lex = LexNest } -> P.SourcePos n l (P.unsafePos $ c' + w - ((c' - 1) `rem` w))
+        _ -> P.SourcePos n l (c <> u)
+
+instance P.ShowToken LexToken where
+  showTokens (x :| xs) = show (x:xs)
+
+instance P.ShowToken [LexToken] where
+  showTokens (x :| xs) = show (x : xs)
 
 data Lex
   = LexLowerCamelCase Text
@@ -134,7 +155,8 @@ data Lex
   | LexDollar
   | LexForwardSlash
   | LexPound
-  deriving (Show, Eq)
+  | LexEOI
+  deriving (Show, Eq, Ord)
 
 --- Syntax + Semantic
 
