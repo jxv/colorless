@@ -3,6 +3,8 @@ module Colorless.Parser.Syntax
   ( runSyntaxM
   , satisfy
   , fnName
+  , fnDef
+  , primTy
   ) where
 
 import Pregame
@@ -38,3 +40,40 @@ lowerCamelCase = do
 
 fnName :: SyntaxParser m => m FnName
 fnName = FnName <$> lowerCamelCase
+
+colon :: SyntaxParser m => m ()
+colon = do
+  void . satisfy $ \(LexToken _ l) -> l == LexColon
+  return ()
+
+fnDef :: SyntaxParser m => m FnDef
+fnDef = FnDef
+  <$> P.manyTill arg colon
+  <*> fmap MonoTyRefPrimTy primTy
+  <*> pure mempty
+
+arg :: SyntaxParser m => m (ArgName, MonoTyRef)
+arg = do
+  p <- primTy
+  return (primTyToArgName p, MonoTyRefPrimTy p)
+
+primTyToArgName :: PrimTy -> ArgName
+primTyToArgName = \case
+  PrimTyUnit -> "unit"
+  PrimTyU8 -> "u8"
+  PrimTyStr -> "str"
+  _ -> "a"
+
+primTy :: SyntaxParser m => m PrimTy
+primTy = P.choice $ map (uncurryN lowerCamelCaseToken)
+  [ ("unit", PrimTyUnit)
+  , ("u8", PrimTyU8)
+  , ("str", PrimTyStr)
+  ]
+
+lowerCamelCaseToken :: SyntaxParser m => Text -> a -> m a
+lowerCamelCaseToken u a = P.token test Nothing
+  where
+    err x = Left (Set.singleton (P.Tokens (x:|[])), Set.empty, Set.empty)
+    test x@LexToken{ _lex = LexLowerCamelCase t } = if t == u then Right a else err x
+    test x = err x
