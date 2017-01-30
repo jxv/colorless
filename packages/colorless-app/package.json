@@ -1,0 +1,15 @@
+{
+  "name": "colorless-app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "electron main.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "github.com/jxv/colorless"
+  },
+  "author": "",
+  "license": "ISC"
+}
