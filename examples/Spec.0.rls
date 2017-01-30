@@ -1,146 +1,146 @@
-;; single line comment
+//// single line comment
 
-;; meta information
+//// meta information
 
-; colorless version
-@colorless 0.0.0
+// colorless version
+@Colorless(0,0);
 
-;; encoding and primitive types
+//// encoding and primitive types
 
-; unit
-; u8, u16, u32, u64
-; i8, i16, i32, i64
-; f32, f64
-; bool
-; char
-; str
-; int
-; neg
-; pos
-; nat
-; rat
+// unit
+// u8, u16, u32, u64
+// i8, i16, i32, i64
+// f32, f64
+// bool
+// char
+// str
+// int
+// neg
+// pos
+// nat
+// rat
 
-;; builtin sum types and collections
+//// builtin sum types and collections
 
-; Option a
-; Either a b
-; List a
-; Map key value
-; Array (size: pos) b
-; MinList (minSize: pos) b
+// Option a
+// Either a b
+// List a
+// Map key value
+// Array (size: pos) b
+// MinList (minSize: pos) b
 
-;; tags
+//// tags
 
-#Tag
-#AnotherTag
+#Tag;
+#AnotherTag;
 
-;; function declaration
+//// function declaration
 
-echo str: str
+echo (str): str;
 
-;; type aliases
+//// type aliases
 
-Name: str
+Name: str;
 
-; type alias with a tag
+// type alias with a tag
 
-Years: nonneg
-  #Tag
+Years: nonneg;
+#Tag;
 
-; type alias with a phantom type
+// type alias with a phantom type
 
-Id a: str
+Id a: str;
 
-;; product types
+//// product types
 
-Person
-  name: Name
+Person: {
+  name: Name,
+};
 
-Parents
-  mother: Id Person
-  father: Id Person
+Parents: {
+  mother: Id Person,
+  father: Id Person,
+};
 
-;; more function declarations
+//// more function declarations
 
-age (Id Person): Years
-parents (Id Person): Parents
+age (Id Person): Years;
+parents (Id Person): Parents;
 
-; function declaration with minimally sized list, array of size 7, a tag, and parameter names
+// function declaration with minimally sized list, array of size 7, a tag, and parameter names
 
-foo (MinList 2 str) (asd: bool) (jkl: char): Array 7 Person
-  #Tag
+foo(MinList 2 str, asd: bool, jkl: char): Array 7 Person;
+#Tag;
 
-;; types
+//// types
 
-; sum type
+// sum type
 
-Color
-  Red
-  Blue
-  Yellow
-  Green
+Color: Red, Blue, Yellow, Green;
 
-; product type
+// product type
 
-Item
-  name: Name
-  color: Color
+Item: {
+  name: Name,
+  color: Color,
+};
 
-; product type with two phantom types
+// product type with two phantom types
 
-Ownership
-  person: Id Person
-  item: Id Item
+Ownership: {
+  person: Id Person,
+  item: Id Item,
+};
 
-; product type with a tag
+// product type with a tag
 
-Circle
-  center: Point f64
-  radius: f64
-  #AnotherTag
+Circle: {
+  center: Point f64,
+  radius: f64,
+};
+#AnotherTag;
 
-; product types can have polymorphic variables and be used before declaration
+// product types can have polymorphic variables and be used before declaration
 
-Point a
-  x: a
-  y: a
+Point a: {
+  x: a,
+  y: a,
+};
 
-; encoding types can be used as constraints
-A (a: str)
-  b: i32
-  c: f32
+// encoding types can be used as constraints
+A (a: str): {
+  b: i32,
+  c: f32,
+};
 
-D
-  E (A "hello")
-  F (A "bye")
+D:
+E [ A "hello" ],
+F { a: A "bye" };
 
-; sum type with polymorphic variables
+// sum type with polymorphic variables
 
-Shape a b
-  Circle Circle
-  Rectangle (Point a) (Point a)
-  Polygon (MinList 3 (Point b))
+Shape a b:
+  Circle [ Circle ],
+  Rectangle { x: Point a, y: Point a },
+  Polygon { vertices: MinList 3 (Point b) };
 
-;; import hooks
+//// import hooks
 
-; opaque type
+// opaque type
 
-> Suit
-> Rank
+> Suit;
+> Rank;
 
-; tag
+// opaque types and
 
-> #ImportedTag
+> A, B, D, E;
 
-; opaque types and tags
+// imports used locally
 
-> A, B, #C, D, E
+Card: {
+  suit: Suit,
+  rank: Rank,
+};
 
-; imports used locally
-
-Card
-  suit: Suit
-  rank: Rank
-
-higherCard Card Card: Card
-  #ImportedTag
+higherCard (Card, Card): Card;
+#ImportedTag;

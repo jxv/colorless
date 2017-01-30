@@ -1,68 +1,78 @@
-@colorless 0.0.0
+@Colorless(0,0);
 
-;; Imports
-; Import with version
+//// Module version specifier
 
-> %Imports.0
-> %Spec.0
-> %Deck.0
-> %Calculator.1
+%Imports.0;
+%Spec.0;
+%Deck.0;
+%Calculator.1;
 
-; Imports without version
-; The version must be specified elsewhere
+//// Imports
 
-> %Calculator
+// Imports without version
 
-; While self importing is elegant, it's not useful.
-; Below is this module, 'Services.0', which is referenced as '%'.
+>%Imports;
+>%Calculator;
 
-> %
+// While self importing is elegant, it's not useful.
+// Below is this module, 'Services.0', which is referenced as '%'.
 
-;; Domains
+>%;
 
-; Simple domain
+//// Domains
 
-!Calculator
-  %Calculator ; all functions and required types
+// Simple domain
 
-
-; Hook in types from other modules
-
-!Example
-  %Imports > Error
-  %Spec < %Imports
-  %Spec < %Deck
-  %Spec
-
-; Domains inside domain
+!Calculator: {
+  %Calculator; // all functions and required types
+};
 
 
-!Combined
-  !Example
-  !Calculator
+// Hook in types from other modules
 
-; Service
+!Example: {
+  %Imports > Error;
+  %Spec < %Imports;
+  %Spec < %Deck;
+  %Spec;
+};
 
-$Root HTTP
-  dir: /
-  format: JSON
-  meta: Header
-  port: 80
-  domain: !Combined
-  error: Error
+// Domains inside domain
 
-$Calculator HTTP
-  dir: calculator
-  format: JSON
-  meta: Header
-  port: 80
-  domain: !Calculator
-  error: unit
 
-$Example HTTP
-  dir: /example/example
-  format: JSON
-  meta: Header
-  port: 80
-  domain: !Example
-  error: Error
+!Combined: {
+  !Example;
+  !Calculator;
+};
+
+// Service
+
+$Root: HTTP {
+  address: "127.0.0.1",
+  path: "/",
+  format: JSON,
+  meta: Header,
+  port: 80,
+  domain: !Combined,
+  error: Error,
+};
+
+$Calculator: HTTP {
+  address: "127.0.0.1",
+  path: "calculator",
+  format: JSON,
+  meta: Header,
+  port: 80,
+  domain: !Calculator,
+  error: Error,
+};
+
+$Example: HTTP {
+  address: "127.0.0.1",
+  path: "/example/example",
+  format: JSON,
+  meta: Header,
+  port: 80,
+  domain: !Example,
+  error: Error,
+};
