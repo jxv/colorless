@@ -29,11 +29,6 @@
 // Array (size: pos) b
 // MinList (minSize: pos) b
 
-//// tags
-
-#Tag;
-#AnotherTag;
-
 //// function declaration
 
 echo (str): str;
@@ -44,8 +39,8 @@ Name: str;
 
 // type alias with a tag
 
+#Tag
 Years: nonneg;
-#Tag;
 
 // type alias with a phantom type
 
@@ -69,8 +64,9 @@ parents (Id Person): Parents;
 
 // function declaration with minimally sized list, array of size 7, a tag, and parameter names
 
+#Tag
 foo(MinList 2 str, asd: bool, jkl: char): Array 7 Person;
-#Tag;
+
 
 //// types
 
@@ -94,11 +90,11 @@ Ownership: {
 
 // product type with a tag
 
+#AnotherTag
 Circle: {
   center: Point f64,
   radius: f64,
 };
-#AnotherTag;
 
 // product types can have polymorphic variables and be used before declaration
 
@@ -142,5 +138,5 @@ Card: {
   rank: Rank,
 };
 
+#ImportedTag
 higherCard (Card, Card): Card;
-#ImportedTag;
