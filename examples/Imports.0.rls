@@ -1,0 +1,10 @@
+#C
+A: { x: i32 };
+
+#C
+B a: { x: a };
+
+D: X, Y, Z;
+
+#C
+E a b: X [a], Y [b], Z;

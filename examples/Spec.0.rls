@@ -1,0 +1,142 @@
+//// single line comment
+
+//// meta information
+
+// colorless version
+@Colorless(0,0);
+
+//// encoding and primitive types
+
+// unit
+// u8, u16, u32, u64
+// i8, i16, i32, i64
+// f32, f64
+// bool
+// char
+// str
+// int
+// neg
+// pos
+// nat
+// rat
+
+//// builtin sum types and collections
+
+// Option a
+// Either a b
+// List a
+// Map key value
+// Array (size: pos) b
+// MinList (minSize: pos) b
+
+//// function declaration
+
+echo (str): str;
+
+//// type aliases
+
+Name: str;
+
+// type alias with a tag
+
+#Tag
+Years: nonneg;
+
+// type alias with a phantom type
+
+Id a: str;
+
+//// product types
+
+Person: {
+  name: Name,
+};
+
+Parents: {
+  mother: Id Person,
+  father: Id Person,
+};
+
+//// more function declarations
+
+age (Id Person): Years;
+parents (Id Person): Parents;
+
+// function declaration with minimally sized list, array of size 7, a tag, and parameter names
+
+#Tag
+foo(MinList 2 str, asd: bool, jkl: char): Array 7 Person;
+
+
+//// types
+
+// sum type
+
+Color: Red, Blue, Yellow, Green;
+
+// product type
+
+Item: {
+  name: Name,
+  color: Color,
+};
+
+// product type with two phantom types
+
+Ownership: {
+  person: Id Person,
+  item: Id Item,
+};
+
+// product type with a tag
+
+#AnotherTag
+Circle: {
+  center: Point f64,
+  radius: f64,
+};
+
+// product types can have polymorphic variables and be used before declaration
+
+Point a: {
+  x: a,
+  y: a,
+};
+
+// encoding types can be used as constraints
+A (a: str): {
+  b: i32,
+  c: f32,
+};
+
+D:
+E [ A "hello" ],
+F { a: A "bye" };
+
+// sum type with polymorphic variables
+
+Shape a b:
+  Circle [ Circle ],
+  Rectangle { x: Point a, y: Point a },
+  Polygon { vertices: MinList 3 (Point b) };
+
+//// import hooks
+
+// opaque type
+
+> Suit;
+> Rank;
+
+// opaque types and
+
+> A, B, D, E;
+
+// imports used locally
+
+Card: {
+  suit: Suit,
+  rank: Rank,
+};
+
+#ImportedTag
+higherCard (Card, Card): Card;
