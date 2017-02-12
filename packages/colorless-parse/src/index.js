@@ -24,6 +24,17 @@ function notKeys(ls, o) {
     return true;
 }
 
+function Sum(name, params, ctors, tags) {
+    this._n = name;
+    this._p = params;
+    this._c = ctors;
+    this._t = tags;
+}
+
+function toSum(v) {
+    return new Sum(v._n, '_p' in v ? v._p : [], v._c, '_t' in v ? v._t : []);
+}
+
 function isSum(v) {
     return hasKeys(['_n', '_c'], v) && notKeys(['_f', '_a', '_s', '_o'], v);
 }
@@ -55,13 +66,14 @@ var types = {
                 { "_n": "King" }
             ]
         },
+        { "product": { "_n": "A", "_f": { "x": "i32" }, "_t": [ "C" ] } },
         { "_n": "A", "_f": { "x": "i32" }, "_t": [ "C" ] },
         { "_n": "B", "_p": [ { "_n": "a" } ], "_f": { "x": "a" }, "_t": [ "C" ] },
         { "_n": "D", "_c": [ "X", "Y", "Z" ] },
-        { "_n": "E", "_p": ["a", "b"], "_c": [
-                { "_n": "X", "_p": { "_n": "List", "_p": { "_n": "a" } },
-                { "_n": "Y", "_p": { "_n": "List", "_p": { "_n": "b" }} },
-                "Z" 
+        { "_n": "E", "_p": [ { "_n": "a" }, { "_n": "b" }], "_c": [
+                { "_n": "X", "_p": [ { "_n": "List", "_p": [ {"_n": "a" } ] } ] },
+                { "_n": "Y", "_p": [ { "_n": "List", "_p": [ {"_n": "b" } ] } ] },
+                { "_n": "Z" }
             ] 
         }
     ]
@@ -71,11 +83,6 @@ function typeDeclTag(v) {
     if (isProduct(v)) return { product: v };
     if (isSum(v)) return { sum: v };
     if (isSynonym(v)) return { synonym: v };
-}
-
-function expandTags(tags) {
-    if (typeof(tags) == 'string') return [tags];
-    if (Array.isArray(tags)) return tags;
 }
 
 function typeDeclTags(v) {
@@ -98,3 +105,7 @@ function isFunctionDecl(f) {
 function areFunctionDecls(v) {
     return v._functions.map(function (f) { return [ f._n, isFunctionDecl(f) ]; } );
 }
+
+module.exports = {
+    parse: () => ""
+};
