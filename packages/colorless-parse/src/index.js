@@ -24,27 +24,62 @@ function notKeys(ls, o) {
     return true;
 }
 
+function isSum(v) {
+    return hasKeys(['_n', '_c'], v) && notKeys(['_f', '_a', '_s', '_o'], v);
+}
+
 function Sum(name, params, ctors, tags) {
     this._n = name;
-    this._p = params;
+    this._p = params || [];
     this._c = ctors;
-    this._t = tags;
+    this._t = tags || [];
 }
 
 function toSum(v) {
-    return new Sum(v._n, '_p' in v ? v._p : [], v._c, '_t' in v ? v._t : []);
+    return new Sum(v._n, v._p, v._c, v._t);
 }
 
-function isSum(v) {
-    return hasKeys(['_n', '_c'], v) && notKeys(['_f', '_a', '_s', '_o'], v);
+function isConstructor(v) {
+    return hasKeys(['_n'], v) && notKeys(['_f', '_a', '_c', '_s', '_o', '_t'], v);
+}
+
+function Constructor(name, params) {
+    this._n = name;
+    this._p = params || [];
+}
+
+function toConstructor(v) {
+    return new Constructor(v._n, v._p);
 }
 
 function isProduct(v) {
     return hasKeys(['_n', '_f'], v) && notKeys(['_c', '_a', '_s', '_o'], v);
 }
 
+function Product(name, params, fields, tags) {
+    this._n = name;
+    this._p = params || [];
+    this._f = fields;
+    this._t = tags || [];
+}
+
+function toProduct(v) {
+    return new Product(v._n, v._p, v._f, v._t);
+}
+
 function isSynonym(v) {
     return hasKeys(['_n', '_s'], v) && notKeys(['_c', '_f', '_a', '_o'], v);
+}
+
+function Synonym(name, params, synonym, tags) {
+    this._n = name;
+    this._p = params || [];
+    this._s = synonym;
+    this._t = tags || [];
+}
+
+function toSynonym(v) {
+    return new Synonym(v._n, v._p, v._s, v._t);
 }
 
 var types = {
@@ -66,10 +101,10 @@ var types = {
                 { "_n": "King" }
             ]
         },
-        { "product": { "_n": "A", "_f": { "x": "i32" }, "_t": [ "C" ] } },
+        { "_n": "A", "_f": { "x": "i32" }, "_t": [ "C" ] },
         { "_n": "A", "_f": { "x": "i32" }, "_t": [ "C" ] },
         { "_n": "B", "_p": [ { "_n": "a" } ], "_f": { "x": "a" }, "_t": [ "C" ] },
-        { "_n": "D", "_c": [ "X", "Y", "Z" ] },
+        { "_n": "D", "_c": [ { "_n": "X" }, { "_n": "Y" }, { "_n": "Z" } ] },
         { "_n": "E", "_p": [ { "_n": "a" }, { "_n": "b" }], "_c": [
                 { "_n": "X", "_p": [ { "_n": "List", "_p": [ {"_n": "a" } ] } ] },
                 { "_n": "Y", "_p": [ { "_n": "List", "_p": [ {"_n": "b" } ] } ] },
@@ -80,9 +115,9 @@ var types = {
 };
 
 function typeDeclTag(v) {
-    if (isProduct(v)) return { product: v };
-    if (isSum(v)) return { sum: v };
-    if (isSynonym(v)) return { synonym: v };
+    if (isProduct(v)) return [ 'product', v ];
+    if (isSum(v)) return [ 'sum', v ];
+    if (isSynonym(v)) return [ 'synonym', v ];
 }
 
 function typeDeclTags(v) {
