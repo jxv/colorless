@@ -1,5 +1,4 @@
 /*
- * _d = description
  * _n = name
  * _f = fields
  * _c = constructors
@@ -161,36 +160,39 @@ function isLowerCamelCase(s) {
     return hasCamelCaseCharacters(s);
 }
 
-function validateFunction(f) {
-    var errors = [];
-    if ('_n' in f) {
-        if (!(isLowerCamelCase(f._n))) {
-            errors.push('name must be lower camel case');
+function isPrimitiveType(ty) {
+    return ty === 'string';
+}
+
+function Errors() {
+    this.list = [];
+}
+
+Errors.prototype = {
+    assert: function(cond, error) {
+        if (!cond) {
+            this.list.push(error);
         }
-    } else {
-        errors.push('missing name');
+        return cond;
+    },
+    orResult: function(f) {
+        return !!this.list.length ? ['error', this.list] : ['ok', f()];
     }
-    if ('_o' in f) {
-    } else {
-        errors.push('missing output');
-    }
-    if ('_a' in f) {
-    } else {
-        errors.push('missing arguments');
-    }
-    if ('_t' in f) {
-    } else {
-        errors.push('missing tags');
-    }
-    if ('_d' in f) {
-    } else {
-        errors.push('missing description');
-    }
-    return errors.length ? ['error', errors] : ['ok', f];
+};
+
+function validateFunction(f) {
+    var errors = new Errors();
+    errors.assert('_n' in f, 'missing name') &&
+        errors.assert(isLowerCamelCase(f._n), 'lower camel case name');
+    errors.assert('_o' in f, 'missing output') &&
+        errors.assert(isPrimitiveType(f._o), 'invalid primitive output');
+    errors.assert('_a' in f, 'missing arguments');
+    errors.assert('_t' in f, 'missing tags');
+    errors.assert('_d' in f, 'missing description');
+    return errors.orResult(() => f);
 }
 
 module.exports = {
     parse: () => "",
-    validateFunction: validateFunction,
-    Error: Error
+    validateFunction: validateFunction
 };
