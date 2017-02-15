@@ -126,7 +126,7 @@ function typeDeclTag(v) {
 }
 
 function typeDeclTags(v) {
-    return v._types.map(function (t) { return  typeDeclTag(t); } );
+    return v._types.map(function (t) { return typeDeclTag(t); } );
 }
 
 //
