@@ -134,7 +134,7 @@ function typeDeclTags(v) {
 var functions = {
     "_functions": [
         { "_n": "helloWorld", "_o": "str" },
-        { "_n": "add", "_a": ["f32", "f32"], "_o": "f32" }
+        { "_n": "add", "_a": [["x","f32"], ["y","f32"]], "_o": "f32" }
     ]
 };
 
