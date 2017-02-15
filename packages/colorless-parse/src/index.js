@@ -115,7 +115,7 @@ var types = {
                 { "_n": "Z" }
             ] 
         },
-        { "_n": "Id", "_p": [ { "_n": "a", "_k": "str" } ], "_s": { "_n": "i32" } }
+        { "_n": "Id", "_p": [ { "_n": "a", "_k": "string" } ], "_s": { "_n": "i32" } }
     ]
 };
 
@@ -133,7 +133,7 @@ function typeDeclTags(v) {
 
 var functions = {
     "_functions": [
-        { "_n": "helloWorld", "_o": "str" },
+        { "_n": "helloWorld", "_o": "string" },
         { "_n": "add", "_a": [["x","f32"], ["y","f32"]], "_o": "f32" }
     ]
 };
@@ -191,6 +191,78 @@ function validateFunction(f) {
     errors.assert('_d' in f, 'missing description');
     return errors.orResult(() => f);
 }
+
+var domains = {
+    "_domains": [
+        {
+            "name": "Calculator",
+            "modules": [
+                "Calculator.0.json"
+            ],
+            "domains": [
+            ]
+        },
+        {
+            "name": "Example",
+            "modules": [
+                "Imports.0.json",
+                "Deck.0.json",
+                "Spec.0.json"
+            ],
+            "domains": [
+            ]
+        },
+        {
+            "name": "Combined",
+            "modules": [
+            ],
+            "domains": [
+                "Example",
+                "Calculator"
+            ]
+        }
+    ]
+};
+
+var services = {
+    "_services": [
+        [   "http",
+            {
+                "name": "Root",
+                "address": "127.0.0.1",
+                "path": "/",
+                "format": "json",
+                "port": 8888,
+                "domain": "Combined",
+                "error": { "_n": "Error" }
+            }
+        ],
+        [   
+            "http",
+            {
+                "name": "Calculator",
+                "address": "127.0.0.1",
+                "path": "calculator",
+                "format": "json",
+                "port": 8888,
+                "domain": "Calculator",
+                "error": { "_n": "unit" }
+            }
+        ],
+        [ 
+            "http",
+            {
+                "name": "Example",
+                "address": "127.0.0.1",
+                "path": "/example/example",
+                "format": "json",
+                "port": 8888,
+                "domain": "Example",
+                "error": { "_n": "unit" }
+            }
+        ]
+    ]
+};
 
 module.exports = {
     parse: () => "",
