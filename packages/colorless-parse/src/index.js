@@ -173,6 +173,15 @@ function validateFunction(f) {
     return errors.orResult(() => f);
 }
 
+var relations = {
+    "relations": [
+        [
+            { "n": "Id", "p": [ { "n": "Person" } ] },
+            { "n": "Person" }
+        ],
+    ]
+};
+
 var domains = {
     "domains": [
         {
