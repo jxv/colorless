@@ -1,0 +1,30 @@
+{
+    "enums": [],
+    "structs": [],
+    "wrappers": [],
+    "functions": [
+        { "n": "helloWorld", "a": [], "o": { "n": "String" }, "d": "", "t": [] }
+    ],
+    "relations": [],
+    "domains": [
+        {
+            "name": "HelloWorld",
+            "modules": [],
+            "domains": []
+        }
+    ],
+    "rpc": [
+        [
+            "http",
+            {
+                "name": "HelloWorld",
+                "address": "127.0.0.1",
+                "path": "/",
+                "format": "json",
+                "port": 8000,
+                "domain": "HelloWorld",
+                "error": { "n": "Unit" }
+           }
+        ]
+    ]
+}

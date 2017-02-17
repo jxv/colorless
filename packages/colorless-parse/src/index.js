@@ -2,7 +2,7 @@
  * n = name
  * m = members
  * c = constructors
- * w = wrapped type
+ * w = wrapper type
  * a = arguments
  * o = output type
  * p = type parameters
@@ -36,11 +36,11 @@ function notKeys(ls, o) {
     return true;
 }
 
-function isSum(v) {
+function isEnum(v) {
     return hasKeys(['n', 'c'], v) && notKeys(['m', 'a', 'w', 'o'], v);
 }
 
-function Sum(name, params, ctors, tags, description) {
+function Enum(name, params, ctors, tags, description) {
     this.n = name;
     this.p = params || [];
     this.c = ctors;
@@ -48,8 +48,8 @@ function Sum(name, params, ctors, tags, description) {
     this.d = description || '';
 }
 
-function toSum(v) {
-    return new Sum(v.n, v.p, v.c, v.t, v.d);
+function toEnum(v) {
+    return new Enum(v.n, v.p, v.c, v.t, v.d);
 }
 
 function isConstructor(v) {
@@ -65,11 +65,11 @@ function toConstructor(v) {
     return new Constructor(v.n, v.p);
 }
 
-function isProduct(v) {
+function isStruct(v) {
     return hasKeys(['n', 'm'], v) && notKeys(['c', 'a', 'w', 'o'], v);
 }
 
-function Product(name, params, members, tags, description) {
+function Struct(name, params, members, tags, description) {
     this.n = name;
     this.p = params || [];
     this.m = members;
@@ -77,8 +77,8 @@ function Product(name, params, members, tags, description) {
     this.d = description || '';
 }
 
-function toProduct(v) {
-    return new Product(v.n, v.p, v.m, v.t, v.d);
+function toStruct(v) {
+    return new Struct(v.n, v.p, v.m, v.t, v.d);
 }
 
 function isWrapper(v) {
@@ -98,14 +98,14 @@ function toWrapper(v) {
 }
 
 var types = {
-    "sums": [
+    "enums": [
     //  { "n": "Suit", "c": [ "Hearts", "Diamonds", "Clubs", "Spades" ] },
         { "n": "Suit", "c": [ { "n": "Hearts" }, { "n": "Diamonds" }, { "n": "Clubs" }, { "n": "Spades" }] },
         { "n": "Rank", "c": [ { "n": "Ace" }, { "n": "R2" }, { "n": "R3" }, { "n": "R4" }, { "n": "R5" }, { "n": "R6" }, { "n": "R7" }, { "n": "R8" }, { "n": "R9" }, { "n": "R10" }, { "n": "Jack" }, { "n": "Queen" }, { "n": "King" } ] },
         { "n": "D", "c": [ { "n": "X" }, { "n": "Y" }, { "n": "Z" } ] },
         { "n": "E", "p": [ { "n": "a" }, { "n": "b" }], "c": [ { "n": "X", "p": [ { "n": "List", "p": [ {"n": "a" } ] } ] }, { "n": "Y", "p": [ { "n": "List", "p": [ {"n": "b" } ] } ] }, { "n": "Z" } ] }
     ],
-    "products": [
+    "structs": [
         { "n": "A", "m": { "x": { "n": "I32" } }, "t": [ "C" ] },
         { "n": "B", "p": [ { "n": "a" } ], "m": { "x": "a" }, "t": [ "C" ] },
     ],
@@ -115,8 +115,8 @@ var types = {
 };
 
 function typeDeclTag(v) {
-    if (isProduct(v)) return [ 'product', v ];
-    if (isSum(v)) return [ 'sum', v ];
+    if (isStruct(v)) return [ 'struct', v ];
+    if (isEnum(v)) return [ 'enum', v ];
     if (isWrapper(v)) return [ 'wrapper', v ];
 }
 
