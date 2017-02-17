@@ -205,7 +205,7 @@ var domains = {
 };
 
 var services = {
-    "services": [
+    "rpc": [
         [   "http",
             {
                 "name": "Root",
@@ -239,6 +239,20 @@ var services = {
                 "port": 8888,
                 "domain": "Example",
                 "error": { "n": "unit" }
+            }
+        ],
+    ],
+    "stream": [
+        [
+            "websocket",
+            {
+                "name": "Example",
+                "address": "127.0.0.1",
+                "path": "/event-stream",
+                "format": "json",
+                "port": 8888,
+                "domain": "Example",
+                "event": { "n": "Event" }
             }
         ]
     ]

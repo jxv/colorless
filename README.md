@@ -1,2 +1,2 @@
 #colorless
-Yet another IDL for RPC
+IDL for RPC and Stream Processing
