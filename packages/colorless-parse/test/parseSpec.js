@@ -5,7 +5,7 @@ const expect = require('chai').expect;
 const { validateFunction, Error,  Ok } = require('../src/index.js');
 
 describe("parsing validation:", () => {
-    const hello = { n: 'hello', a: [], o: 'string', t: [], d: '' };
+    const hello = { n: 'hello', a: [], o: 'String', t: [], d: '' };
     it("no function", () => {
         expect(validateFunction({})).to.deep.equal(['error', ['missing name', 'missing output', 'missing arguments', 'missing tags', 'missing description']]);
     });

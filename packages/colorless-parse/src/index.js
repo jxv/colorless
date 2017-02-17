@@ -1,8 +1,8 @@
 /*
  * n = name
- * f = fields
+ * m = members
  * c = constructors
- * s = type synonym
+ * w = wrapped type
  * a = arguments
  * o = output type
  * p = type parameters
@@ -10,6 +10,17 @@
  * k = type level value constraint
  *
  */
+
+/* Unit
+ * U8, U16, U32, U64
+ * I8, I16, I32, I64
+ * F32, F64
+ * Bool
+ * Char
+ * String
+ */
+
+var R = require('ramda');
 
 function hasKeys(ls, o) {
     for (var i in ls) {
@@ -26,7 +37,7 @@ function notKeys(ls, o) {
 }
 
 function isSum(v) {
-    return hasKeys(['n', 'c'], v) && notKeys(['f', 'a', 's', 'o'], v);
+    return hasKeys(['n', 'c'], v) && notKeys(['m', 'a', 'w', 'o'], v);
 }
 
 function Sum(name, params, ctors, tags, description) {
@@ -42,7 +53,7 @@ function toSum(v) {
 }
 
 function isConstructor(v) {
-    return hasKeys(['n'], v) && notKeys(['f', 'a', 'c', 's', 'o', 't'], v);
+    return hasKeys(['n'], v) && notKeys(['m', 'a', 'c', 'w', 'o', 't'], v);
 }
 
 function Constructor(name, params) {
@@ -55,55 +66,58 @@ function toConstructor(v) {
 }
 
 function isProduct(v) {
-    return hasKeys(['n', 'f'], v) && notKeys(['c', 'a', 's', 'o'], v);
+    return hasKeys(['n', 'm'], v) && notKeys(['c', 'a', 'w', 'o'], v);
 }
 
-function Product(name, params, fields, tags, description) {
+function Product(name, params, members, tags, description) {
     this.n = name;
     this.p = params || [];
-    this.f = fields;
+    this.m = members;
     this.t = tags || [];
     this.d = description || '';
 }
 
 function toProduct(v) {
-    return new Product(v.n, v.p, v.f, v.t, v.d);
+    return new Product(v.n, v.p, v.m, v.t, v.d);
 }
 
-function isSynonym(v) {
-    return hasKeys(['n', 's'], v) && notKeys(['c', 'f', 'a', 'o'], v);
+function isWrapper(v) {
+    return hasKeys(['n', 'w'], v) && notKeys(['c', 'm', 'a', 'o'], v);
 }
 
-function Synonym(name, params, synonym, tags, description) {
+function Wrapper(name, params, wrapper, tags, description) {
     this.n = name;
     this.p = params || [];
-    this.s = synonym;
+    this.s = wrapper;
     this.t = tags || [];
     this.d = description || '';
 }
 
-function toSynonym(v) {
-    return new Synonym(v.n, v.p, v.s, v.t, v.d);
+function toWrapper(v) {
+    return new Wrapper(v.n, v.p, v.s, v.t, v.d);
 }
 
 var types = {
-    "types": [
-     // { "n": "Suit", "c": [ "Hearts", "Diamonds", "Clubs", "Spades" ] },
+    "sums": [
+    //  { "n": "Suit", "c": [ "Hearts", "Diamonds", "Clubs", "Spades" ] },
         { "n": "Suit", "c": [ { "n": "Hearts" }, { "n": "Diamonds" }, { "n": "Clubs" }, { "n": "Spades" }] },
         { "n": "Rank", "c": [ { "n": "Ace" }, { "n": "R2" }, { "n": "R3" }, { "n": "R4" }, { "n": "R5" }, { "n": "R6" }, { "n": "R7" }, { "n": "R8" }, { "n": "R9" }, { "n": "R10" }, { "n": "Jack" }, { "n": "Queen" }, { "n": "King" } ] },
-        { "n": "A", "f": [ ["x", { "n": "i32" }] ], "t": [ "C" ] },
-        { "n": "A", "f": [ ["x", { "n": "i32" }] ], "t": [ "C" ] },
-        { "n": "B", "p": [ { "n": "a" } ], "f": [["x","a"]], "t": [ "C" ] },
         { "n": "D", "c": [ { "n": "X" }, { "n": "Y" }, { "n": "Z" } ] },
-        { "n": "E", "p": [ { "n": "a" }, { "n": "b" }], "c": [ { "n": "X", "p": [ { "n": "List", "p": [ {"n": "a" } ] } ] }, { "n": "Y", "p": [ { "n": "List", "p": [ {"n": "b" } ] } ] }, { "n": "Z" } ] },
-        { "n": "Id", "p": [ { "n": "a", "k": "string" } ], "s": { "n": "i32" } }
+        { "n": "E", "p": [ { "n": "a" }, { "n": "b" }], "c": [ { "n": "X", "p": [ { "n": "List", "p": [ {"n": "a" } ] } ] }, { "n": "Y", "p": [ { "n": "List", "p": [ {"n": "b" } ] } ] }, { "n": "Z" } ] }
+    ],
+    "products": [
+        { "n": "A", "m": { "x": { "n": "I32" } }, "t": [ "C" ] },
+        { "n": "B", "p": [ { "n": "a" } ], "m": { "x": "a" }, "t": [ "C" ] },
+    ],
+    "wrappers": [
+        { "n": "Id", "p": [ { "n": "a", "k": "String" } ], "w": { "n": "I32" } }
     ]
 };
 
 function typeDeclTag(v) {
     if (isProduct(v)) return [ 'product', v ];
     if (isSum(v)) return [ 'sum', v ];
-    if (isSynonym(v)) return [ 'synonym', v ];
+    if (isWrapper(v)) return [ 'wrapper', v ];
 }
 
 function typeDeclTags(v) {
@@ -114,8 +128,8 @@ function typeDeclTags(v) {
 
 var functions = {
     "functions": [
-        { "n": "helloWorld", "o": "string" },
-        { "n": "add", "a": [["x","f32"], ["y","f32"]], "o": "f32" }
+        { "n": "helloWorld", "o": "String" },
+        { "n": "add", "a": [ {"x":"F32"}, {"y":"F32"} ], "o": "F32" }
     ]
 };
 
@@ -142,7 +156,7 @@ function isLowerCamelCase(s) {
 }
 
 function isPrimitiveType(ty) {
-    return ty === 'string';
+    return ty === 'String';
 }
 
 function Errors() {
@@ -236,7 +250,7 @@ var services = {
                 "format": "json",
                 "port": 8888,
                 "domain": "Calculator",
-                "error": { "n": "unit" }
+                "error": { "n": "Unit" }
             }
         ],
         [ 
@@ -248,7 +262,7 @@ var services = {
                 "format": "json",
                 "port": 8888,
                 "domain": "Example",
-                "error": { "n": "unit" }
+                "error": { "n": "Unit" }
             }
         ],
     ],
