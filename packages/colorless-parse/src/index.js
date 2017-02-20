@@ -2,9 +2,9 @@
  * n = name
  * m = members
  * e = enumerals
- * w = wrapper type
- * a = arguments
- * o = output type
+ * w = wrapper
+ * u = union
+ * o = output
  * p = type parameters
  * g = groups
  * k = type level value constraint
@@ -37,23 +37,24 @@ function notKeys(ls, o) {
 }
 
 function isEnum(v) {
-    return hasKeys(['n', 'c'], v) && notKeys(['m', 'a', 'w', 'o'], v);
+    return hasKeys(['n', 'e'], v) && notKeys(['m', 'u', 'w'], v);
 }
 
-function Enum(name, params, enumerals, groups, description) {
+function Enum(name, params, enumerals, output, groups, description) {
     this.n = name;
     this.p = params || [];
     this.e = enumerals;
+    this.o = output || "Unit";
     this.g = groups || [];
-    this.d = description || '';
+    this.d = description || [];
 }
 
 function toEnum(v) {
-    return new Enum(v.n, v.p, v.c, v.t, v.d);
+    return new Enum(v.n, v.p, v.e, v.o, v.g, v.d);
 }
 
 function isEnumeral(v) {
-    return hasKeys(['n'], v) && notKeys(['m', 'a', 'c', 'w', 'o', 'g'], v);
+    return hasKeys(['n'], v) && notKeys(['m', 'e', 'u', 'w', 'g', 'd'], v);
 }
 
 function Enumeral(name, params) {
@@ -66,57 +67,70 @@ function toEnumeral(v) {
 }
 
 function isStruct(v) {
-    return hasKeys(['n', 'm'], v) && notKeys(['c', 'a', 'w', 'o'], v);
+    return hasKeys(['n', 'm'], v) && notKeys(['e', 'u', 'w'], v);
 }
 
-function Struct(name, params, members, groups, description) {
+function Struct(name, params, members, output, groups, description) {
     this.n = name;
     this.p = params || [];
     this.m = members;
+    this.o = output || "Unit";
     this.g = groups || [];
-    this.d = description || '';
+    this.d = description || [];
 }
 
 function toStruct(v) {
-    return new Struct(v.n, v.p, v.m, v.t, v.d);
+    return new Struct(v.n, v.p, v.m, v.o, v.g, v.d);
 }
 
 function isWrapper(v) {
-    return hasKeys(['n', 'w'], v) && notKeys(['c', 'm', 'a', 'o'], v);
+    return hasKeys(['n', 'w'], v) && notKeys(['e', 'm', 'u'], v);
 }
 
-function Wrapper(name, params, wrapper, groups, description) {
+function Wrapper(name, params, wrapper, output, groups, description) {
     this.n = name;
     this.p = params || [];
-    this.s = wrapper;
+    this.w = wrapper;
+    this.o = output || "Unit";
     this.g = groups || [];
-    this.d = description || '';
+    this.d = description || [];
 }
 
 function toWrapper(v) {
-    return new Wrapper(v.n, v.p, v.s, v.t, v.d);
+    return new Wrapper(v.n, v.p, v.w, v.o, v.g, v.d);
+}
+
+function isUnion(v) {
+    return hasKeys(['n', 'u'], v) && notKeys(['e', 'm', 'w', 'o'], v);
+}
+
+function Union(name, params, union, groups, description) {
+    this.n = name;
+    this.p = params || [];
+    this.u = union;
+    this.g = groups || [];
+    this.d = description || [];
 }
 
 var types = {
-    "enums": [
-    //  { "n": "Suit", "c": [ "Hearts", "Diamonds", "Clubs", "Spades" ] },
-        { "n": "Suit", "c": [ { "n": "Hearts" }, { "n": "Diamonds" }, { "n": "Clubs" }, { "n": "Spades" }] },
-        { "n": "Rank", "c": [ { "n": "Ace" }, { "n": "R2" }, { "n": "R3" }, { "n": "R4" }, { "n": "R5" }, { "n": "R6" }, { "n": "R7" }, { "n": "R8" }, { "n": "R9" }, { "n": "R10" }, { "n": "Jack" }, { "n": "Queen" }, { "n": "King" } ] },
-        { "n": "D", "c": [ { "n": "X" }, { "n": "Y" }, { "n": "Z" } ] },
-        { "n": "E", "p": [ { "n": "a" }, { "n": "b" }], "c": [ { "n": "X", "p": [ { "n": "List", "p": [ {"n": "a" } ] } ] }, { "n": "Y", "p": [ { "n": "List", "p": [ {"n": "b" } ] } ] }, { "n": "Z" } ] }
-    ],
-    "structs": [
-        { "n": "A", "m": { "x": { "n": "I32" } }, "t": [ "C" ] },
-        { "n": "B", "p": [ { "n": "a" } ], "m": { "x": "a" }, "t": [ "C" ] },
-    ],
-    "wrappers": [
-        { "n": "Id", "p": [ { "n": "a", "k": "String" } ], "w": { "n": "I32" } }
+    "types": [
+        { "n": "Suit", "e": [ "Hearts", "Diamonds", "Clubs", "Spades" ] },
+        { "n": "Rank", "e": [ "Ace", "R2", "R3", "R4", "R5", "R6", "R7", "R8", "R9", "R10", "Jack", "Queen", "King" ] },
+        { "n": "D", "e": [ "X", "Y", "Z" ] },
+        { "n": "E", "p": [ "a", "b" ], "e": [ { "n": "X", "p": [ { "n": "List", "p": [ "a" ] } ] }, { "n": "Y", "p": [ { "n": "List", "p": [ "b" ] } ] }, "Z" ] },
+        { "n": "A", "m": [ [ "x", "I32" ] ], "g": [ "C" ] },
+        { "n": "B", "p": [ "a" ], "m": [ [ "x", "a" ] ], "g": [ "C" ] },
+        { "n": "Id", "p": [ { "n": "a", "k": "String" } ], "w": "I32" },
+        { "n": "Card", "m": [ [ "suit", "Suit" ], [ "rank", "Rank" ] ] },
+        { "n": "Joker" },
+        { "n": "AnyCard", "u": [ "Card", "Joker" ] }
     ]
 };
 
 function typeDeclTag(v) {
     if (isStruct(v)) return [ 'struct', v ];
     if (isEnum(v)) return [ 'enum', v ];
+    if (isUnion(v)) return [ 'union', v ];
     if (isWrapper(v)) return [ 'wrapper', v ];
 }
 
@@ -125,21 +139,6 @@ function typeDeclTags(v) {
 }
 
 //
-
-var functions = {
-    "functions": [
-        { "n": "helloWorld", "o": "String" },
-        { "n": "add", "a": [ {"x":"F32"}, {"y":"F32"} ], "o": "F32" }
-    ]
-};
-
-function isFunctionDecl(f) {
-    return 'n' in f && 'o' in f
-}
-
-function areFunctionDecls(v) {
-    return v.functions.map(function (f) { return [f.n, isFunctionDecl(f)]; } );
-}
 
 function hasCamelCaseCharacters(s) {
     for (var i in s) {
@@ -194,96 +193,50 @@ function validateWrapper(f) {
 
 var relations = {
     "relations": [
-        [
-            { "n": "Id", "p": [ { "n": "Person" } ] },
-            { "n": "Person" }
-        ],
-    ]
-};
-
-var domains = {
-    "domains": [
-        {
-            "name": "Calculator",
-            "modules": [
-                "Calculator.0.json"
-            ],
-            "domains": [
-            ]
-        },
-        {
-            "name": "Example",
-            "modules": [
-                "Imports.0.json",
-                "Deck.0.json",
-                "Spec.0.json"
-            ],
-            "domains": [
-            ]
-        },
-        {
-            "name": "Combined",
-            "modules": [
-            ],
-            "domains": [
-                "Example",
-                "Calculator"
-            ]
-        }
+        [ { "n": "Id", "p": [ "Person" ] }, "Person" ]
     ]
 };
 
 var services = {
     "rpc": [
-        [   "http",
-            {
-                "name": "Root",
-                "address": "127.0.0.1",
-                "path": "/",
-                "format": "json",
-                "port": 8888,
-                "domain": "Combined",
-                "error": { "n": "Error" }
-            }
-        ],
-        [   
-            "http",
-            {
-                "name": "Calculator",
-                "address": "127.0.0.1",
-                "path": "calculator",
-                "format": "json",
-                "port": 8888,
-                "domain": "Calculator",
-                "error": { "n": "Unit" }
-            }
-        ],
-        [ 
-            "http",
-            {
-                "name": "Example",
-                "address": "127.0.0.1",
-                "path": "/example/example",
-                "format": "json",
-                "port": 8888,
-                "domain": "Example",
-                "error": { "n": "Unit" }
-            }
-        ],
+        {
+            "protocol": "http",
+            "name": "Root",
+            "address": "127.0.0.1",
+            "path": "/",
+            "format": "json",
+            "port": 8886,
+            "send": [ { "message": "Root", "error": "Unit" } ]
+        },
+        {
+            "protocol": "http",
+            "name": "Calculator",
+            "address": "127.0.0.1",
+            "path": "calculator",
+            "format": "json",
+            "port": 8887,
+            "send": [ { "message": "Operation", "error": "Unit" } ]
+        },
+        {
+            "protocol": "HTTP",
+            "name": "Example",
+            "address": "127.0.0.1",
+            "path": "/example/example",
+            "format": "JSON",
+            "port": 8888,
+            "send": [ { "message": "Combined", "error": "Unit" } ]
+        }
     ],
     "stream": [
-        [
-            "websocket",
-            {
-                "name": "Example",
-                "address": "127.0.0.1",
-                "path": "/event-stream",
-                "format": "json",
-                "port": 8888,
-                "domain": "Example",
-                "event": { "n": "Event" }
-            }
-        ]
+        {
+            "protocol": "Websocket",
+            "name": "Example",
+            "address": "127.0.0.1",
+            "path": "/event-stream",
+            "format": "JSON",
+            "port": 8888,
+            "receive": [ "Event" ]
+        }
     ]
 };
 
