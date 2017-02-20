@@ -1,12 +1,12 @@
 /*
  * n = name
  * m = members
- * c = constructors
+ * e = enumerals
  * w = wrapper type
  * a = arguments
  * o = output type
  * p = type parameters
- * t = tags
+ * g = groups
  * k = type level value constraint
  *
  */
@@ -40,11 +40,11 @@ function isEnum(v) {
     return hasKeys(['n', 'c'], v) && notKeys(['m', 'a', 'w', 'o'], v);
 }
 
-function Enum(name, params, ctors, tags, description) {
+function Enum(name, params, enumerals, groups, description) {
     this.n = name;
     this.p = params || [];
-    this.c = ctors;
-    this.t = tags || [];
+    this.e = enumerals;
+    this.g = groups || [];
     this.d = description || '';
 }
 
@@ -52,28 +52,28 @@ function toEnum(v) {
     return new Enum(v.n, v.p, v.c, v.t, v.d);
 }
 
-function isConstructor(v) {
-    return hasKeys(['n'], v) && notKeys(['m', 'a', 'c', 'w', 'o', 't'], v);
+function isEnumeral(v) {
+    return hasKeys(['n'], v) && notKeys(['m', 'a', 'c', 'w', 'o', 'g'], v);
 }
 
-function Constructor(name, params) {
+function Enumeral(name, params) {
     this.n = name;
     this.p = params || [];
 }
 
-function toConstructor(v) {
-    return new Constructor(v.n, v.p);
+function toEnumeral(v) {
+    return new Enumeral(v.n, v.p);
 }
 
 function isStruct(v) {
     return hasKeys(['n', 'm'], v) && notKeys(['c', 'a', 'w', 'o'], v);
 }
 
-function Struct(name, params, members, tags, description) {
+function Struct(name, params, members, groups, description) {
     this.n = name;
     this.p = params || [];
     this.m = members;
-    this.t = tags || [];
+    this.g = groups || [];
     this.d = description || '';
 }
 
@@ -85,11 +85,11 @@ function isWrapper(v) {
     return hasKeys(['n', 'w'], v) && notKeys(['c', 'm', 'a', 'o'], v);
 }
 
-function Wrapper(name, params, wrapper, tags, description) {
+function Wrapper(name, params, wrapper, groups, description) {
     this.n = name;
     this.p = params || [];
     this.s = wrapper;
-    this.t = tags || [];
+    this.g = groups || [];
     this.d = description || '';
 }
 
@@ -155,6 +155,12 @@ function isLowerCamelCase(s) {
     return hasCamelCaseCharacters(s);
 }
 
+function isUpperCamelCase(s) {
+    if (!s.length) return false;
+    if (!(s[0] >= 'A' && s[0] <= 'Z')) return false;
+    return hasCamelCaseCharacters(s);
+}
+
 function isPrimitiveType(ty) {
     return ty === 'String';
 }
@@ -175,14 +181,13 @@ Errors.prototype = {
     }
 };
 
-function validateFunction(f) {
+function validateWrapper(f) {
     var errors = new Errors();
     errors.assert('n' in f, 'missing name') &&
-        errors.assert(isLowerCamelCase(f.n), 'lower camel case name');
-    errors.assert('o' in f, 'missing output') &&
-        errors.assert(isPrimitiveType(f.o), 'invalid primitive output');
-    errors.assert('a' in f, 'missing arguments');
-    errors.assert('t' in f, 'missing tags');
+        errors.assert(isUpperCamelCase(f.n), 'upper camel case name');
+    errors.assert('o' in f, 'missing output');
+    errors.assert('w' in f, 'missing wrapper');
+    errors.assert('g' in f, 'missing groups');
     errors.assert('d' in f, 'missing description');
     return errors.orResult(() => f);
 }
@@ -284,5 +289,5 @@ var services = {
 
 module.exports = {
     parse: () => "",
-    validateFunction: validateFunction
+    validateWrapper: validateWrapper
 };
