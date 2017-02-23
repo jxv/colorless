@@ -22,23 +22,21 @@
 
 var R = require('ramda');
 
-function hasKeys(ls, o) {
+const hasKeys = (ls, o) => {
     for (var i in ls) {
         if (!(ls[i] in o)) return false;
     }
     return true;
-}
+};
 
-function notKeys(ls, o) {
+const notKeys = (ls, o) => {
     for (var i in ls) {
         if ((ls[i] in o)) return false;
     }
     return true;
-}
+};
 
-function isEnum(v) {
-    return hasKeys(['n', 'e'], v) && notKeys(['m', 'u', 'w'], v);
-}
+const isEnum = v => hasKeys(['n', 'e'], v) && notKeys(['m', 'u', 'w'], v);
 
 function Enum(name, params, enumerals, output, groups, description) {
     this.n = name;
@@ -49,26 +47,18 @@ function Enum(name, params, enumerals, output, groups, description) {
     this.d = description || [];
 }
 
-function toEnum(v) {
-    return new Enum(v.n, v.p, v.e, v.o, v.g, v.d);
-}
+const toEnum = v => new Enum(v.n, v.p, v.e, v.o, v.g, v.d);
 
-function isEnumeral(v) {
-    return hasKeys(['n'], v) && notKeys(['m', 'e', 'u', 'w', 'g', 'd'], v);
-}
+const isEnumeral = v => hasKeys(['n'], v) && notKeys(['m', 'e', 'u', 'w', 'g', 'd'], v);
 
 function Enumeral(name, params) {
     this.n = name;
     this.p = params || [];
 }
 
-function toEnumeral(v) {
-    return new Enumeral(v.n, v.p);
-}
+const toEnumeral = v => new Enumeral(v.n, v.p);
 
-function isStruct(v) {
-    return hasKeys(['n', 'm'], v) && notKeys(['e', 'u', 'w'], v);
-}
+const isStruct = v => hasKeys(['n', 'm'], v) && notKeys(['e', 'u', 'w'], v);
 
 function Struct(name, params, members, output, groups, description) {
     this.n = name;
@@ -79,13 +69,9 @@ function Struct(name, params, members, output, groups, description) {
     this.d = description || [];
 }
 
-function toStruct(v) {
-    return new Struct(v.n, v.p, v.m, v.o, v.g, v.d);
-}
+const toStruct = v => new Struct(v.n, v.p, v.m, v.o, v.g, v.d);
 
-function isWrapper(v) {
-    return hasKeys(['n', 'w'], v) && notKeys(['e', 'm', 'u'], v);
-}
+const isWrapper = v => hasKeys(['n', 'w'], v) && notKeys(['e', 'm', 'u'], v);
 
 function Wrapper(name, params, wrapper, output, groups, description) {
     this.n = name;
@@ -96,13 +82,9 @@ function Wrapper(name, params, wrapper, output, groups, description) {
     this.d = description || [];
 }
 
-function toWrapper(v) {
-    return new Wrapper(v.n, v.p, v.w, v.o, v.g, v.d);
-}
+const toWrapper = v => new Wrapper(v.n, v.p, v.w, v.o, v.g, v.d);
 
-function isUnion(v) {
-    return hasKeys(['n', 'u'], v) && notKeys(['e', 'm', 'w', 'o'], v);
-}
+const isUnion = v => hasKeys(['n', 'u'], v) && notKeys(['e', 'm', 'w', 'o'], v);
 
 function Union(name, params, union, groups, description) {
     this.n = name;
@@ -118,21 +100,21 @@ var types = {
         { "n": "Rank", "e": [ "Ace", "R2", "R3", "R4", "R5", "R6", "R7", "R8", "R9", "R10", "Jack", "Queen", "King" ] },
         { "n": "D", "e": [ "X", "Y", "Z" ] },
         { "n": "E", "p": [ "a", "b" ], "e": [ { "n": "X", "p": [ { "n": "List", "p": [ "a" ] } ] }, { "n": "Y", "p": [ { "n": "List", "p": [ "b" ] } ] }, "Z" ] },
-        { "n": "A", "m": [ [ "I32", "x" ] ], "g": [ "C" ] },
-        { "n": "B", "p": [ "a" ], "m": [ [ "a", "x" ] ], "g": [ "C" ] },
+        { "n": "A", "m": [ {"x":"I32"} ], "g": [ "C" ] },
+        { "n": "B", "p": [ "a" ], "m": [ {"x":"a"} ], "g": [ "C" ] },
         { "n": "Id", "p": [ { "n": "a", "k": "String" } ], "w": "I32" },
-        { "n": "Card", "m": [ "Suit" , "Rank" ] },
+        { "n": "Card", "m": [ {"suit":"Suit"} , {"rank":"Rank"} ] },
         { "n": "Joker" },
         { "n": "AnyCard", "u": [ "Card", "Joker" ] }
     ]
 };
 
-function typeDeclTag(v) {
+const typeDeclTag = v => {
     if (isStruct(v)) return [ 'struct', v ];
     if (isEnum(v)) return [ 'enum', v ];
     if (isUnion(v)) return [ 'union', v ];
     if (isWrapper(v)) return [ 'wrapper', v ];
-}
+};
 
 function typeDeclTags(v) {
     return v.types.map(function (t) { return typeDeclTag(t); } );
