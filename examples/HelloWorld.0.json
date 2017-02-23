@@ -5,11 +5,11 @@
     ],
     "rpc": [
         {
-            "protocol": "HTTP",
+            "protocol": "Http",
             "name": "HelloWorld",
             "address": "127.0.0.1",
             "path": "/",
-            "format": "JSON",
+            "format": "Json",
             "port": 8000,
             "send": [
                 { "message": "Hello", "error": "Unit" }
