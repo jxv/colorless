@@ -41,8 +41,8 @@ const isEnum = v => hasKeys(['n', 'e'], v) && notKeys(['m', 'u', 'w'], v);
 function Enum(name, params, enumerals, output, groups, description) {
     this.n = name;
     this.p = params || [];
-    this.e = enumerals;
-    this.o = output || "Unit";
+    this.e = enumerals.map(R.compose(toEnumeral, expandFromName));
+    this.o = output || { n: "Unit" };
     this.g = groups || [];
     this.d = description || [];
 }
@@ -51,20 +51,21 @@ const toEnum = v => new Enum(v.n, v.p, v.e, v.o, v.g, v.d);
 
 const isEnumeral = v => hasKeys(['n'], v) && notKeys(['m', 'e', 'u', 'w', 'g', 'd'], v);
 
-function Enumeral(name, params) {
+function Enumeral(name, params, members) {
     this.n = name;
     this.p = params || [];
+    this.m = members || [];
 }
 
-const toEnumeral = v => new Enumeral(v.n, v.p);
+const toEnumeral = v => new Enumeral(v.n, v.p, v.m);
 
 const isStruct = v => hasKeys(['n', 'm'], v) && notKeys(['e', 'u', 'w'], v);
 
 function Struct(name, params, members, output, groups, description) {
     this.n = name;
     this.p = params || [];
-    this.m = members;
-    this.o = output || "Unit";
+    this.m = members.map(R.map(expandFromName));
+    this.o = output || { n: "Unit" };
     this.g = groups || [];
     this.d = description || [];
 }
@@ -76,8 +77,8 @@ const isWrapper = v => hasKeys(['n', 'w'], v) && notKeys(['e', 'm', 'u'], v);
 function Wrapper(name, params, wrapper, output, groups, description) {
     this.n = name;
     this.p = params || [];
-    this.w = wrapper;
-    this.o = output || "Unit";
+    this.w = wrapper || { n: "Unit" };
+    this.o = output || { n: "Unit" };
     this.g = groups || [];
     this.d = description || [];
 }
@@ -89,10 +90,12 @@ const isUnion = v => hasKeys(['n', 'u'], v) && notKeys(['e', 'm', 'w', 'o'], v);
 function Union(name, params, union, groups, description) {
     this.n = name;
     this.p = params || [];
-    this.u = union;
+    this.u = union.map(R.compose(ensureParams, expandFromName));
     this.g = groups || [];
     this.d = description || [];
 }
+
+const toUnion = v => new Union(v.n, v.p, v.u, v.g, v.d);
 
 var types = {
     "types": [
@@ -119,6 +122,12 @@ const typeDeclTag = v => {
 function typeDeclTags(v) {
     return v.types.map(function (t) { return typeDeclTag(t); } );
 }
+
+const expandFromName = v => (typeof v == 'string') ? { n: v } : v;
+
+const ensureParams = v => Object.assign({ p: [] }, v);
+
+const ensureMembers = v => Object.assign({ m: [] }, v);
 
 //
 
@@ -224,5 +233,11 @@ var services = {
 
 module.exports = {
     parse: () => "",
-    validateWrapper: validateWrapper
+    toEnum: toEnum,
+    toEnumernal: toEnumeral,
+    toStruct: toStruct,
+    toWrapper: toWrapper,
+    toUnion: toUnion,
+    validateWrapper: validateWrapper,
+    expandFromName: expandFromName
 };
