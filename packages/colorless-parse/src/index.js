@@ -155,31 +155,38 @@ function isPrimitiveType(ty) {
     return ty === 'String';
 }
 
-function Errors() {
-    this.list = [];
+function Checker() {
+    this.errors = [];
+    this.warnings = [];
 }
 
-Errors.prototype = {
+Checker.prototype = {
     assert: function(cond, error) {
         if (!cond) {
-            this.list.push(error);
+            this.errors.push(error);
+        }
+        return cond;
+    },
+    suggest: function(cond, warning) {
+        if (!cond) {
+            this.warnings.push(warning);
         }
         return cond;
     },
     orResult: function(f) {
-        return !!this.list.length ? ['error', this.list] : ['ok', f()];
+        return !!this.errors.length ? ['error', this.errors, this.warnings] : ['ok', f(), this.warnings];
     }
 };
 
 function validateWrapper(f) {
-    var errors = new Errors();
-    errors.assert('n' in f, 'missing name') &&
-        errors.assert(isUpperCamelCase(f.n), 'upper camel case name');
-    errors.assert('o' in f, 'missing output');
-    errors.assert('w' in f, 'missing wrapper');
-    errors.assert('g' in f, 'missing groups');
-    errors.assert('d' in f, 'missing description');
-    return errors.orResult(() => f);
+    var checker = new Checker();
+    checker.assert('n' in f, 'missing name') &&
+        checker.assert(isUpperCamelCase(f.n), 'upper camel case name');
+    checker.assert('o' in f, 'missing output');
+    checker.assert('w' in f, 'missing wrapper');
+    checker.assert('g' in f, 'missing groups');
+    checker.assert('d' in f, 'missing description');
+    return checker.orResult(() => f);
 }
 
 var relations = {
@@ -231,6 +238,15 @@ var services = {
     ]
 };
 
+function generateRuntimeClient(spec) {
+    var rpc = spec.rpc[0];
+    return function () {
+        fetch("https://" + rpc.address)
+            .then(r => r.json())
+            .then(console.log)
+    }
+}
+
 module.exports = {
     parse: () => "",
     toEnum: toEnum,
@@ -239,5 +255,6 @@ module.exports = {
     toWrapper: toWrapper,
     toUnion: toUnion,
     validateWrapper: validateWrapper,
-    expandFromName: expandFromName
+    expandFromName: expandFromName,
+    generateRuntimeClient: generateRuntimeClient
 };
