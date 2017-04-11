@@ -174,7 +174,16 @@ Checker.prototype = {
         return cond;
     },
     orResult: function(f) {
-        return !!this.errors.length ? ['error', this.errors, this.warnings] : ['ok', f(), this.warnings];
+        return !!this.errors.length
+            ?  {
+                type: 'error',
+                errors: this.errors,
+                warnings: this.warnings
+            } : {
+                type: 'ok',
+                value: f(),
+                warnings: this.warnings
+            };
     }
 };
 
