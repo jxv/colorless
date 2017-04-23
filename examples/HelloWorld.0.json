@@ -1,10 +1,15 @@
 {
     "colorless": { "major": 0, "minor": 0 },
-    "types": [
-        { "n": "Hello", "m": [ {"target":"String"} ], "o": "String" }
-    ],
-    "rpc": [
+    "domains": {
+        "Simple": {
+            "types": [
+                { "n": "Hello", "m": [ {"target":"String"} ], "o": "String" }
+            ]
+        }
+    },
+    "services": [
         {
+            "direction": "Push",
             "protocol": "Http",
             "name": "HelloWorld",
             "address": "127.0.0.1",
@@ -12,7 +17,7 @@
             "format": "Json",
             "port": 8000,
             "send": [
-                { "message": "Hello", "error": "Unit" }
+                { "domain": "Simple", "message": "Hello", "error": "Unit" }
             ]
         }
     ]

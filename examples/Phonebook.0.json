@@ -1,0 +1,53 @@
+{
+    "colorless": { "major": 0, "minor": 0 },
+    "domains": {
+        "Phonebook": {
+            "types": [
+                {
+                    "n": "Person",
+                    "m": [ { "name": "String" }, { "number": "String" }, {"friends": { "n": "List", "p": [ "PersonId" ] } } ]
+                },
+                {
+                    "n": "LookupPerson",
+                    "m": [ { "name": "String" } ],
+                    "o": { "n": "Option", "p": [ "Person" ] }
+                }
+            ],
+            "mappings": [
+                { "f": "PersonId", "t": "Person" }
+            ],
+            "projections": [
+                {
+                    "n": "LookupPersonWithoutFriends",
+                    "i": "LookupPerson",
+                    "o": {
+                        "n": "Option",
+                        "p": [ { "s": [ "name", "number" ] } ]
+                    }
+                },
+                {
+                    "n": "LookupPersonFriends",
+                    "i": "LookupPerson",
+                    "o": {
+                        "n": "Option",
+                        "p": [ { "s": [ { "friends": { "n": "List", "p": [ { "s": "Person" } ] } } ] } ]
+                    }
+                }
+            ]
+        }
+    },
+    "services": [
+        {
+            "direction": "Push",
+            "protocol": "Http",
+            "name": "HelloWorld",
+            "address": "127.0.0.1",
+            "path": "/",
+            "format": "Json",
+            "port": 8000,
+            "send": [
+                { "domain": "Phonebook", "message": "Hello", "error": "Unit" }
+            ]
+        }
+    ]
+}

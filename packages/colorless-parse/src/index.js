@@ -8,7 +8,10 @@
  * p = type parameters
  * g = groups
  * k = type level value constraint
- *
+ * f = from (mappings)
+ * t = to (mappings)
+ * i = input (projections)
+ * s = show (projections)
  */
 
 /* Unit
@@ -198,16 +201,17 @@ function validateWrapper(f) {
     return checker.orResult(() => f);
 }
 
-var relations = {
-    "relations": [
-        [ { "n": "Id", "p": [ "Person" ] }, "Person" ]
+var mappings = {
+    "mappings": [
+        { "f": { "n": "Id", "p": [ "Person" ], "t": "Person" }
     ]
 };
 
 var services = {
-    "rpc": [
+    "services": [
         {
-            "protocol": "http",
+            "direction": "Push",
+            "protocol": "Http",
             "name": "Root",
             "address": "127.0.0.1",
             "path": "/",
@@ -216,7 +220,8 @@ var services = {
             "send": [ { "message": "Root", "error": "Unit" } ]
         },
         {
-            "protocol": "http",
+            "direction": "Push",
+            "protocol": "Http",
             "name": "Calculator",
             "address": "127.0.0.1",
             "path": "calculator",
@@ -225,17 +230,17 @@ var services = {
             "send": [ { "message": "Operation", "error": "Unit" } ]
         },
         {
-            "protocol": "HTTP",
+            "direction": "Push",
+            "protocol": "Http",
             "name": "Example",
             "address": "127.0.0.1",
             "path": "/example/example",
             "format": "JSON",
             "port": 8888,
             "send": [ { "message": "Combined", "error": "Unit" } ]
-        }
-    ],
-    "stream": [
+        },
         {
+            "direction": "Pull",
             "protocol": "Websocket",
             "name": "Example",
             "address": "127.0.0.1",
