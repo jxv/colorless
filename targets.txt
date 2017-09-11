@@ -12,6 +12,7 @@ Delphi
 Elixir
 Elm
 Erlang
+Eta
 FSharp
 Frege
 GambitScheme
@@ -28,7 +29,6 @@ Java
 JavaScript
 Julia
 Kotlin
-LabVIEW
 Lua
 Nim
 OCaml

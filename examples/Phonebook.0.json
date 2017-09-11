@@ -1,53 +1,20 @@
 {
     "colorless": { "major": 0, "minor": 0 },
-    "domains": {
-        "Phonebook": {
-            "types": [
-                {
-                    "n": "Person",
-                    "m": [ { "name": "String" }, { "number": "String" }, {"friends": { "n": "List", "p": [ "PersonId" ] } } ]
-                },
-                {
-                    "n": "LookupPerson",
-                    "m": [ { "name": "String" } ],
-                    "o": { "n": "Option", "p": [ "Person" ] }
-                }
-            ],
-            "mappings": [
-                { "f": "PersonId", "t": "Person" }
-            ],
-            "projections": [
-                {
-                    "n": "LookupPersonWithoutFriends",
-                    "i": "LookupPerson",
-                    "o": {
-                        "n": "Option",
-                        "p": [ { "s": [ "name", "number" ] } ]
-                    }
-                },
-                {
-                    "n": "LookupPersonFriends",
-                    "i": "LookupPerson",
-                    "o": {
-                        "n": "Option",
-                        "p": [ { "s": [ { "friends": { "n": "List", "p": [ { "s": "Person" } ] } } ] } ]
-                    }
-                }
-            ]
-        }
-    },
-    "services": [
-        {
-            "direction": "Push",
-            "protocol": "Http",
-            "name": "HelloWorld",
-            "address": "127.0.0.1",
-            "path": "/",
-            "format": "Json",
-            "port": 8000,
-            "send": [
-                { "domain": "Phonebook", "message": "Hello", "error": "Unit" }
-            ]
-        }
-    ]
+    "types": [
+      { "n": "PersonId", "w": "String" },
+      { "n": "Name", "w": "String" },
+      { "n": "Person", "m": [ {"name": "Name"}, {"phone": "String"}, {"friends": {"n":"List", "p": "PersonId"}} ] },
+      { "n": "LookupPerson", "m": [{"id": "PersonId"}], "o": {"n":"Option","p":"Person"} },
+      { "n": "LookupPersonByName", "m": [{"name": "String"}], "o": {"n":"List","p":"Person"} }
+    ],
+    "rpc": {
+      "protocol": "http",
+      "name": "Phonebook",
+      "address": "127.0.0.1",
+      "path": "/",
+      "format": "JSON",
+      "port": 8000,
+      "error": "Unit",
+      "meta": "Unit"
+    }
 }
