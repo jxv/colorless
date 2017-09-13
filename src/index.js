@@ -36,6 +36,8 @@ const haskell = {
 
   wrap(name, type) {
     return [
+      '\n',
+      '-- Wrap: ', name , '\n',
       'newtype ', name , ' = ', name, ' ', type, '\n',
       '  deriving (P.Show, P.Eq, A.FromJSON, A.ToJSON, C.ToVal, C.FromVal)', '\n',
     ].join('')
@@ -45,6 +47,8 @@ const haskell = {
   struct(name, members) {
     // Data type declaration
     const declName = [
+      '\n',
+      '-- Struct: ', name, '\n',
       'data ', name, ' = ', name, '\n',
     ];
     var declMembers = ['  { ', members[0][0], ' :: ', members[0][1], '\n'];
@@ -55,10 +59,14 @@ const haskell = {
     const decl = declName.concat(declMembers).concat([declDeriving]);
 
     // ToJSON instance
-    const toJSON  = ['instance A.ToJSON ', name, '\n\n'];
+    const toJSON  = [
+      '\n',
+      'instance A.ToJSON ', name, '\n',
+    ];
 
     // ToVal instance
     const toValDecl = [
+      '\n',
       'instance C.ToVal ', name, ' where', '\n',
       '  toVal ', name, '\n',
     ];
@@ -91,7 +99,6 @@ const haskell = {
     }
     fromVal = fromVal.concat([
       '    _ -> Nothing\n',
-      '\n'
     ]);
 
     return decl.concat(toJSON).concat(toVal).concat(fromVal).join('');
@@ -100,14 +107,18 @@ const haskell = {
 
   enumeration(name, enumerals) {
     // Data type declaration
-    const declName = ['data ', name, '\n'];
+    const declName = [
+      '\n',
+      '-- Enumeration: ', name, '\n',
+      'data ', name, '\n',
+    ];
     function nameTag(i) {
       return name + '\'' + enumerals[i][0];
     }
     function nameTagMembers(i) {
       return name + '\'' + enumerals[i][0] + '\'Members';
     }
-   var declEnumerals = ['  = ', nameTag(0), ' '].concat(enumerals[0][1] ? [nameTagMembers(0), '\n'] : ['\n']);
+    var declEnumerals = ['  = ', nameTag(0), ' '].concat(enumerals[0][1] ? [nameTagMembers(0), '\n'] : ['\n']);
     for (var i = 1; i < enumerals.length; i++) {
       declEnumerals = declEnumerals.concat(
         enumerals[i][1]
@@ -115,7 +126,7 @@ const haskell = {
           : ['  | ', nameTag(i), '\n']
       );
     }
-    declEnumerals.push(['  deriving (P.Show, P.Eq)\n\n']);
+    declEnumerals.push(['  deriving (P.Show, P.Eq)\n']);
     const decl = declName.concat(declEnumerals);
 
     // Data type declarations for members
@@ -126,20 +137,27 @@ const haskell = {
         continue;
       }
       // Data type declarations for member 
-      const declMemberName = ['data ', nameTagMembers(i), ' = ', nameTagMembers(i), '\n'];
+      const declMemberName = [
+        '\n',
+        'data ', nameTagMembers(i), ' = ', nameTagMembers(i), '\n'
+      ];
       var declMembers = ['  { ', members[0][0], ' :: ', members[0][1], '\n'];
       for (var j = 1; j < members.length; j++) {
         declMembers = declMembers.concat(['  , ', members[j][0], ' :: ', members[j][1], '\n']);
       }
-      var declDeriving = '  } deriving (P.Show, P.Eq, P.Generic)\n\n';
+      var declDeriving = '  } deriving (P.Show, P.Eq, P.Generic)\n';
       const declMember = declMemberName.concat(declMembers).concat([declDeriving]);
       // ToJSON instance
-      const toJSON  = ['instance A.ToJSON ', nameTagMembers(i), '\n\n'];
+      const toJSON  = [
+        '\n',
+        'instance A.ToJSON ', nameTagMembers(i), '\n'
+      ];
       declMemberDecls = declMemberDecls.concat(declMember).concat(toJSON);
     }
 
     // ToJSON instance
     var toJSON  = [
+      '\n',
       'instance A.ToJSON ', name, ' where\n',
       '  toJSON = \\case\n',
     ];
@@ -155,10 +173,10 @@ const haskell = {
       }
       toJSON = toJSON.concat(line);
     }
-    toJSON.push('\n');
 
     // FromVal instance
     var fromVal = [
+      '\n',
       'instance C.FromVal ', name, ' where\n',
       '  fromVal = \\case\n',
       '    C.Val\'ApiVal (C.ApiVal\'Enumerator (C.Enumerator tag m)) -> case (tag,m) of\n',
@@ -188,12 +206,13 @@ const haskell = {
     }
     fromVal = fromVal.concat([
       '    _ -> P.Nothing\n',
-      '  _ -> P.Nothing\n\n',
+      '  _ -> P.Nothing\n',
     ]);
 
 
     // ToVal instance
     var toVal = [
+      '\n',
       'instance C.ToVal ', name, ' where\n',
       '  toVal = \\case\n',
     ];
@@ -230,13 +249,15 @@ const haskell = {
       }
     }
 
-    return decl.concat(declMemberDecls).concat(toJSON).concat(fromVal).concat(toVal).concat(['\n']).join('');
+    return decl.concat(declMemberDecls).concat(toJSON).concat(fromVal).concat(toVal).join('');
   },
 
 
   api(name, calls) {
     const apiName = name + '\'Call';
     var api = [
+      '\n',
+      '-- API: ', name, '\n',
       'data ', apiName, '\n',
     ];
     api = api.concat([
@@ -250,7 +271,6 @@ const haskell = {
     }
     var deriving = [
       '  deriving (Show, Eq)\n',
-      '\n'
     ];
     return api.concat(deriving).join('');
   },
@@ -258,14 +278,18 @@ const haskell = {
 
   serviceThrower(error) {
     return [
+      '\n',
+      '--\n',
       'class Monad m => ServiceThrower m where\n',
       '  serviceThrow :: ', error, ' -> m a\n',
-      '\n',
     ].join('');
   },
 
+
   service(calls) {
     var lines = [
+      '\n',
+      '--\n',
       'class ServiceThrower m => Service meta m where\n'
     ];
     for (var i = 0; i < calls.length; i++) {
@@ -274,8 +298,17 @@ const haskell = {
       ]);
     }
     return lines.join('');
-  }
+  },
 
+
+  version(major,minor) {
+    return [
+      '\n',
+      '--\n',
+      'version :: C.Version\n',
+      'version = C.Version ', major, ' ', minor, '\n',
+    ].join('');
+  }
 };
 
 function lowercaseFirst(str) {
@@ -296,3 +329,5 @@ console.log(haskell.api('Api', [['Hello',true], ['GoodBye',false]]));
 console.log(haskell.serviceThrower('Error'));
 
 console.log(haskell.service([['hello', 'Hello', 'T.Text'], ['goodBye', null, '()']]));
+
+console.log(haskell.version(0,0))
