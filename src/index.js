@@ -231,8 +231,58 @@ const haskell = {
     }
 
     return decl.concat(declMemberDecls).concat(toJSON).concat(fromVal).concat(toVal).concat(['\n']).join('');
+  },
+
+
+  api(name, calls) {
+    const apiName = name + '\'Call';
+    var api = [
+      'data ', apiName, '\n',
+    ];
+    api = api.concat([
+      '  = ', apiName, '\'', calls[0][0],  calls[0][1] ? (' ' + calls[0][0]) : '', '\n',
+    ]);
+    for (var i = 1; i < calls.length; i++) {
+      api = api.concat([
+        '  | ', apiName, '\'', calls[i][0],  calls[i][1] ? (' ' + calls[i][0]) : '', '\n',
+      ]);
+
+    }
+    var deriving = [
+      '  deriving (Show, Eq)\n',
+      '\n'
+    ];
+    return api.concat(deriving).join('');
+  },
+
+
+  serviceThrower(error) {
+    return [
+      'class Monad m => ServiceThrower m where\n',
+      '  serviceThrow :: ', error, ' -> m a\n',
+      '\n',
+    ].join('');
+  },
+
+  service(calls) {
+    var lines = [
+      'class ServiceThrower m => Service meta m where\n'
+    ];
+    for (var i = 0; i < calls.length; i++) {
+      lines = lines.concat([
+        '  ', calls[i][0], ' :: meta ->', calls[i][1] ? (' ' + calls[i][1] + ' ->') : '', ' m ', calls[i][2], '\n',
+      ]);
+    }
+    return lines.join('');
   }
+
 };
+
+function lowercaseFirst(str) {
+  var s = str;
+  s[0] = s[0].toLowerCase();
+  return s;
+}
 
 console.log(haskell.wrap('Name',haskell.primMap['String']))
 console.log(haskell.wrap('Email',haskell.primMap['String']))
@@ -240,3 +290,9 @@ console.log(haskell.wrap('Email',haskell.primMap['String']))
 console.log(haskell.struct('User',[['userId','UUID'], ['name','T.Text'], ['email','Maybe Email']]));
 
 console.log(haskell.enumeration('Color', [['Red'],['Blue'],['Green'],['Custom',[['red','I.Word8'],['blue','I.Word8'],['green','I.Word8']]]])); 
+
+console.log(haskell.api('Api', [['Hello',true], ['GoodBye',false]]));
+
+console.log(haskell.serviceThrower('Error'));
+
+console.log(haskell.service([['hello', 'Hello', 'T.Text'], ['goodBye', null, '()']]));
