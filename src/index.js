@@ -308,6 +308,110 @@ const haskell = {
       'version :: C.Version\n',
       'version = C.Version ', major, ' ', minor, '\n',
     ].join('');
+  },
+
+  apiParser(name, calls) {
+    var lines = [
+      '\n',
+      'apiParser :: C.ApiParser ', name, '\n',
+      'apiParser = C.ApiParser\n',
+    ];
+
+    // Hollow
+    if (calls.hollow.length > 0) {
+      lines = lines.concat([
+        '  { hollow = Map.fromList\n',
+      ]);
+      lines = lines.concat([
+        '     [ ("', calls.hollow[0], '", ', name, '\'', calls.hollow[0], ')\n',
+      ]);
+      for (var i = 1; i < calls.hollow.length; i++) {
+        lines = lines.concat([
+          '     , ("', calls.hollow[i], '", ', name, '\'', calls.hollow[i], ')\n',
+        ]);
+      }
+      lines = lines.concat([
+        '     ]\n',
+      ]);
+    } else {
+      lines = lines.concat([
+        '  { hollow = Map.empty\n',
+      ]);
+    }
+
+    // Struct
+    if (calls.struct.length > 0) {
+      lines = lines.concat([
+        '  , struct = Map.fromList\n',
+      ]);
+      lines = lines.concat([
+        '     [ ("', calls.struct[0], '", v ', name, '\'', calls.struct[0], ')\n',
+      ]);
+      for (var i = 1; i < calls.struct.length; i++) {
+        lines = lines.concat([
+          '     , ("', calls.struct[i], '", v ', name, '\'', calls.struct[i], ')\n',
+        ]);
+      }
+      lines = lines.concat([
+        '     ]\n',
+      ]);
+    } else {
+      lines = lines.concat([
+        '  , struct = Map.empty\n',
+      ]);
+    }
+
+    // Enumeration
+    if (calls.enumeration.length > 0) {
+      lines = lines.concat([
+        '  , enumeration = Map.fromList\n',
+      ]);
+      lines = lines.concat([
+        '     [ ("', calls.enumeration[0], '", v ', name, '\'', calls.enumeration[0], ')\n',
+      ]);
+      for (var i = 1; i < calls.enumeration.length; i++) {
+        lines = lines.concat([
+          '     , ("', calls.enumeration[i], '", v ', name, '\'', calls.enumeration[i], ')\n',
+        ]);
+      }
+      lines = lines.concat([
+        '     ]\n',
+      ]);
+    } else {
+      lines = lines.concat([
+        '  , enumeration = Map.empty\n',
+      ]);
+    }
+ 
+    // Wrap
+    if (calls.wrap.length > 0) {
+      lines = lines.concat([
+        '  , wrap = Map.fromList\n',
+      ]);
+      lines = lines.concat([
+        '     [ ("', calls.wrap[0], '", v ', name, '\'', calls.wrap[0], ')\n',
+      ]);
+      for (var i = 1; i < calls.wrap.length; i++) {
+        lines = lines.concat([
+          '     , ("', calls.wrap[i], '", v ', name, '\'', calls.wrap[i], ')\n',
+        ]);
+      }
+      lines = lines.concat([
+        '     ]\n',
+      ]);
+    } else {
+      lines = lines.concat([
+        '  , wrap = Map.empty\n',
+      ]);
+    }
+
+    lines = lines.concat([
+      '  }\n',
+      '  where\n',
+      '    v x y = x P.<$> C.fromVal y\n'
+    ]);
+ 
+    return lines.join('');
   }
 };
 
@@ -331,3 +435,20 @@ console.log(haskell.serviceThrower('Error'));
 console.log(haskell.service([['hello', 'Hello', 'T.Text'], ['goodBye', null, '()']]));
 
 console.log(haskell.version(0,0))
+
+console.log(haskell.apiParser('Api', {
+  hollow: [
+    'Hello'
+  ],
+  struct: [
+    'Hola'
+  ],
+  enumeration: [
+    'One',
+    'Two',
+    'Three',
+  ],
+  wrap: [
+    'Goodbye',
+  ],
+}));
