@@ -412,6 +412,57 @@ const haskell = {
     ]);
  
     return lines.join('');
+  },
+
+  apiLookup(calls) {
+    var lines = [
+      '\n',
+      '--\n',
+      'api :: (Service meta m, C.RuntimeThrower m) => meta -> C.ApiCall -> m C.Val\n',
+      'api meta apiCall = case C.parseApiCall apiParser apiCall of\n',
+      '  P.Nothing -> C.runtimeThrow C.RuntimeError\'UnrecognizedCall\n',
+      '  P.Just x -> case x of\n',
+    ];
+    for (var i = 0; i < calls.hollow.length; i++) {
+      lines = lines.concat([
+        '    Api\'', calls.hollow[i][0], ' -> C.toVal P.<$> ', calls.hollow[i][1], ' meta\n',
+      ]);
+    }
+    for (var i = 0; i < calls.filled.length; i++) {
+      lines = lines.concat([
+        '    Api\'', calls.filled[i][0], ' a -> C.toVal P.<$> ', calls.filled[i][1], ' meta a\n',
+      ]);
+    }
+    return lines.join('');
+  },
+
+  handleRequest(meta) {
+    var lines = [
+      '\n',
+      '--\n',
+      'handleRequest :: (Service meta m, C.RuntimeThrower m, IO.MonadIO m) => C.Options -> (', meta, ' -> m meta) -> C.Request -> m C.Response\n',
+      'handleRequest options metaMiddleware C.Request{meta,calls} = do\n',
+      '  meta\' <- P.maybe (C.runtimeThrow C.RuntimeError\'UnparsableMeta) P.return (C.fromValFromJson meta)\n',
+      '  xformMeta <- metaMiddleware meta\n',
+      '  envRef <- IO.liftIO C.emptyEnv\n',
+      '  variableBaseCount <- IO.liftIO (Map.size <$> IO.readIORef envRef)\n',
+      '  let options\' = C.Options\n',
+      '        { variableLimit = P.fmap (P.+ variableBaseCount) (C.variableLimit options)\n',
+      '        }\n',
+      '  let evalConfig = C.EvalConfig\n',
+      '        { C.options = options\'\n',
+      '        , C.apiCall = api xformMeta\n',
+      '        }\n',
+      '  calls\' <- P.maybe (C.runtimeThrow C.RuntimeError\'UnparsableCalls) P.return (P.mapM C.jsonToExpr calls)\n',
+      '  vals <- P.mapM (\\v -> C.runEval (C.forceVal P.=<< C.eval v envRef) evalConfig) calls\'\n',
+      '  P.return (C.Response\'Success (A.toJSON vals))\n',
+    ];
+    return lines.join('');
+  },
+
+  imports() {
+    var lines = [
+    ];
   }
 };
 
@@ -452,3 +503,20 @@ console.log(haskell.apiParser('Api', {
     'Goodbye',
   ],
 }));
+
+console.log(haskell.apiLookup({
+  hollow: [
+    ['Hello','hello'],
+  ],
+  filled: [
+    ['Hola','hola'],
+    ['One','one'],
+    ['Two','two'],
+    ['Three','three'],
+    ['Four','four'],
+  ],
+}));
+
+console.log(haskell.handleRequest('Meta'));
+
+
