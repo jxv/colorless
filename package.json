@@ -1,0 +1,31 @@
+{
+  "name": "colorless-cli",
+  "version": "0.0.0",
+  "description": "Generate colorless client and server code through the command line",
+  "main": "index.js",
+  "directories": {
+    "example": "examples"
+  },
+  "dependencies": {
+    "commander": "^2.11.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "npm build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jxv/colorless.git"
+  },
+  "keywords": [
+    "colorless",
+    "idl"
+  ],
+  "author": "jxv",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jxv/colorless/issues"
+  },
+  "homepage": "https://github.com/jxv/colorless#readme"
+}
