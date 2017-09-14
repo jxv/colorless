@@ -34,14 +34,14 @@ const haskell = {
   },
 
 
-  wrap(name, type) {
+  wrap(name, type, instances) {
     var lines = [
       '\n',
       '-- Wrap: ', name , '\n',
       'newtype ', name , ' = ', name, ' ', type, '\n',
     ];
     lines = lines.concat([
-      '  deriving (P.Show, P.Eq, A.FromJSON, A.ToJSON, C.ToVal, C.FromVal)', '\n',
+      '  deriving (P.Show, P.Eq, ', instances.text ? 'P.IsString, T.ToText, ' : '', instances.number ? 'P.Num, ' : '', 'A.FromJSON, A.ToJSON, C.ToVal, C.FromVal)', '\n',
     ]);
     return lines.join('');
   },
@@ -471,6 +471,7 @@ const haskell = {
       'import qualified Data.Aeson as A\n',
       'import qualified Data.Text as T\n',
       'import qualified Data.Text.Conversions as T\n',
+      'import qualified Data.String (IsString) as P\n',
       'import qualified Data.Word as I\n',
       'import qualified Data.Int as I\n',
       'import qualified Data.IORef as IO\n',
@@ -527,8 +528,12 @@ function lowercaseFirst(str) {
   return s;
 }
 
-console.log(haskell.wrap('Name',haskell.primMap['String']))
-console.log(haskell.wrap('Email',haskell.primMap['String']))
+console.log(haskell.wrap('Name', haskell.primMap['String'], {
+  text: true,
+  number: false } ) )
+console.log(haskell.wrap('Email', haskell.primMap['String'], {
+  text: true,
+  number: false } ) )
 
 console.log(haskell.struct('User', [
   { name: 'userId', label: 'userId', type: 'UUID'},
