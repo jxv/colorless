@@ -54,9 +54,9 @@ const haskell = {
       '-- Struct: ', name, '\n',
       'data ', name, ' = ', name, '\n',
     ];
-    var declMembers = ['  { ', members[0][0], ' :: ', members[0][1], '\n'];
+    var declMembers = ['  { ', members[0].name, ' :: ', members[0].type, '\n'];
     for (var i = 1; i < members.length; i++) {
-      declMembers = declMembers.concat(['  , ', members[i][0], ' :: ', members[i][1], '\n']);
+      declMembers = declMembers.concat(['  , ', members[i].name, ' :: ', members[i].type, '\n']);
     }
     var declDeriving = '  } deriving (P.Show, P.Eq, P.Generic)\n\n';
     const decl = declName.concat(declMembers).concat([declDeriving]);
@@ -73,17 +73,17 @@ const haskell = {
       'instance C.ToVal ', name, ' where', '\n',
       '  toVal ', name, '\n',
     ];
-    var toValDecons = ['    { ', members[0][0], '\n'];
+    var toValDecons = ['    { ', members[0].name, '\n'];
     for (var i = 1; i < members.length; i++) {
-      toValDecons = toValDecons.concat(['    , ', members[i][0], '\n']);
+      toValDecons = toValDecons.concat(['    , ', members[i].name, '\n']);
     }
     toValDecons.push('    }');
     var toValDef = [
       ' = C.Val\'ApiVal P.$ C.ApiVal\'Struct P.$ C.Struct P.$ Map.fromList\n',
-      '    [ ("', members[0][0], '", C.toVal ', members[0][0], ')\n',
+      '    [ ("', members[0].label, '", C.toVal ', members[0].name, ')\n',
     ];
     for (var i = 1; i < members.length; i++) {
-      toValDef = toValDef.concat(['    , ("', members[i][0], '", C.toVal ', members[i][0], ')\n']);
+      toValDef = toValDef.concat(['    , ("', members[i].label, '", C.toVal ', members[i].name, ')\n']);
     }
     toValDef.push('    ]\n\n');
     const toVal = toValDecl.concat(toValDecons).concat(toValDef);
@@ -93,11 +93,11 @@ const haskell = {
       'instance C.FromVal ', name, ' where\n',
       '  fromVal = \\case\n',
       '    C.Val\'ApiVal (C.ApiVal\'Struct (C.Struct m)) -> ', name, '\n',
-      '      P.<$> C.getMember m "', members[0][0] , '"\n'
+      '      P.<$> C.getMember m "', members[0].label , '"\n'
     ];
     for (var i = 1; i < members.length; i++) {
       fromVal = fromVal.concat([
-        '      P.<*> C.getMember m "', members[i][0], '"\n'
+        '      P.<*> C.getMember m "', members[i].label, '"\n'
       ]);
     }
     fromVal = fromVal.concat([
@@ -530,15 +530,32 @@ function lowercaseFirst(str) {
 console.log(haskell.wrap('Name',haskell.primMap['String']))
 console.log(haskell.wrap('Email',haskell.primMap['String']))
 
-console.log(haskell.struct('User',[['userId','UUID'], ['name','T.Text'], ['email','Maybe Email']]));
+console.log(haskell.struct('User', [
+  { name: 'userId', label: 'userId', type: 'UUID'},
+  { name: 'name', label: 'name', type: 'T.Text'},
+  { name: 'email', label: 'email', type: 'Maybe Email'},
+]));
 
-console.log(haskell.enumeration('Color', [['Red'],['Blue'],['Green'],['Custom',[['red','I.Word8'],['blue','I.Word8'],['green','I.Word8']]]])); 
+console.log(haskell.enumeration('Color', [
+  ['Red'],
+  ['Blue'],
+  ['Green'],
+  ['Custom', [
+      ['red','I.Word8'],['blue','I.Word8'],['green','I.Word8']]
+    ]
+])); 
 
-console.log(haskell.api('Api', [['Hello',true], ['GoodBye',false]]));
+console.log(haskell.api('Api', [
+  ['Hello',true],
+  ['GoodBye',false]
+]));
 
 console.log(haskell.serviceThrower('Error'));
 
-console.log(haskell.service([['hello', 'Hello', 'T.Text'], ['goodBye', null, '()']]));
+console.log(haskell.service([
+  ['hello', 'Hello', 'T.Text'],
+  ['goodBye', null, '()']
+]));
 
 console.log(haskell.version(0,0))
 
