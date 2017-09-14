@@ -116,15 +116,15 @@ const haskell = {
       'data ', name, '\n',
     ];
     function nameTag(i) {
-      return name + '\'' + enumerals[i][0];
+      return name + '\'' + enumerals[i].tag;
     }
     function nameTagMembers(i) {
-      return name + '\'' + enumerals[i][0] + '\'Members';
+      return name + '\'' + enumerals[i].tag + '\'Members';
     }
-    var declEnumerals = ['  = ', nameTag(0), ' '].concat(enumerals[0][1] ? [nameTagMembers(0), '\n'] : ['\n']);
+    var declEnumerals = ['  = ', nameTag(0), ' '].concat(enumerals[0].members ? [nameTagMembers(0), '\n'] : ['\n']);
     for (var i = 1; i < enumerals.length; i++) {
       declEnumerals = declEnumerals.concat(
-        enumerals[i][1]
+        enumerals[i].members
           ? ['  | ', nameTag(i), ' ', nameTagMembers(i), '\n']
           : ['  | ', nameTag(i), '\n']
       );
@@ -135,7 +135,7 @@ const haskell = {
     // Data type declarations for members
     var declMemberDecls = [];
     for (var i = 0; i < enumerals.length; i++) {
-      const members = enumerals[i][1];
+      const members = enumerals[i].members;
       if (members == undefined) {
         continue;
       }
@@ -144,9 +144,9 @@ const haskell = {
         '\n',
         'data ', nameTagMembers(i), ' = ', nameTagMembers(i), '\n'
       ];
-      var declMembers = ['  { ', members[0][0], ' :: ', members[0][1], '\n'];
+      var declMembers = ['  { ', members[0].name, ' :: ', members[0].type, '\n'];
       for (var j = 1; j < members.length; j++) {
-        declMembers = declMembers.concat(['  , ', members[j][0], ' :: ', members[j][1], '\n']);
+        declMembers = declMembers.concat(['  , ', members[j].name, ' :: ', members[j].type, '\n']);
       }
       var declDeriving = '  } deriving (P.Show, P.Eq, P.Generic)\n';
       const declMember = declMemberName.concat(declMembers).concat([declDeriving]);
@@ -168,11 +168,11 @@ const haskell = {
       var line = [
         '    ', nameTag(i), ' ',
       ];
-      const members = enumerals[i][1];
+      const members = enumerals[i].members;
       if (members == undefined) {
-        line = line.concat(['-> A.object [ "tag" A..= ("', enumerals[i][0], '" :: T.Text) ]\n']);
+        line = line.concat(['-> A.object [ "tag" A..= ("', enumerals[i].tag, '" :: T.Text) ]\n']);
       } else {
-        line = line.concat(['m -> C.combineObjects (A.object [ "tag" A..= ("', enumerals[i][0], '" :: T.Text) ]) (A.toJSON m)\n']);
+        line = line.concat(['m -> C.combineObjects (A.object [ "tag" A..= ("', enumerals[i].label, '" :: T.Text) ]) (A.toJSON m)\n']);
       }
       toJSON = toJSON.concat(line);
     }
@@ -185,21 +185,21 @@ const haskell = {
       '    C.Val\'ApiVal (C.ApiVal\'Enumerator (C.Enumerator tag m)) -> case (tag,m) of\n',
     ];
     for (var i = 0; i < enumerals.length; i++) {
-      const members = enumerals[i][1];
+      const members = enumerals[i].members;
       if (members == undefined) {
         fromVal = fromVal.concat([
-          '      ("', enumerals[i][0], '", P.Nothing) -> P.Just ', nameTag(i), '\n',
+          '      ("', enumerals[i].label, '", P.Nothing) -> P.Just ', nameTag(i), '\n',
         ]);
       } else {
         fromVal = fromVal.concat([
-          '      ("', enumerals[i][0], '", P.Just m\') -> ', nameTag(i), ' P.<$> (', nameTagMembers(i), '\n',
+          '      ("', enumerals[i].label, '", P.Just m\') -> ', nameTag(i), ' P.<$> (', nameTagMembers(i), '\n',
         ]);
         fromVal = fromVal.concat([
-          '          P.<$> C.getMember m\' "', members[0][0], '"\n'
+          '          P.<$> C.getMember m\' "', members[0].label, '"\n'
         ]);
         for (var j = 1; j < members.length ; j++) {
           fromVal = fromVal.concat([
-            '          P.<*> C.getMember m\' "', members[j][0], '"\n'
+            '          P.<*> C.getMember m\' "', members[j].label, '"\n'
           ]);
         }
         fromVal = fromVal.concat([
@@ -220,32 +220,32 @@ const haskell = {
       '  toVal = \\case\n',
     ];
     for (var i = 0; i < enumerals.length; i++) {
-      const members = enumerals[i][1];
+      const members = enumerals[i].members;
       if (members == undefined) {
         toVal = toVal.concat([
-          '    ', nameTag(i), ' -> C.Val\'ApiVal P.$ C.ApiVal\'Enumerator $ C.Enumerator "', enumerals[i][0], '" P.Nothing\n',
+          '    ', nameTag(i), ' -> C.Val\'ApiVal P.$ C.ApiVal\'Enumerator $ C.Enumerator "', enumerals[i].label, '" P.Nothing\n',
         ]);
       } else {
         toVal = toVal.concat([
           '    ', nameTag(i), ' ', nameTagMembers(i), '\n',
         ]);
         toVal = toVal.concat([
-          '      { ', members[0][0], '\n'
+          '      { ', members[0].name, '\n'
         ]);
         for (var j = 1; j < members.length; j++) {
           toVal = toVal.concat([
-            '      , ', members[j][0], '\n'
+            '      , ', members[j].name, '\n'
           ]);
         }
         toVal = toVal.concat([
-          '      } -> C.Val\'ApiVal P.$ C.ApiVal\'Enumerator $ C.Enumerator "', enumerals[i][0], '" P.$ Map.fromList\n',
+          '      } -> C.Val\'ApiVal P.$ C.ApiVal\'Enumerator $ C.Enumerator "', enumerals[i].label, '" P.$ Map.fromList\n',
         ]);
         toVal = toVal.concat([
-          '      [ ("', members[0][0], '", C.toVal ', members[0][0], ')\n'
+          '      [ ("', members[0].label, '", C.toVal ', members[0].name, ')\n'
         ]);
         for (var j = 1; j < members.length; j++) {
           toVal = toVal.concat([
-            '      , ("', members[j][0], '", C.toVal ', members[j][0], ')\n'
+            '      , ("', members[j].label, '", C.toVal ', members[j].name, ')\n'
           ]);
         }
         toVal = toVal.concat(['      ]\n']);
@@ -533,17 +533,17 @@ console.log(haskell.wrap('Email',haskell.primMap['String']))
 console.log(haskell.struct('User', [
   { name: 'userId', label: 'userId', type: 'UUID'},
   { name: 'name', label: 'name', type: 'T.Text'},
-  { name: 'email', label: 'email', type: 'Maybe Email'},
-]));
+  { name: 'email', label: 'email', type: 'Maybe Email'} ]));
 
 console.log(haskell.enumeration('Color', [
-  ['Red'],
-  ['Blue'],
-  ['Green'],
-  ['Custom', [
-      ['red','I.Word8'],['blue','I.Word8'],['green','I.Word8']]
-    ]
-])); 
+  { tag: 'Red', label: 'Red' },
+  { tag: 'Blue', label: 'Blue' },
+  { tag: 'Green', label: 'Green' },
+  { tag: 'Custom', label: 'Custom',
+    members: [
+      { name: 'red', label: 'red', type: 'I.Word8' },
+      { name: 'blue', label: 'blue', type: 'I.Word8' },
+      { name: 'green', label: 'green', type: 'I.Word8' } ] } ] ) );
 
 console.log(haskell.api('Api', [
   ['Hello',true],
