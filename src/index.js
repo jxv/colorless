@@ -422,18 +422,18 @@ const haskell = {
       '\n',
       '--\n',
       'api :: (Service meta m, C.RuntimeThrower m) => meta -> C.ApiCall -> m C.Val\n',
-      'api meta apiCall = case C.parseApiCall apiParser apiCall of\n',
+      'api meta\' apiCall\' = case C.parseApiCall apiParser\' apiCall\' of\n',
       '  P.Nothing -> C.runtimeThrow C.RuntimeError\'UnrecognizedCall\n',
-      '  P.Just x -> case x of\n',
+      '  P.Just x\' -> case x\' of\n',
     ];
     for (var i = 0; i < calls.hollow.length; i++) {
       lines = lines.concat([
-        '    Api\'', calls.hollow[i][0], ' -> C.toVal P.<$> ', calls.hollow[i][1], ' meta\n',
+        '    Api\'', calls.hollow[i].name, ' -> C.toVal P.<$> ', calls.hollow[i].func, ' meta\'\n',
       ]);
     }
     for (var i = 0; i < calls.filled.length; i++) {
       lines = lines.concat([
-        '    Api\'', calls.filled[i][0], ' a -> C.toVal P.<$> ', calls.filled[i][1], ' meta a\n',
+        '    Api\'', calls.filled[i].name, ' a\' -> C.toVal P.<$> ', calls.filled[i].func, ' meta\' a\'\n',
       ]);
     }
     return lines.join('');
@@ -581,14 +581,14 @@ console.log(haskell.apiParser('Api', {
 
 console.log(haskell.apiLookup({
   hollow: [
-    ['Hello','hello'],
+    { name: 'Hello', func: 'hello' },
   ],
   filled: [
-    ['Hola','hola'],
-    ['One','one'],
-    ['Two','two'],
-    ['Three','three'],
-    ['Four','four'],
+    { name: 'Hola', func: 'hola' },
+    { name: 'One', func: 'one' },
+    { name: 'Two', func: 'two' },
+    { name: 'Three', func: 'three' },
+    { name: 'Four', func: 'four' },
   ],
 }));
 
