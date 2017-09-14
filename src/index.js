@@ -297,7 +297,7 @@ const haskell = {
     ];
     for (var i = 0; i < calls.length; i++) {
       lines = lines.concat([
-        '  ', calls[i][0], ' :: meta ->', calls[i][1] ? (' ' + calls[i][1] + ' ->') : '', ' m ', calls[i][2], '\n',
+        '  ', calls[i].func, ' :: meta ->', calls[i].name ? (' ' + calls[i].name + ' ->') : '', ' m ', calls[i].output, '\n',
       ]);
     }
     return lines.join('');
@@ -557,9 +557,8 @@ console.log(haskell.api('Api', [
 console.log(haskell.serviceThrower('Error'));
 
 console.log(haskell.service([
-  ['hello', 'Hello', 'T.Text'],
-  ['goodBye', null, '()']
-]));
+  { func: 'hello', name: 'Hello', output: 'T.Text' },
+  { func: 'goodBye', output: '()' } ] ) );
 
 console.log(haskell.version(0,0))
 
