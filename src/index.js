@@ -264,11 +264,11 @@ const haskell = {
       'data ', apiName, '\n',
     ];
     api = api.concat([
-      '  = ', apiName, '\'', calls[0][0],  calls[0][1] ? (' ' + calls[0][0]) : '', '\n',
+      '  = ', apiName, '\'', calls[0].name,  calls[0].filled ? (' ' + calls[0].name) : '', '\n',
     ]);
     for (var i = 1; i < calls.length; i++) {
       api = api.concat([
-        '  | ', apiName, '\'', calls[i][0],  calls[i][1] ? (' ' + calls[i][0]) : '', '\n',
+        '  | ', apiName, '\'', calls[i].name,  calls[i].filled ? (' ' + calls[i].name) : '', '\n',
       ]);
 
     }
@@ -551,9 +551,8 @@ console.log(haskell.enumeration('Color', [
       { name: 'green', label: 'green', type: 'I.Word8' } ] } ] ) );
 
 console.log(haskell.api('Api', [
-  ['Hello',true],
-  ['GoodBye',false]
-]));
+  { name: 'Hello', filled: true },
+  { name: 'GoodBye', filled: false } ] ) );
 
 console.log(haskell.serviceThrower('Error'));
 
