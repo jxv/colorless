@@ -6,15 +6,15 @@ program
   .option('-s --src [type]', 'Directory of colorless specs')
   .option('-d --dest [type]', 'Directory to generate code')
   .option('-l --lang [type]', 'Language of code')
-  .option('-t --target [type]', 'Client or server side code', 'client')
+  .option('-m --prefix [type]', 'Module name/prefix')
+  .option('-e --side [type]', 'Client or server side code', 'client')
   .parse(process.argv);
-
-// console.log(program)
 
 const src = program.src;
 const dest = program.dest;
 const lang = program.lang;
-const target = program.target;
+const side = program.side;
+const prefix = program.prefix;
 
 const haskell = {
   primMap: {
@@ -479,6 +479,45 @@ const haskell = {
       'import qualified Colorless.Runtime.Expr as C\n',
       'import qualified Colorless.Runtime.Val as C (ToVal(..), FromVal(..), getMember, fromValFromJson, combineObjects)\n',
     ].join('');
+  },
+
+  extensions() {
+    return [
+      '{-# LANGUAGE DeriveGeneric #-}\n',
+      '{-# LANGUAGE DuplicateRecordFields #-}\n',
+      '{-# LANGUAGE LambdaCase #-}\n',
+      '{-# LANGUAGE OverloadedStrings #-}\n',
+      '{-# LANGUAGE GeneralizedNewtypeDeriving #-}\n',
+      '{-# LANGUAGE MultiParamTypeClasses #-}\n',
+      '{-# LANGUAGE NamedFieldPuns #-}\n',
+      '{-# LANGUAGE TupleSections #-}\n',
+      '{-# LANGUAGE FlexibleContexts #-}\n',
+      '{-# LANGUAGE FlexibleInstances #-}\n',
+      '{-# LANGUAGE ScopedTypeVariables #-}\n',
+      '{-# LANGUAGE NoImplicitPrelude #-}\n',
+    ].join('');
+  },
+
+  module(prefix, version, types) {
+    var lines = [
+      '\n',
+      '-- Module\n',
+      'module ', prefix, '.V', version.major, '_', version.minor, '\n',
+      '  ( version\n',
+      '  , handleRequest\n',
+      '  , ServiceThrower(..)\n',
+      '  , Service(..)\n',
+      '  , Api(..)\n',
+    ];
+    for (var i = 0; i < types.length; i++) {
+      lines = lines.concat([
+        '  , ', types[i], '(..)\n',
+      ]);
+    }
+    lines = lines.concat([
+      '  ) where\n',
+    ]);
+    return lines.join('');
   }
 };
 
@@ -536,3 +575,15 @@ console.log(haskell.apiLookup({
 console.log(haskell.handleRequest('Meta'));
 
 console.log(haskell.imports());
+
+console.log(haskell.extensions());
+
+console.log(haskell.module('MyModule.Somewhere', {major: 1, minor: 2}, [
+  'Error',
+  'Meta',
+  'Hello',
+  'Hola',
+  'One',
+  'Two',
+  'Three',
+]));
