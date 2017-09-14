@@ -35,12 +35,15 @@ const haskell = {
 
 
   wrap(name, type) {
-    return [
+    var lines = [
       '\n',
       '-- Wrap: ', name , '\n',
       'newtype ', name , ' = ', name, ' ', type, '\n',
+    ];
+    lines = lines.concat([
       '  deriving (P.Show, P.Eq, A.FromJSON, A.ToJSON, C.ToVal, C.FromVal)', '\n',
-    ].join('')
+    ]);
+    return lines.join('');
   },
 
 
@@ -270,7 +273,7 @@ const haskell = {
 
     }
     var deriving = [
-      '  deriving (Show, Eq)\n',
+      '  deriving (P.Show, P.Eq)\n',
     ];
     return api.concat(deriving).join('');
   },
@@ -461,8 +464,21 @@ const haskell = {
   },
 
   imports() {
-    var lines = [
-    ];
+    return [
+      'import qualified Prelude as P\n',
+      'import qualified Data.Map as Map\n',
+      'import qualifeid Control.Monad.IO.Class as IO\n',
+      'import qualified Data.Aeson as A\n',
+      'import qualified Data.Text as T\n',
+      'import qualified Data.Text.Conversions as T\n',
+      'import qualified Data.Word as I\n',
+      'import qualified Data.Int as I\n',
+      'import qualified Data.IORef as IO\n',
+      'import qualified GHC.Generics as P\n',
+      'import qualified Colorless.Types as C\n',
+      'import qualified Colorless.Runtime.Expr as C\n',
+      'import qualified Colorless.Runtime.Val as C (ToVal(..), FromVal(..), getMember, fromValFromJson, combineObjects)\n',
+    ].join('');
   }
 };
 
@@ -519,4 +535,4 @@ console.log(haskell.apiLookup({
 
 console.log(haskell.handleRequest('Meta'));
 
-
+console.log(haskell.imports());
