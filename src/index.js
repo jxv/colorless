@@ -34,7 +34,7 @@ const haskell = {
   },
 
 
-  wrap(name, type, instances) {
+  wrap({name, type, instances}) {
     var lines = [
       '\n',
       '-- Wrap: ', name , '\n',
@@ -47,7 +47,7 @@ const haskell = {
   },
 
 
-  struct(name, members) {
+  struct({name, members}) {
     // Data type declaration
     const declName = [
       '\n',
@@ -108,7 +108,7 @@ const haskell = {
   },
 
 
-  enumeration(name, enumerals) {
+  enumeration({name, enumerals}) {
     // Data type declaration
     const declName = [
       '\n',
@@ -257,32 +257,32 @@ const haskell = {
 
 
   api(name, calls) {
-    const apiName = name + '\'Call';
-    var api = [
+    const apiName = name;
+    var lines = [
       '\n',
       '-- API: ', name, '\n',
       'data ', apiName, '\n',
     ];
-    api = api.concat([
+    lines = lines.concat([
       '  = ', apiName, '\'', calls[0].name,  calls[0].filled ? (' ' + calls[0].name) : '', '\n',
     ]);
     for (var i = 1; i < calls.length; i++) {
-      api = api.concat([
+      lines = lines.concat([
         '  | ', apiName, '\'', calls[i].name,  calls[i].filled ? (' ' + calls[i].name) : '', '\n',
       ]);
 
     }
-    var deriving = [
+    lines = lines.concat([
       '  deriving (P.Show, P.Eq)\n',
-    ];
-    return api.concat(deriving).join('');
+    ]);
+    return lines.join('');
   },
 
 
   serviceThrower(error) {
     return [
       '\n',
-      '--\n',
+      '-- ServiceThrower\n',
       'class Monad m => ServiceThrower m where\n',
       '  serviceThrow :: ', error, ' -> m a\n',
     ].join('');
@@ -292,7 +292,7 @@ const haskell = {
   service(calls) {
     var lines = [
       '\n',
-      '--\n',
+      '-- Service\n',
       'class ServiceThrower m => Service meta m where\n'
     ];
     for (var i = 0; i < calls.length; i++) {
@@ -307,7 +307,7 @@ const haskell = {
   version(major,minor) {
     return [
       '\n',
-      '--\n',
+      '-- Version\n',
       'version :: C.Version\n',
       'version = C.Version ', major, ' ', minor, '\n',
     ].join('');
@@ -316,6 +316,7 @@ const haskell = {
   apiParser(name, calls) {
     var lines = [
       '\n',
+      '-- API Parser\n',
       'apiParser :: C.ApiParser ', name, '\n',
       'apiParser = C.ApiParser\n',
     ];
@@ -326,11 +327,11 @@ const haskell = {
         '  { hollow = Map.fromList\n',
       ]);
       lines = lines.concat([
-        '     [ ("', calls.hollow[0], '", ', name, '\'', calls.hollow[0], ')\n',
+        '     [ ("', calls.hollow[0].label, '", ', name, '\'', calls.hollow[0].name, ')\n',
       ]);
       for (var i = 1; i < calls.hollow.length; i++) {
         lines = lines.concat([
-          '     , ("', calls.hollow[i], '", ', name, '\'', calls.hollow[i], ')\n',
+          '     , ("', calls.hollow[i].label, '", ', name, '\'', calls.hollow[i].name, ')\n',
         ]);
       }
       lines = lines.concat([
@@ -348,11 +349,11 @@ const haskell = {
         '  , struct = Map.fromList\n',
       ]);
       lines = lines.concat([
-        '     [ ("', calls.struct[0], '", v ', name, '\'', calls.struct[0], ')\n',
+        '     [ ("', calls.struct[0].label, '", v ', name, '\'', calls.struct[0].name, ')\n',
       ]);
       for (var i = 1; i < calls.struct.length; i++) {
         lines = lines.concat([
-          '     , ("', calls.struct[i], '", v ', name, '\'', calls.struct[i], ')\n',
+          '     , ("', calls.struct[i].label, '", v ', name, '\'', calls.struct[i].name, ')\n',
         ]);
       }
       lines = lines.concat([
@@ -370,11 +371,11 @@ const haskell = {
         '  , enumeration = Map.fromList\n',
       ]);
       lines = lines.concat([
-        '     [ ("', calls.enumeration[0], '", v ', name, '\'', calls.enumeration[0], ')\n',
+        '     [ ("', calls.enumeration[0].label, '", v ', name, '\'', calls.enumeration[0].name, ')\n',
       ]);
       for (var i = 1; i < calls.enumeration.length; i++) {
         lines = lines.concat([
-          '     , ("', calls.enumeration[i], '", v ', name, '\'', calls.enumeration[i], ')\n',
+          '     , ("', calls.enumeration[i].label, '", v ', name, '\'', calls.enumeration[i].name, ')\n',
         ]);
       }
       lines = lines.concat([
@@ -392,11 +393,11 @@ const haskell = {
         '  , wrap = Map.fromList\n',
       ]);
       lines = lines.concat([
-        '     [ ("', calls.wrap[0], '", v ', name, '\'', calls.wrap[0], ')\n',
+        '     [ ("', calls.wrap[0].label, '", v ', name, '\'', calls.wrap[0].name, ')\n',
       ]);
       for (var i = 1; i < calls.wrap.length; i++) {
         lines = lines.concat([
-          '     , ("', calls.wrap[i], '", v ', name, '\'', calls.wrap[i], ')\n',
+          '     , ("', calls.wrap[i].label, '", v ', name, '\'', calls.wrap[i].name, ')\n',
         ]);
       }
       lines = lines.concat([
@@ -420,9 +421,9 @@ const haskell = {
   apiLookup(calls) {
     var lines = [
       '\n',
-      '--\n',
+      '-- API\n',
       'api :: (Service meta m, C.RuntimeThrower m) => meta -> C.ApiCall -> m C.Val\n',
-      'api meta\' apiCall\' = case C.parseApiCall apiParser\' apiCall\' of\n',
+      'api meta\' apiCall\' = case C.parseApiCall apiParser apiCall\' of\n',
       '  P.Nothing -> C.runtimeThrow C.RuntimeError\'UnrecognizedCall\n',
       '  P.Just x\' -> case x\' of\n',
     ];
@@ -442,7 +443,7 @@ const haskell = {
   handleRequest(meta) {
     var lines = [
       '\n',
-      '--\n',
+      '-- Handle Request\n',
       'handleRequest :: (Service meta m, C.RuntimeThrower m, IO.MonadIO m) => C.Options -> (', meta, ' -> m meta) -> C.Request -> m C.Response\n',
       'handleRequest options metaMiddleware C.Request{meta,calls} = do\n',
       '  meta\' <- P.maybe (C.runtimeThrow C.RuntimeError\'UnparsableMeta) P.return (C.fromValFromJson meta)\n',
@@ -465,17 +466,19 @@ const haskell = {
 
   imports() {
     return [
+      '\n',
+      '-- Imports\n',
       'import qualified Prelude as P\n',
       'import qualified Data.Map as Map\n',
       'import qualifeid Control.Monad.IO.Class as IO\n',
       'import qualified Data.Aeson as A\n',
       'import qualified Data.Text as T\n',
       'import qualified Data.Text.Conversions as T\n',
-      'import qualified Data.String (IsString) as P\n',
+      'import qualified Data.String as P (IsString)\n',
       'import qualified Data.Word as I\n',
       'import qualified Data.Int as I\n',
       'import qualified Data.IORef as IO\n',
-      'import qualified GHC.Generics as P\n',
+      'import qualified GHC.Generics as P (Generic)\n',
       'import qualified Colorless.Types as C\n',
       'import qualified Colorless.Runtime.Expr as C\n',
       'import qualified Colorless.Runtime.Val as C (ToVal(..), FromVal(..), getMember, fromValFromJson, combineObjects)\n',
@@ -484,6 +487,7 @@ const haskell = {
 
   extensions() {
     return [
+      '-- Extensions\n',
       '{-# LANGUAGE DeriveGeneric #-}\n',
       '{-# LANGUAGE DuplicateRecordFields #-}\n',
       '{-# LANGUAGE LambdaCase #-}\n',
@@ -522,88 +526,143 @@ const haskell = {
   }
 };
 
-function lowercaseFirst(str) {
-  var s = str;
-  s[0] = s[0].toLowerCase();
-  return s;
+function mkExportTypes(s) {
+  return []
+    .concat(s.hollow)
+    .concat(s.struct)
+    .concat(s.enumeration)
+    .concat(s.wrap)
+    .map(x => x.name);
 }
 
-console.log(haskell.wrap('Name', haskell.primMap['String'], {
-  text: true,
-  number: false } ) )
-console.log(haskell.wrap('Email', haskell.primMap['String'], {
-  text: true,
-  number: false } ) )
+function mkServiceCalls(s) {
+  return []
+    .concat(s.hollow
+      .map(x => {
+        var copy = Object.assign({}, x);
+        delete copy.name;
+        return copy;
+      }))
+    .concat(s.struct)
+    .concat(s.enumeration)
+    .concat(s.wrap)
+    .filter(x => x.output && x.func);
+}
 
-console.log(haskell.struct('User', [
-  { name: 'userId', label: 'userId', type: 'UUID'},
-  { name: 'name', label: 'name', type: 'T.Text'},
-  { name: 'email', label: 'email', type: 'Maybe Email'} ]));
+function mkApiLookupPairs(s) {
+  return {
+    hollow: s.hollow.filter(x => x.func && x.output),
+    filled: [].concat(s.wrap).concat(s.struct).concat(s.enumeration).filter(x => x.func && x.output),
+  };
+}
 
-console.log(haskell.enumeration('Color', [
-  { tag: 'Red', label: 'Red' },
-  { tag: 'Blue', label: 'Blue' },
-  { tag: 'Green', label: 'Green' },
-  { tag: 'Custom', label: 'Custom',
-    members: [
-      { name: 'red', label: 'red', type: 'I.Word8' },
-      { name: 'blue', label: 'blue', type: 'I.Word8' },
-      { name: 'green', label: 'green', type: 'I.Word8' } ] } ] ) );
+function mkApiCalls(s) {
+  const filled = ({name}) => ({name, filled: true});
+  const notFilled = ({name}) => ({name, filled: false});
+  return []
+    .concat(s.hollow.map(notFilled))
+    .concat(s.struct.map(filled))
+    .concat(s.enumeration.map(filled))
+    .concat(s.wrap.map(filled));
+}
 
-console.log(haskell.api('Api', [
-  { name: 'Hello', filled: true },
-  { name: 'GoodBye', filled: false } ] ) );
+function mkApiParserCalls(s) {
+  const isFunc = x => x.func && x.output;
+  return {
+    hollow: s.hollow.filter(isFunc),
+    wrap: s.wrap.filter(isFunc),
+    struct: s.struct.filter(isFunc),
+    enumeration: s.enumeration.filter(isFunc),
+  };
+}
 
-console.log(haskell.serviceThrower('Error'));
+function gen(s) {
+  const exportTypes = mkExportTypes(s);
+  const serviceCalls = mkServiceCalls(s);
+  const apiLookupPairs = mkApiLookupPairs(s);
+  const apiCalls = mkApiCalls(s);
+  const apiParserCalls = mkApiParserCalls(s);
+  return [
+    haskell.extensions(),
+    haskell.module(s.modulePath, s.version, exportTypes),
+    haskell.imports(),
+    haskell.version(s.version.major, s.version.minor),
+    haskell.serviceThrower(s.error),
+    haskell.service(serviceCalls),
+    haskell.handleRequest(s.meta),
+    haskell.apiLookup(apiLookupPairs),
+    haskell.apiParser(s.name, apiParserCalls),
+    haskell.api(s.name, apiCalls),
+  ]
+    .concat(s.wrap.map(haskell.wrap))
+    .concat(s.struct.map(haskell.struct))
+    .concat(s.enumeration.map(haskell.enumeration))
+    .join('');
+}
 
-console.log(haskell.service([
-  { func: 'hello', name: 'Hello', output: 'T.Text' },
-  { func: 'goodBye', output: '()' } ] ) );
-
-console.log(haskell.version(0,0))
-
-console.log(haskell.apiParser('Api', {
+console.log(gen({
+  modulePath: 'Hello.World',
+  version: { major: 0, minor: 0 },
+  error: 'Goodbye',
+  meta: 'User',
+  name: 'Api',
   hollow: [
-    'Hello'
+    { name: 'Goodbye', label: 'Goodbye', func: 'goodbye', output: '()' },
   ],
   struct: [
-    'Hola'
+    { name: 'Hello',
+      label: 'Hello',
+      func: 'hello',
+      output: 'T.Text',
+      members: [
+        { name: 'target', label: 'target', type:  'T.Text' },
+      ]
+    },
+    { name: 'User',
+      label: 'User',
+      members: [
+        { name: 'userId', label: 'userId', type: 'UUID'},
+        { name: 'name', label: 'name', type: 'T.Text'},
+        { name: 'email', label: 'email', type: 'Maybe Email'},
+      ],
+    },
   ],
   enumeration: [
-    'One',
-    'Two',
-    'Three',
+    { name: 'Color',
+      label: 'Color',
+      enumerals: [
+        { tag: 'Red', label: 'Red' },
+        { tag: 'Blue', label: 'Blue' },
+        { tag: 'Green', label: 'Green' },
+        { tag: 'Custom', label: 'Custom',
+          members: [
+            { name: 'red', label: 'red', type: 'I.Word8' },
+            { name: 'blue', label: 'blue', type: 'I.Word8' },
+            { name: 'green', label: 'green', type: 'I.Word8' } ] }
+      ],
+    },
+    { name: 'Move',
+      label: 'Move',
+      func: 'move',
+      output: '()',
+      enumerals: [
+        { tag: 'Up', label: 'Up' },
+        { tag: 'Down', label: 'Down' },
+        { tag: 'Other', label: 'Other',
+          members: [
+            { name: 'angle', label: 'angle', type: 'Float' }
+          ] },
+      ],
+    }
   ],
   wrap: [
-    'Goodbye',
+    { name: 'Email',
+      label: 'Email',
+      type: 'T.Text',
+      instances: {
+        text: true,
+        number: false
+      },
+    },
   ],
 }));
-
-console.log(haskell.apiLookup({
-  hollow: [
-    { name: 'Hello', func: 'hello' },
-  ],
-  filled: [
-    { name: 'Hola', func: 'hola' },
-    { name: 'One', func: 'one' },
-    { name: 'Two', func: 'two' },
-    { name: 'Three', func: 'three' },
-    { name: 'Four', func: 'four' },
-  ],
-}));
-
-console.log(haskell.handleRequest('Meta'));
-
-console.log(haskell.imports());
-
-console.log(haskell.extensions());
-
-console.log(haskell.module('MyModule.Somewhere', {major: 1, minor: 2}, [
-  'Error',
-  'Meta',
-  'Hello',
-  'Hola',
-  'One',
-  'Two',
-  'Three',
-]));
