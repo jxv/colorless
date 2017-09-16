@@ -7,12 +7,22 @@
     "example": "examples"
   },
   "dependencies": {
-    "commander": "^2.11.0"
+    "commander": "^2.11.0",
+    "ramda": "^0.24.1"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.0",
+    "babel-loader": "^7.1.2",
+    "babel-preset-env": "^1.6.0",
+    "babel-preset-es2017": "^6.24.1",
+    "webpack": "^3.6.0"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "npm build"
+    "build": "babel src -d lib --presets es2017",
+    "bin": "cli.js",
+    "run": "node ./node_modules/.bin/colorless"
   },
   "repository": {
     "type": "git",
