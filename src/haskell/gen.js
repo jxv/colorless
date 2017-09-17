@@ -1,3 +1,4 @@
+const R = require('ramda');
 
 const primMap = {
   'Bool': 'P.Bool',
@@ -557,7 +558,7 @@ const mkApiParserCalls = (s) => {
   };
 };
 
-export const gen = (s) => {
+const gen = (s) => {
   const exportTypes = mkExportTypes(s);
   const serviceCalls = mkServiceCalls(s);
   const apiLookupPairs = mkApiLookupPairs(s);
@@ -580,3 +581,5 @@ export const gen = (s) => {
     .concat(s.enumeration.map(genEnumeration))
     .join('');
 };
+
+module.exports.gen = gen;

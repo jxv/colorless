@@ -21,8 +21,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "babel src -d lib --presets es2017",
-    "bin": "cli.js",
-    "run": "node ./node_modules/.bin/colorless"
+    "bin": {"colorless":"./lib/cli.js"}
   },
   "repository": {
     "type": "git",

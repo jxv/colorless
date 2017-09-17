@@ -1,9 +1,9 @@
-var fs = require('fs');
+#!/usr/bin/env node
+'use strict';
+
+const fs = require('fs');
 var program = require('commander');
-
-import R from 'ramda';
-
-import Haskell from './haskell/gen.js';
+const Haskell = require('./haskell/gen.js');
 
 program
   .version('0.0.0')
