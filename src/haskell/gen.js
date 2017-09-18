@@ -1,21 +1,3 @@
-const R = require('ramda');
-
-const primMap = {
-  'Bool': 'P.Bool',
-  'U8': 'I.Word8',
-  'U16': 'I.Word16',
-  'U32': 'I.Word32',
-  'U64': 'I.Word64',
-  'I8': 'I.Int8',
-  'I16': 'I.Int16',
-  'I32': 'I.Int32',
-  'I64': 'I.Int64',
-  'F32': 'P.Float',
-  'F64': 'P.Float',
-  'Char': 'P.Char',
-  'String': 'T.Text',
-};
-
 
 const genWrap = ({name, type, instances}) => {
   var lines = [
@@ -41,7 +23,7 @@ const genStruct = ({name, members}) => {
   for (var i = 1; i < members.length; i++) {
     declMembers = declMembers.concat(['  , ', members[i].name, ' :: ', members[i].type, '\n']);
   }
-  var declDeriving = '  } deriving (P.Show, P.Eq, P.Generic)\n\n';
+  var declDeriving = '  } deriving (P.Show, P.Eq, P.Generic)\n';
   const decl = declName.concat(declMembers).concat([declDeriving]);
 
   // ToJSON instance
@@ -539,13 +521,14 @@ const mkApiLookupPairs = (s) => {
 };
 
 const mkApiCalls = (s) => {
+  const isFunc = x => x.func && x.output;
   const filled = ({name}) => ({name, filled: true});
   const notFilled = ({name}) => ({name, filled: false});
   return []
-    .concat(s.hollow.map(notFilled))
-    .concat(s.struct.map(filled))
-    .concat(s.enumeration.map(filled))
-    .concat(s.wrap.map(filled));
+    .concat(s.hollow.filter(isFunc).map(notFilled))
+    .concat(s.struct.filter(isFunc).map(filled))
+    .concat(s.enumeration.filter(isFunc).map(filled))
+    .concat(s.wrap.filter(isFunc).map(filled));
 };
 
 const mkApiParserCalls = (s) => {

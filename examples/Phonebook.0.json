@@ -3,16 +3,21 @@
     "types": [
       { "n": "PersonId", "w": "String" },
       { "n": "Name", "w": "String" },
-      { "n": "Person", "m": [ {"name": "Name"}, {"phone": "String"}, {"friends": {"n":"List", "p": "PersonId"}} ] },
+      { "n": "Phone", "w": "String" },
+      { "n": "Street", "w": "String" },
+      { "n": "City", "w": "String" },
+      { "n": "State", "e": ["CA","NY","TX"] },
+      { "n": "Zipcode", "w": "String" },
+      { "n": "Address", "m": [ {"street":"Street"}, {"city":"City"}, {"zipcode":"Zipcode"}, {"state":"State"} ] },
+      { "n": "Person", "m": [ {"name": "Name"}, {"phone": "Phone"}, {"address":{"n":"Option","p":"Address"}}, {"friends": {"n":"List", "p": "PersonId"}} ] },
       { "n": "LookupPerson", "m": [{"id": "PersonId"}], "o": {"n":"Option","p":"Person"} },
       { "n": "LookupPersonByName", "m": [{"name": "String"}], "o": {"n":"List","p":"Person"} }
     ],
-    "rpc": {
+    "pull": {
       "protocol": "http",
       "name": "Phonebook",
       "address": "127.0.0.1",
       "path": "/",
-      "format": "JSON",
       "port": 8000,
       "error": "Unit",
       "meta": "Unit"

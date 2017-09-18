@@ -1,15 +1,14 @@
 {
   "colorless": { "major": 0, "minor": 0 },
   "types": [
-    { "n": "Hello", "m": [ {"name":"target", "type":"String"} ], "o": "String" }
+    { "n": "Hello", "m": [ {"target":"String"} ], "o": "String" }
   ],
-  "rpc": {
+  "pull": {
     "protocol": "http",
     "name": "HelloWorld",
     "address": "127.0.0.1",
     "meta": "Unit",
     "path": "/",
-    "format": "JSON",
     "port": 8080,
     "error": "Unit"
   }
