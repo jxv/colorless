@@ -89,7 +89,7 @@ const enumeration = (types) => types.filter(type => type.n && type.e).map(type =
     }
     if (typeof enumeral === 'object') {
       return {
-        tag: langTypeName(numeral.tag),
+        tag: langTypeName(enumeral.tag),
         label: langTypeLabel(enumeral.tag),
         members: enumeral.m.map(member => {
           const key = Object.keys(member);
