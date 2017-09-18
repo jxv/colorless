@@ -1,5 +1,5 @@
 const primMap = {
-  'Unit': 'P.()',
+  'Unit': '()',
   'Bool': 'P.Bool',
   'U8': 'I.Word8',
   'U16': 'I.Word16',
@@ -47,10 +47,10 @@ const langType = ty => {
       return '[' + langType(ty.p) + ']'
     }
     if (ty.n === 'Option') {
-      return '(Maybe ' + langType(ty.p) + ')'
+      return '(P.Maybe ' + langType(ty.p) + ')'
     }
     if (ty.n === 'Either') {
-      return '(Either (' + langType(ty.p[0]) + ') (' + langType(ty.p[1]) + '))'
+      return '(P.Either (' + langType(ty.p[0]) + ') (' + langType(ty.p[1]) + '))'
     }
   }
 };

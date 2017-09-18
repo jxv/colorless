@@ -1,4 +1,8 @@
 
+const isFunc = x => x.func && x.output;
+
+const enumeralNameTagMember = (n,e) => n + '\'' + e + '\'Members';
+
 const genWrap = ({name, type, instances}) => {
   var lines = [
     '\n',
@@ -6,7 +10,7 @@ const genWrap = ({name, type, instances}) => {
     'newtype ', name , ' = ', name, ' ', type, '\n',
   ];
   lines = lines.concat([
-    '  deriving (P.Show, P.Eq, ', instances.text ? 'P.IsString, T.ToText, ' : '', instances.number ? 'P.Num, ' : '', 'A.FromJSON, A.ToJSON, C.ToVal, C.FromVal)', '\n',
+    '  deriving (P.Show, P.Eq, P.Ord, ', instances.text ? 'P.IsString, T.ToText, ' : '', instances.number ? 'P.Num, ' : '', 'A.FromJSON, A.ToJSON, C.ToVal, C.FromVal)', '\n',
   ]);
   return lines.join('');
 };
@@ -66,7 +70,7 @@ const genStruct = ({name, members}) => {
     ]);
   }
   fromVal = fromVal.concat([
-    '    _ -> Nothing\n',
+    '    _ -> P.Nothing\n',
   ]);
 
   return decl.concat(toJSON).concat(toVal).concat(fromVal).join('');
@@ -84,7 +88,7 @@ const genEnumeration = ({name, enumerals}) => {
     return name + '\'' + enumerals[i].tag;
   }
   function nameTagMembers(i) {
-    return name + '\'' + enumerals[i].tag + '\'Members';
+    return enumeralNameTagMember(name, enumerals[i].tag);
   }
   var declEnumerals = ['  = ', nameTag(0), ' '].concat(enumerals[0].members ? [nameTagMembers(0), '\n'] : ['\n']);
   for (var i = 1; i < enumerals.length; i++) {
@@ -173,8 +177,8 @@ const genEnumeration = ({name, enumerals}) => {
     }
   }
   fromVal = fromVal.concat([
+    '      _ -> P.Nothing\n',
     '    _ -> P.Nothing\n',
-    '  _ -> P.Nothing\n',
   ]);
 
 
@@ -188,7 +192,7 @@ const genEnumeration = ({name, enumerals}) => {
     const members = enumerals[i].members;
     if (members == undefined) {
       toVal = toVal.concat([
-        '    ', nameTag(i), ' -> C.Val\'ApiVal P.$ C.ApiVal\'Enumerator $ C.Enumerator "', enumerals[i].label, '" P.Nothing\n',
+        '    ', nameTag(i), ' -> C.Val\'ApiVal P.$ C.ApiVal\'Enumerator P.$ C.Enumerator "', enumerals[i].label, '" P.Nothing\n',
       ]);
     } else {
       toVal = toVal.concat([
@@ -203,7 +207,7 @@ const genEnumeration = ({name, enumerals}) => {
         ]);
       }
       toVal = toVal.concat([
-        '      } -> C.Val\'ApiVal P.$ C.ApiVal\'Enumerator $ C.Enumerator "', enumerals[i].label, '" P.$ Map.fromList\n',
+        '      } -> C.Val\'ApiVal P.$ C.ApiVal\'Enumerator P.$ C.Enumerator "', enumerals[i].label, '" P.$ P.Just P.$ Map.fromList\n',
       ]);
       toVal = toVal.concat([
         '      [ ("', members[0].label, '", C.toVal ', members[0].name, ')\n'
@@ -248,7 +252,7 @@ const genServiceThrower = (error) => {
   return [
     '\n',
     '-- ServiceThrower\n',
-    'class Monad m => ServiceThrower m where\n',
+    'class P.Monad m => ServiceThrower m where\n',
     '  serviceThrow :: ', error, ' -> m a\n',
   ].join('');
 };
@@ -412,9 +416,9 @@ const genHandleRequest = (meta) => {
     'handleRequest :: (Service meta m, C.RuntimeThrower m, IO.MonadIO m) => C.Options -> (', meta, ' -> m meta) -> C.Request -> m C.Response\n',
     'handleRequest options metaMiddleware C.Request{meta,calls} = do\n',
     '  meta\' <- P.maybe (C.runtimeThrow C.RuntimeError\'UnparsableMeta) P.return (C.fromValFromJson meta)\n',
-    '  xformMeta <- metaMiddleware meta\n',
+    '  xformMeta <- metaMiddleware meta\'\n',
     '  envRef <- IO.liftIO C.emptyEnv\n',
-    '  variableBaseCount <- IO.liftIO (Map.size <$> IO.readIORef envRef)\n',
+    '  variableBaseCount <- IO.liftIO (Map.size P.<$> IO.readIORef envRef)\n',
     '  let options\' = C.Options\n',
     '        { variableLimit = P.fmap (P.+ variableBaseCount) (C.variableLimit options)\n',
     '        }\n',
@@ -492,11 +496,15 @@ const genModule = (prefix, version, types) => {
 
 const mkExportTypes = (s) => {
   return []
-    .concat(s.hollow)
-    .concat(s.struct)
-    .concat(s.enumeration)
-    .concat(s.wrap)
-    .map(x => x.name);
+    .concat(s.wrap.map(x => x.name))
+    .concat(s.struct.map(x => x.name))
+    .concat([].concat.apply([], s.enumeration.map(e =>
+      [e.name]
+        .concat(
+          e.enumerals
+            .filter(x => x.members)
+            .map(x => enumeralNameTagMember(e.name, x.tag)))
+    )))
 };
 
 const mkServiceCalls = (s) => {
@@ -507,21 +515,24 @@ const mkServiceCalls = (s) => {
         delete copy.name;
         return copy;
       }))
+    .concat(s.wrap)
     .concat(s.struct)
     .concat(s.enumeration)
-    .concat(s.wrap)
-    .filter(x => x.output && x.func);
+    .filter(isFunc);
 };
 
 const mkApiLookupPairs = (s) => {
   return {
-    hollow: s.hollow.filter(x => x.func && x.output),
-    filled: [].concat(s.wrap).concat(s.struct).concat(s.enumeration).filter(x => x.func && x.output),
+    hollow: s.hollow.filter(isFunc),
+    filled: []
+      .concat(s.wrap)
+      .concat(s.struct)
+      .concat(s.enumeration)
+      .filter(isFunc)
   };
 };
 
 const mkApiCalls = (s) => {
-  const isFunc = x => x.func && x.output;
   const filled = ({name}) => ({name, filled: true});
   const notFilled = ({name}) => ({name, filled: false});
   return []
@@ -532,7 +543,6 @@ const mkApiCalls = (s) => {
 };
 
 const mkApiParserCalls = (s) => {
-  const isFunc = x => x.func && x.output;
   return {
     hollow: s.hollow.filter(isFunc),
     wrap: s.wrap.filter(isFunc),
