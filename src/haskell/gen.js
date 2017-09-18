@@ -435,7 +435,7 @@ const genImports = () => {
     '-- Imports\n',
     'import qualified Prelude as P\n',
     'import qualified Data.Map as Map\n',
-    'import qualifeid Control.Monad.IO.Class as IO\n',
+    'import qualified Control.Monad.IO.Class as IO\n',
     'import qualified Data.Aeson as A\n',
     'import qualified Data.Text as T\n',
     'import qualified Data.Text.Conversions as T\n',
