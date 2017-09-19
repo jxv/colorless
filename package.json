@@ -7,6 +7,7 @@
     "example": "examples"
   },
   "dependencies": {
+    "chai": "^4.1.2",
     "commander": "^2.11.0",
     "mocha": "^3.5.3",
     "ramda": "^0.24.1"
@@ -20,7 +21,7 @@
     "webpack": "^3.6.0"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "mocha --watch --reporter spec",
     "build": "babel src -d lib --presets es2017",
     "bin": {
       "colorless": "./lib/cli.js"
