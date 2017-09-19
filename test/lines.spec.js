@@ -46,3 +46,10 @@ describe('lines.add', () => {
     expect(x.lines).to.eql(['x','y','z','a'])
   })
 })
+
+describe('lines.collapse', () => {
+  it('collapse', () => {
+    var x = new Lines(['x','y','z'])
+    expect(x.collapse()).to.eql('xyz')
+  })
+})
