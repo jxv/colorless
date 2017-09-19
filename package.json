@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "commander": "^2.11.0",
+    "mocha": "^3.5.3",
     "ramda": "^0.24.1"
   },
   "devDependencies": {
@@ -21,7 +22,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "babel src -d lib --presets es2017",
-    "bin": {"colorless":"./lib/cli.js"}
+    "bin": {
+      "colorless": "./lib/cli.js"
+    }
   },
   "repository": {
     "type": "git",
