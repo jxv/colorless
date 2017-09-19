@@ -454,9 +454,10 @@ const genImports = () => {
   ].join('');
 };
 
-const genExtensions = () => {
+const genPragmas = () => {
   return [
-    '-- Extensions\n',
+    '-- Pragmas\n',
+    '{-# OPTIONS_GHC -fno-warn-unused-imports #-}\n',
     '{-# LANGUAGE DeriveGeneric #-}\n',
     '{-# LANGUAGE DuplicateRecordFields #-}\n',
     '{-# LANGUAGE LambdaCase #-}\n',
@@ -476,7 +477,7 @@ const genModule = (prefix, version, types) => {
   var lines = [
     '\n',
     '-- Module\n',
-    'module ', prefix, '.V', version.major, '_', version.minor, '\n',
+    'module ', prefix, '.V', version.major, '\n',
     '  ( version\n',
     '  , handleRequest\n',
     '  , ServiceThrower(..)\n',
@@ -558,7 +559,7 @@ const gen = (s) => {
   const apiCalls = mkApiCalls(s);
   const apiParserCalls = mkApiParserCalls(s);
   return [
-    genExtensions(),
+    genPragmas(),
     genModule(s.module, s.version, exportTypes),
     genImports(),
     genVersion(s.version.major, s.version.minor),
