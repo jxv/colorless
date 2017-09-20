@@ -1,0 +1,7 @@
+git:
+  depth: 10
+sudo: false
+langauge: node_js
+cache:
+  directories:
+  - node_modules
