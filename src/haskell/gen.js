@@ -559,6 +559,7 @@ const gen = (s) => {
     .concat(s.wrap.map(genWrap))
     .concat(s.struct.map(genStruct))
     .concat(s.enumeration.map(genEnumeration))
+    .concat(['\n'])
     .join('');
 };
 

@@ -101,6 +101,7 @@ const latest = (spec) => {
   lines.add(genHandleRequest(spec.meta));
   lines.add(genMetaMiddlewares(spec.meta));
   lines.add(genMkHandleRequestMap());
+  lines.add('\n');
   return lines.collapse();
 };
 

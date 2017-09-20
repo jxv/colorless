@@ -9,6 +9,7 @@
   "dependencies": {
     "chai": "^4.1.2",
     "commander": "^2.11.0",
+    "mkdirp": "^0.5.1",
     "mocha": "^3.5.3",
     "ramda": "^0.24.1"
   },
