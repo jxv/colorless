@@ -386,7 +386,7 @@ const genApiParser = (name, calls) => {
   return lines.join('');
 };
 
-const genApiLookup = (calls) => {
+const genApiLookup = (name, calls) => {
   var lines = [
     '\n',
     '-- API\n',
@@ -397,12 +397,12 @@ const genApiLookup = (calls) => {
   ];
   for (var i = 0; i < calls.hollow.length; i++) {
     lines = lines.concat([
-      '    Api\'', calls.hollow[i].name, ' -> C.toVal P.<$> ', calls.hollow[i].func, ' meta\'\n',
+      '    ', name, '\'', calls.hollow[i].name, ' -> C.toVal P.<$> ', calls.hollow[i].func, ' meta\'\n',
     ]);
   }
   for (var i = 0; i < calls.filled.length; i++) {
     lines = lines.concat([
-      '    Api\'', calls.filled[i].name, ' a\' -> C.toVal P.<$> ', calls.filled[i].func, ' meta\' a\'\n',
+      '    ', name, '\'', calls.filled[i].name, ' a\' -> C.toVal P.<$> ', calls.filled[i].func, ' meta\' a\'\n',
     ]);
   }
   return lines.join('');
@@ -481,7 +481,6 @@ const genModule = (prefix, version, types) => {
     '  , handleRequest\n',
     '  , ServiceThrower(..)\n',
     '  , Service(..)\n',
-    '  , Api(..)\n',
   ];
   for (var i = 0; i < types.length; i++) {
     lines = lines.concat([
@@ -552,7 +551,7 @@ const gen = (s) => {
     genServiceThrower(s.error),
     genService(serviceCalls),
     genHandleRequest(s.meta),
-    genApiLookup(apiLookupPairs),
+    genApiLookup(s.name, apiLookupPairs),
     genApiParser(s.name, apiParserCalls),
     genApi(s.name, apiCalls),
   ]

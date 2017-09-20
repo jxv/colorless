@@ -123,7 +123,7 @@ const spec = (prefix, s) => ({
   version: { major: 0, minor: 0 },
   error: langType(s.pull.error),
   meta: langType(s.pull.meta),
-  name: 'Api', // s.pull.name, // FIXME
+  name: s.pull.name,
   hollow: hollow(s.types),
   struct: struct(s.types),
   enumeration: enumeration(s.types),
