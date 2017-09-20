@@ -1,7 +1,6 @@
+var { enumeralNameTagMember, mkExportTypes } = require('./common.js');
 
 const isFunc = x => x.func && x.output;
-
-const enumeralNameTagMember = (n,e) => n + '\'' + e + '\'Members';
 
 const genWrap = ({name, type, instances}) => {
   var lines = [
@@ -493,19 +492,6 @@ const genModule = (prefix, version, types) => {
     '  ) where\n',
   ]);
   return lines.join('');
-};
-
-const mkExportTypes = (s) => {
-  return []
-    .concat(s.wrap.map(x => x.name))
-    .concat(s.struct.map(x => x.name))
-    .concat([].concat.apply([], s.enumeration.map(e =>
-      [e.name]
-        .concat(
-          e.enumerals
-            .filter(x => x.members)
-            .map(x => enumeralNameTagMember(e.name, x.tag)))
-    )))
 };
 
 const mkServiceCalls = (s) => {

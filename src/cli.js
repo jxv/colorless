@@ -10,16 +10,18 @@ program
   .option('-s --src [type]', 'Directory of colorless specs')
   .option('-d --dest [type]', 'Directory to generate code')
   .option('-l --lang [type]', 'Language of code')
-  .option('-m --prefix [type]', 'Module name/prefix')
-  .option('-e --side [type]', 'Client or server side code', 'client')
+  .option('-m --prefix [type]', 'Prefix or module name')
+  .option('-e --side [type]', '\'client\' or \'server\' side code', 'client')
   .parse(process.argv);
 
-const src = program.src;
-const dest = program.dest;
-const lang = program.lang;
-const side = program.side;
-const prefix = program.prefix;
+(function() {
+  if (program.lang === 'haskell' && program.side === 'server' && program.dest && program.src) {
+    var jsonSpec = JSON.parse(fs.readFileSync(program.src, 'utf8'));
+    var spec = Haskell.spec(program.prefix, jsonSpec);
+    //console.log(Haskell.gen(spec);
+    //console.log(Haskell.latest(spec));
+    return;
+  }
 
-var spec = JSON.parse(fs.readFileSync(src, 'utf8'));
-
-console.log(Haskell.gen(Haskell.spec(prefix, spec)));
+  console.log('Bad args');
+})();
