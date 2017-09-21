@@ -24,7 +24,7 @@ program
       program.dest && program.dest.length &&
       program.src && program.src.length) {
     const jsonSpec = JSON.parse(fs.readFileSync(program.src, 'utf8'));
-    const spec = Haskell.spec(program.prefix, jsonSpec);
+    const spec = Haskell.spec(program.prefix, { major: 0, minor: 0 }, jsonSpec);
 
     const v0 = Haskell.gen(spec);
     const latest = Haskell.latest(spec);

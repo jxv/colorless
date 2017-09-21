@@ -118,9 +118,9 @@ const wrap = (types) => types.filter(type => type.n && type.w).map(type => ({
   },
 }));
 
-const spec = (prefix, s) => ({
+const spec = (prefix, version, s) => ({
   module: prefix,
-  version: { major: 0, minor: 0 },
+  version: version,
   error: langType(s.pull.error),
   meta: langType(s.pull.meta),
   name: s.pull.name,
