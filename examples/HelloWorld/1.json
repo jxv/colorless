@@ -1,0 +1,16 @@
+{
+  "colorless": { "major": 0, "minor": 0 },
+  "types": [
+    { "n": "Hello", "m": [ {"target":"String"} ], "o": "String" },
+    { "n": "Goodbye", "o": "Unit" }
+  ],
+  "pull": {
+    "protocol": "http",
+    "name": "HelloWorld",
+    "address": "127.0.0.1",
+    "meta": "Unit",
+    "path": "/",
+    "port": 8080,
+    "error": "Unit"
+  }
+}
