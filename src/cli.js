@@ -44,12 +44,17 @@ const hasJsonExtension = (name) => {
 
         var version = { major: 0, minor: 0 };
         var specs = [];
+        var changes = [];
         for (var i = 0; i < jsonSpecs.length; i++) {
           specs.push(Haskell.spec(program.prefix, version, jsonSpecs[i]));
           if (i < diffs.length) {
+            changes.push(typeChanges(diffs[i]));
             version = nextVersion(version, versionChange(diffs[i]));
           }
         }
+
+        console.log(changes)
+
         // TODO
         const spec = specs[specs.length - 1];
         const latest = Haskell.latest(spec);
@@ -94,15 +99,29 @@ const writeCode = (path, specs) => {
 };
 
 const versionChange = diff => {
-  if (diff.removeType.length ||
-      diff.modifyType.length ||
-      diff.modifyWrap.length ||
-      diff.modifyStruct.length ||
-      diff.modifyEnumeration.filter(e => e.removeEnumerator.length || e.modifyEnumerator.length || !!e.removeOutput).length) {
+  const changes = typeChanges(diff);
+  if (changes.major.length) {
     return 'major';
   }
-  return 'minor';
+  if (changes.minor.length) {
+    return 'minor';
+  }
+  return null;
 };
+
+const typeChanges = diff => ({
+  major: R.uniq(R.flatten([
+    diff.removeType,
+    diff.modifyType,
+    diff.modifyWrap,
+    diff.modifyStruct,
+    diff.modifyEnumeration.filter(e => e.removeEnumerator.length || e.modifyEnumerator.length || !!e.removeOutput).map(x => x.name),
+  ])),
+  minor: R.uniq(R.flatten([
+    diff.addType,
+    diff.modifyEnumeration.filter(e => !(e.removeEnumerator.length || e.modifyEnumerator.length || !!e.removeOutput)).map(x => x.name),
+  ])),
+});
 
 const nextVersion = ({major, minor}, delta) => ({
   major: delta === 'major' ? major + 1 : major,
