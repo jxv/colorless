@@ -91,7 +91,7 @@ const enumeration = (types) => types.filter(type => type.n && type.e).map(type =
       return {
         tag: langTypeName(enumeral.tag),
         label: langTypeLabel(enumeral.tag),
-        members: enumeral.m.map(member => {
+        members: enumeral.m && enumeral.m.map(member => {
           const key = Object.keys(member);
           return {
             name: langTypeName(key),

@@ -78,7 +78,7 @@ const diff = (prev, next) => {
           addEnumerator: addTags,
           removeEnumerator: removeTags,
           modifyEnumerator: modifyEnumerator,
-          removeOutput: prev.o && !next.o,
+          removeOutput: !!prev.o && !next.o,
         };
         modifyEnumeration.push(item);
       }

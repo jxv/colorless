@@ -42,11 +42,16 @@ const hasJsonExtension = (name) => {
           diffs.push(diff.diff(jsonSpecs[i], jsonSpecs[i + 1]));
         }
 
+        var version = { major: 0, minor: 0 };
+        var specs = [];
+        for (var i = 0; i < jsonSpecs.length; i++) {
+          specs.push(Haskell.spec(program.prefix, version, jsonSpecs[i]));
+          if (i < diffs.length) {
+            version = nextVersion(version, versionChange(diffs[i]));
+          }
+        }
         // TODO
-        const jsonSpec = jsonSpecs[0];
-        const spec = Haskell.spec(program.prefix, { major: 0, minor: 0 }, jsonSpec);
-
-        const v0 = Haskell.gen(spec);
+        const spec = specs[specs.length - 1];
         const latest = Haskell.latest(spec);
 
         mkdirp(program.dest, function (err) {
@@ -59,9 +64,7 @@ const hasJsonExtension = (name) => {
                 fs.writeFile(path + '.hs', latest, function (err) {
                   if (err) { console.error(err)
                   } else {
-                    fs.writeFile(path + '/V0.hs', v0, function (err) {
-                      if (err) { console.error(err) } else { }
-                    });
+                    writeCode(path, specs);
                   }
                 });
               }
@@ -76,12 +79,26 @@ const hasJsonExtension = (name) => {
   console.log('Bad args');
 })();
 
+const writeCode = (path, specs) => {
+  if (!specs.length) {
+    return;
+  }
+  const code = Haskell.gen(specs[0]);
+  const filePath = path + '/V' + specs[0].version.major + '.hs';
+  fs.writeFile(filePath, code, function (err) {
+    if (err) { console.error(err)
+    } else {
+      writeCode(path, specs.slice(1));
+    }
+  });
+};
+
 const versionChange = diff => {
   if (diff.removeType.length ||
       diff.modifyType.length ||
       diff.modifyWrap.length ||
       diff.modifyStruct.length ||
-      diff.modifyEnumeration.filter(e => !!e.removeEnumerator || !!e.modifyEnumerator || !!e.removeOutput).length) {
+      diff.modifyEnumeration.filter(e => e.removeEnumerator.length || e.modifyEnumerator.length || !!e.removeOutput).length) {
     return 'major';
   }
   return 'minor';
@@ -89,7 +106,7 @@ const versionChange = diff => {
 
 const nextVersion = ({major, minor}, delta) => ({
   major: delta === 'major' ? major + 1 : major,
-  minor: delta === 'minor' ? minor + 1 : minor,
+  minor: delta === 'minor' ? minor + 1 : (delta === 'major' ? 0 : minor),
 });
 
 // expand enumerations
