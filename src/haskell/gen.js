@@ -1,3 +1,5 @@
+const R = require('ramda');
+
 var { enumeralNameTagMember, mkExportTypes } = require('./common.js');
 
 const isFunc = x => x.func && x.output;
@@ -432,8 +434,8 @@ const genHandleRequest = (meta) => {
   return lines.join('');
 };
 
-const genImports = () => {
-  return [
+const genImports = (prefix, version, typeSource) => {
+  var lines = [
     '\n',
     '-- Imports\n',
     'import qualified Prelude as P\n',
@@ -450,7 +452,15 @@ const genImports = () => {
     'import qualified Colorless.Types as C\n',
     'import qualified Colorless.Runtime.Expr as C\n',
     'import qualified Colorless.Runtime.Val as C (ToVal(..), FromVal(..), getMember, fromValFromJson, combineObjects)\n',
-  ].join('');
+    '\n',
+  ];
+  lines = lines.concat(R.toPairs(typeSource)
+    .filter(([ty, major]) => major !== version.major)
+    .map(([ty, major]) =>
+      'import ' + prefix + '.V' + major + ' (' + ty + '(..))\n'
+    )
+  );
+  return lines.join('');
 };
 
 const genPragmas = () => {
@@ -537,6 +547,8 @@ const mkApiParserCalls = (s) => {
   };
 };
 
+const currentTypeSource = R.curry((s,ty) => s.typeSource[ty.name] === s.version.major);
+
 const gen = (s) => {
   const exportTypes = mkExportTypes(s);
   const serviceCalls = mkServiceCalls(s);
@@ -546,7 +558,7 @@ const gen = (s) => {
   return [
     genPragmas(),
     genModule(s.module, s.version, exportTypes),
-    genImports(),
+    genImports(s.module, s.version, s.typeSource),
     genVersion(s.version.major, s.version.minor),
     genServiceThrower(s.error),
     genService(serviceCalls),
@@ -555,9 +567,9 @@ const gen = (s) => {
     genApiParser(s.name, apiParserCalls),
     genApi(s.name, apiCalls),
   ]
-    .concat(s.wrap.map(genWrap))
-    .concat(s.struct.map(genStruct))
-    .concat(s.enumeration.map(genEnumeration))
+    .concat(s.wrap.filter(currentTypeSource(s)).map(genWrap))
+    .concat(s.struct.filter(currentTypeSource(s)).map(genStruct))
+    .concat(s.enumeration.filter(currentTypeSource(s)).map(genEnumeration))
     .concat(['\n'])
     .join('');
 };

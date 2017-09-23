@@ -1,7 +1,7 @@
 {
   "colorless": { "major": 0, "minor": 0 },
   "types": [
-    { "n": "Hello", "m": [ {"who":"String"} ], "o": "String" },
+    { "n": "Hello", "m": [ {"target":"String"} ], "o": "String" },
     { "n": "Goodbye", "m": [ {"target":"String"} ], "o": "Unit" },
     { "n": "Color", "e": [ "Red", "Green", "Blue" ] }
   ],
