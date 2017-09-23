@@ -49,11 +49,14 @@ const hasJsonExtension = (name) => {
           specs.push(Haskell.spec(program.prefix, version, jsonSpecs[i]));
           if (i < diffs.length) {
             changes.push(typeChanges(diffs[i]));
-            version = nextVersion(version, versionChange(diffs[i]));
+            const changes = typeChanges(diff[i]);
+            version = nextVersion(version, versionChange(changes));
           }
         }
 
-        console.log(changes)
+        changes.forEach(delta => {
+          console.log(delta)
+        });
 
         // TODO
         const spec = specs[specs.length - 1];
@@ -98,8 +101,7 @@ const writeCode = (path, specs) => {
   });
 };
 
-const versionChange = diff => {
-  const changes = typeChanges(diff);
+const versionChange = changes => {
   if (changes.major.length) {
     return 'major';
   }
@@ -111,15 +113,20 @@ const versionChange = diff => {
 
 const typeChanges = diff => ({
   major: R.uniq(R.flatten([
-    diff.removeType,
-    diff.modifyType,
-    diff.modifyWrap,
-    diff.modifyStruct,
-    diff.modifyEnumeration.filter(e => e.removeEnumerator.length || e.modifyEnumerator.length || !!e.removeOutput).map(x => x.name),
+    diff.removeType
+      .map(name => ({ name, action: 'remove' })),
+    diff.modifyType
+      .map(name => ({ name, action: 'modify' })),
+    diff.modifyWrap
+      .map(name => ({ name, action: 'modify' })),
+    diff.modifyStruct
+      .map(name => ({ name, action: 'modify' })),
+    diff.modifyEnumeration
+      .map(x => ({ name: x.name, action: 'modify' })),
   ])),
   minor: R.uniq(R.flatten([
-    diff.addType,
-    diff.modifyEnumeration.filter(e => !(e.removeEnumerator.length || e.modifyEnumerator.length || !!e.removeOutput)).map(x => x.name),
+    diff.addType
+      .map(name => ({ name, action: 'add' })),
   ])),
 });
 
@@ -128,10 +135,30 @@ const nextVersion = ({major, minor}, delta) => ({
   minor: delta === 'minor' ? minor + 1 : (delta === 'major' ? 0 : minor),
 });
 
-// expand enumerations
 const expandTypes = s => R.merge(s, {
   types: s.types.map(ty => ty.e
       ? R.merge(ty, { e: (ty.e.map(e => typeof e === 'string' ? { tag: e } : e)) })
       : ty
     )
 });
+
+const initTypeVersions = types => ({
+  version: { major: 0, minor: 0 },
+  types: R.mergeAll(types.map(ty => ({ [ty]: { major: 0, minor: 0 } }))),
+});
+
+const nextTypeVersion = (typeVersion, changes) => {
+  const version = nextVersion(typeVersion.version, versionChange(changes));
+  const typeActions = R.concat(change.major, changes.minor);
+  const removeTypes = typeActions.filter(ty => ty.action === 'remove').map(ty => ty.name);
+  const modifyTypes = typeActions.filter(ty => ty.action === 'modify').map(ty => ty.name);
+  const addTypes = typeActions.filter(ty => ty.action === 'add').map(ty => ty.name);
+  return {
+    version: version,
+    types:
+      R.merge(
+        R.reduce(R.dissoc, typeVersion.types, removeTypes),
+        R.mergeAll(R.concat(addTypes, modifyTypes).map(name => ({ [name]: version })))
+      ),
+  };
+};

@@ -49,11 +49,11 @@ const diff = (prev, next) => {
 
     if (prevType !== nextType) {
       modifyType.push(name);
-    } else if (ty === 'wrap' && (!R.equals(prev.w, next.w) || (prev.o && !next.o))) {
+    } else if (ty === 'wrap' && (!R.equals(prev.w, next.w) || (prev.o && !R.equals(prev.o, next.o)))) {
       modifyWrap.push(name);
-    } else if (ty === 'struct' && (!R.equals(prev.m, next.m) || (prev.o && !next.o))) {
+    } else if (ty === 'struct' && (!R.equals(prev.m, next.m) || (prev.o && !R.equals(prev.o, next.o)))) {
       modifyStruct.push(name);
-    } else if (ty === 'enumeration' && (!R.equals(prev.e, next.e) || (prev.o && !next.o))) {
+    } else if (ty === 'enumeration' && (!R.equals(prev.e, next.e) || (prev.o && !R.equals(prev.o, next.o)))) {
 
       const prevEnumerators = R.mergeAll(prev.e.map(e => ({ [e.tag]: e })));
       const nextEnumerators = R.mergeAll(next.e.map(e => ({ [e.tag]: e })));
@@ -78,7 +78,7 @@ const diff = (prev, next) => {
           addEnumerator: addTags,
           removeEnumerator: removeTags,
           modifyEnumerator: modifyEnumerator,
-          removeOutput: !!prev.o && !next.o,
+          modifyOutput: !!prev.o && !R.equals(prev.o, next.o),
         };
         modifyEnumeration.push(item);
       }
