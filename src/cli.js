@@ -37,30 +37,34 @@ const hasJsonExtension = (name) => {
         const files = items.filter(hasJsonExtension);
         const jsonSpecs = files.map(file => expandTypes(JSON.parse(fs.readFileSync(program.src + '/' + file, 'utf8'))));
 
+        if (!jsonSpecs.length) {
+          console.log('No specs');
+          return;
+        }
+
+        // diff the specs
         var diffs = [];
         for (var i = 0; i < jsonSpecs.length - 1; i++) {
           diffs.push(diff.diff(jsonSpecs[i], jsonSpecs[i + 1]));
         }
 
+        // by major version, extract the req specs and decide where to place the types
         var version = { major: 0, minor: 0 };
         var specs = [];
-        var changes = [];
+        var tyVers = [initTypeVersions(jsonSpecs[0].types.map(ty => ty.n))];
         for (var i = 0; i < jsonSpecs.length; i++) {
           specs.push(Haskell.spec(program.prefix, version, jsonSpecs[i]));
           if (i < diffs.length) {
-            changes.push(typeChanges(diffs[i]));
-            const changes = typeChanges(diff[i]);
-            version = nextVersion(version, versionChange(changes));
+            const change = typeChanges(diffs[i]);
+            version = nextVersion(version, versionChange(change));
+            tyVers.push(nextTypeVersion(tyVers[i], version, change));
           }
         }
 
-        changes.forEach(delta => {
-          console.log(delta)
-        });
+        const reqTyVers = dropLowMinors(tyVers);
+        const reqSpecs = attachTypeSources(specs, reqTyVers);
 
-        // TODO
-        const spec = specs[specs.length - 1];
-        const latest = Haskell.latest(spec);
+        const latest = Haskell.latest(reqSpecs[reqSpecs.length - 1]);
 
         mkdirp(program.dest, function (err) {
           if (err) { console.error(err)
@@ -72,7 +76,7 @@ const hasJsonExtension = (name) => {
                 fs.writeFile(path + '.hs', latest, function (err) {
                   if (err) { console.error(err)
                   } else {
-                    writeCode(path, specs);
+                    writeCode(path, reqSpecs);
                   }
                 });
               }
@@ -147,9 +151,8 @@ const initTypeVersions = types => ({
   types: R.mergeAll(types.map(ty => ({ [ty]: { major: 0, minor: 0 } }))),
 });
 
-const nextTypeVersion = (typeVersion, changes) => {
-  const version = nextVersion(typeVersion.version, versionChange(changes));
-  const typeActions = R.concat(change.major, changes.minor);
+const nextTypeVersion = (typeVersion, version, change) => {
+  const typeActions = R.concat(change.major, change.minor);
   const removeTypes = typeActions.filter(ty => ty.action === 'remove').map(ty => ty.name);
   const modifyTypes = typeActions.filter(ty => ty.action === 'modify').map(ty => ty.name);
   const addTypes = typeActions.filter(ty => ty.action === 'add').map(ty => ty.name);
@@ -161,4 +164,35 @@ const nextTypeVersion = (typeVersion, changes) => {
         R.mergeAll(R.concat(addTypes, modifyTypes).map(name => ({ [name]: version })))
       ),
   };
+};
+
+const dropLowMinors = (tyVers) => {
+  var lastTyVer = null;
+  var dropped = [];
+  R.reverse(tyVers).forEach(tyVer => {
+    if (!!lastTyVer) {
+      if (tyVer.version.major === lastTyVer.version.major) {
+      } else {
+        lastTyVer = { version: tyVer.version, typeSource: R.map(ver => ver.major, tyVer.types) };
+        dropped.unshift(lastTyVer);
+      }
+    } else {
+      lastTyVer = { version: tyVer.version, typeSource: R.map(ver => ver.major, tyVer.types) };
+      dropped.unshift(lastTyVer);
+    }
+  });
+  return dropped;
+};
+
+const attachTypeSources = (specs, typeSources) => {
+  var attached = [];
+  for (var i = 0; i < typeSources.length; i++) {
+    const { version, typeSource } = typeSources[i];
+    for (var j = 0; j < specs.length; j++) {
+      if (R.equals(specs[j].version, version)) {
+        attached.push(R.merge(specs[j], { typeSource }));
+      }
+    }
+  }
+  return attached;
 };
