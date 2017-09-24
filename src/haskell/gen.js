@@ -1,6 +1,6 @@
 const R = require('ramda');
 
-var { enumeralNameTagMember, mkExportTypes } = require('./common.js');
+var { enumeralNameTagMember, mkExportTypes, mkImportTypes } = require('./common.js');
 
 const isFunc = x => x.func && x.output;
 
@@ -434,7 +434,7 @@ const genHandleRequest = (meta) => {
   return lines.join('');
 };
 
-const genImports = (prefix, version, typeSource) => {
+const genImports = (prefix, importTypes) => {
   var lines = [
     '\n',
     '-- Imports\n',
@@ -454,12 +454,9 @@ const genImports = (prefix, version, typeSource) => {
     'import qualified Colorless.Runtime.Val as C (ToVal(..), FromVal(..), getMember, fromValFromJson, combineObjects)\n',
     '\n',
   ];
-  lines = lines.concat(R.toPairs(typeSource)
-    .filter(([ty, major]) => major !== version.major)
-    .map(([ty, major]) =>
-      'import ' + prefix + '.V' + major + ' (' + ty + '(..))\n'
-    )
-  );
+  lines = lines.concat(importTypes.map(({ name, major }) =>
+    'import ' + prefix + '.V' + major + ' (' + name + '(..))\n'
+  ));
   return lines.join('');
 };
 
@@ -551,6 +548,7 @@ const currentTypeSource = R.curry((s,ty) => s.typeSource[ty.name] === s.version.
 
 const gen = (s) => {
   const exportTypes = mkExportTypes(s);
+  const importTypes = mkImportTypes(s);
   const serviceCalls = mkServiceCalls(s);
   const apiLookupPairs = mkApiLookupPairs(s);
   const apiCalls = mkApiCalls(s);
@@ -558,7 +556,7 @@ const gen = (s) => {
   return [
     genPragmas(),
     genModule(s.module, s.version, exportTypes),
-    genImports(s.module, s.version, s.typeSource),
+    genImports(s.module, importTypes),
     genVersion(s.version.major, s.version.minor),
     genServiceThrower(s.error),
     genService(serviceCalls),
