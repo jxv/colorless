@@ -55,29 +55,29 @@ const diff = (prev, next) => {
       modifyStruct.push(name);
     } else if (ty === 'enumeration' && (!R.equals(prev.e, next.e) || (prev.o && !R.equals(prev.o, next.o)))) {
 
-      const prevEnumerators = R.mergeAll(prev.e.map(e => ({ [e.tag]: e })));
-      const nextEnumerators = R.mergeAll(next.e.map(e => ({ [e.tag]: e })));
+      const prevEnumerals = R.mergeAll(prev.e.map(e => ({ [e.tag]: e })));
+      const nextEnumerals = R.mergeAll(next.e.map(e => ({ [e.tag]: e })));
 
-      const prevTags = R.keys(prevEnumerators);
-      const nextTags = R.keys(nextEnumerators);
+      const prevTags = R.keys(prevEnumerals);
+      const nextTags = R.keys(nextEnumerals);
 
       const addTags = R.without(prevTags, nextTags);
       const removeTags = R.without(nextTags, prevTags);
       const sameTags = R.intersection(prevTags, nextTags);
 
-      var modifyEnumerator = [];
+      var modifyEnumeral = [];
       sameTags.forEach(tag => {
-        if (!R.equals(prevEnumerators[tag], nextEnumerators[tag])) {
-          modifyEnumerator.push(tag);
+        if (!R.equals(prevEnumerals[tag], nextEnumerals[tag])) {
+          modifyEnumeral.push(tag);
         }
       });
 
-      if (addTags.length || removeTags.length || modifyEnumerator.length) {
+      if (addTags.length || removeTags.length || modifyEnumeral.length) {
         const item = {
           name: name,
-          addEnumerator: addTags,
-          removeEnumerator: removeTags,
-          modifyEnumerator: modifyEnumerator,
+          addEnumeral: addTags,
+          removeEnumeral: removeTags,
+          modifyEnumeral: modifyEnumeral,
           modifyOutput: !!prev.o && !R.equals(prev.o, next.o),
         };
         modifyEnumeration.push(item);

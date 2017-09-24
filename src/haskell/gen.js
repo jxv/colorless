@@ -152,7 +152,7 @@ const genEnumeration = ({name, enumerals}) => {
     '\n',
     'instance C.FromVal ', name, ' where\n',
     '  fromVal = \\case\n',
-    '    C.Val\'ApiVal (C.ApiVal\'Enumerator (C.Enumerator tag m)) -> case (tag,m) of\n',
+    '    C.Val\'ApiVal (C.ApiVal\'Enumeral (C.Enumeral tag m)) -> case (tag,m) of\n',
   ];
   for (var i = 0; i < enumerals.length; i++) {
     const members = enumerals[i].members;
@@ -193,7 +193,7 @@ const genEnumeration = ({name, enumerals}) => {
     const members = enumerals[i].members;
     if (members == undefined) {
       toVal = toVal.concat([
-        '    ', nameTag(i), ' -> C.Val\'ApiVal P.$ C.ApiVal\'Enumerator P.$ C.Enumerator "', enumerals[i].label, '" P.Nothing\n',
+        '    ', nameTag(i), ' -> C.Val\'ApiVal P.$ C.ApiVal\'Enumeral P.$ C.Enumeral "', enumerals[i].label, '" P.Nothing\n',
       ]);
     } else {
       toVal = toVal.concat([
@@ -208,7 +208,7 @@ const genEnumeration = ({name, enumerals}) => {
         ]);
       }
       toVal = toVal.concat([
-        '      } -> C.Val\'ApiVal P.$ C.ApiVal\'Enumerator P.$ C.Enumerator "', enumerals[i].label, '" P.$ P.Just P.$ Map.fromList\n',
+        '      } -> C.Val\'ApiVal P.$ C.ApiVal\'Enumeral P.$ C.Enumeral "', enumerals[i].label, '" P.$ P.Just P.$ Map.fromList\n',
       ]);
       toVal = toVal.concat([
         '      [ ("', members[0].label, '", C.toVal ', members[0].name, ')\n'
