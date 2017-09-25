@@ -142,7 +142,7 @@ const genEnumeration = ({name, enumerals}) => {
       lines.add([
         '    ', nameTag(enumeral.tag), ' ',
       ]);
-      if (enumeral.members == undefined) {
+      if (!enumeral.members) {
         lines.add(['-> A.object [ "tag" A..= ("', enumeral.tag, '" :: T.Text) ]\n']);
       } else {
         lines.add(['m -> C.combineObjects (A.object [ "tag" A..= ("', enumeral.label, '" :: T.Text) ]) (A.toJSON m)\n']);
@@ -158,7 +158,7 @@ const genEnumeration = ({name, enumerals}) => {
       '    C.Val\'ApiVal (C.ApiVal\'Enumeral (C.Enumeral tag m)) -> case (tag,m) of\n',
     ]);
     enumerals.forEach(enumeral => {
-      if (enumeral.members == undefined) {
+      if (!enumeral.members) {
         lines.add([
           '      ("', enumeral.label, '", P.Nothing) -> P.Just ', nameTag(enumeral.tag), '\n',
         ]);
@@ -190,7 +190,7 @@ const genEnumeration = ({name, enumerals}) => {
       '  toVal = \\case\n',
     ]);
     enumerals.forEach(enumeral => {
-      if (enumeral.members == undefined) {
+      if (!enumeral.members) {
         lines.add([
           '    ', nameTag(enumeral.tag), ' -> C.Val\'ApiVal P.$ C.ApiVal\'Enumeral P.$ C.Enumeral "', enumeral.label, '" P.Nothing\n',
         ]);
@@ -227,25 +227,24 @@ const genEnumeration = ({name, enumerals}) => {
 
 
 const genApi = (name, calls) => {
-  const apiName = name;
-  var lines = [
+  var lines = new Lines();
+  lines.add([
     '\n',
     '-- API: ', name, '\n',
-    'data ', apiName, '\n',
-  ];
-  lines = lines.concat([
-    '  = ', apiName, '\'', calls[0].name,  calls[0].filled ? (' ' + calls[0].name) : '', '\n',
+    'data ', name, '\n',
   ]);
-  for (var i = 1; i < calls.length; i++) {
-    lines = lines.concat([
-      '  | ', apiName, '\'', calls[i].name,  calls[i].filled ? (' ' + calls[i].name) : '', '\n',
-    ]);
-
-  }
-  lines = lines.concat([
+  lines.add([
+    '  = ', name, '\'', calls[0].name,  calls[0].filled ? (' ' + calls[0].name) : '', '\n',
+  ]);
+  calls.slice(1).forEach(call =>
+    lines.add([
+      '  | ', name, '\'', call.name,  call.filled ? (' ' + call.name) : '', '\n'
+    ])
+  );
+  lines.add([
     '  deriving (P.Show, P.Eq)\n',
   ]);
-  return lines.join('');
+  return lines.collapse();
 };
 
 
