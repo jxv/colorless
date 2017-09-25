@@ -364,29 +364,29 @@ const genApiParser = (name, calls) => {
 };
 
 const genApiLookup = (name, calls) => {
-  var lines = [
+  var lines = new Lines([
     '\n',
     '-- API\n',
     'api :: (Service meta m, C.RuntimeThrower m) => meta -> C.ApiCall -> m C.Val\n',
     'api meta\' apiCall\' = case C.parseApiCall apiParser apiCall\' of\n',
     '  P.Nothing -> C.runtimeThrow C.RuntimeError\'UnrecognizedCall\n',
     '  P.Just x\' -> case x\' of\n',
-  ];
-  for (var i = 0; i < calls.hollow.length; i++) {
-    lines = lines.concat([
-      '    ', name, '\'', calls.hollow[i].name, ' -> C.toVal P.<$> ', calls.hollow[i].func, ' meta\'\n',
-    ]);
-  }
-  for (var i = 0; i < calls.filled.length; i++) {
-    lines = lines.concat([
-      '    ', name, '\'', calls.filled[i].name, ' a\' -> C.toVal P.<$> ', calls.filled[i].func, ' meta\' a\'\n',
-    ]);
-  }
-  return lines.join('');
+  ]);
+  calls.hollow.forEach(hollow =>
+    lines.add([
+      '    ', name, '\'', hollow.name, ' -> C.toVal P.<$> ', hollow.func, ' meta\'\n',
+    ])
+  );
+  calls.filled.forEach(filled =>
+    lines.add([
+      '    ', name, '\'', filled.name, ' a\' -> C.toVal P.<$> ', filled.func, ' meta\' a\'\n',
+    ])
+  );
+  return lines.collapse();
 };
 
 const genHandleRequest = (meta) => {
-  var lines = [
+  return new Lines([
     '\n',
     '-- Handle Request\n',
     'handleRequest :: (Service meta m, C.RuntimeThrower m, IO.MonadIO m) => C.Options -> (', meta, ' -> m meta) -> C.Request -> m C.Response\n',
@@ -405,12 +405,11 @@ const genHandleRequest = (meta) => {
     '  calls\' <- P.maybe (C.runtimeThrow C.RuntimeError\'UnparsableCalls) P.return (P.mapM C.jsonToExpr calls)\n',
     '  vals <- P.mapM (\\v -> C.runEval (C.forceVal P.=<< C.eval v envRef) evalConfig) calls\'\n',
     '  P.return (C.Response\'Success (A.toJSON vals))\n',
-  ];
-  return lines.join('');
+  ]).collapse();
 };
 
 const genImports = (prefix, importTypes) => {
-  var lines = [
+  var lines = new Lines([
     '\n',
     '-- Imports\n',
     'import qualified Prelude as P\n',
@@ -428,15 +427,15 @@ const genImports = (prefix, importTypes) => {
     'import qualified Colorless.Runtime.Expr as C\n',
     'import qualified Colorless.Runtime.Val as C (ToVal(..), FromVal(..), getMember, fromValFromJson, combineObjects)\n',
     '\n',
-  ];
-  lines = lines.concat(importTypes.map(({ name, major }) =>
+  ]);
+  lines.add(importTypes.map(({ name, major }) =>
     'import ' + prefix + '.V' + major + ' (' + name + '(..))\n'
   ));
-  return lines.join('');
+  return lines.collapse();
 };
 
 const genPragmas = () => {
-  return [
+  return new Lines([
     '-- Pragmas\n',
     '{-# OPTIONS_GHC -fno-warn-unused-imports #-}\n',
     '{-# LANGUAGE DeriveGeneric #-}\n',
@@ -451,11 +450,11 @@ const genPragmas = () => {
     '{-# LANGUAGE FlexibleInstances #-}\n',
     '{-# LANGUAGE ScopedTypeVariables #-}\n',
     '{-# LANGUAGE NoImplicitPrelude #-}\n',
-  ].join('');
+  ]).collapse();
 };
 
 const genModule = (prefix, version, types) => {
-  var lines = [
+  var lines = new Lines([
     '\n',
     '-- Module\n',
     'module ', prefix, '.V', version.major, '\n',
@@ -463,16 +462,14 @@ const genModule = (prefix, version, types) => {
     '  , handleRequest\n',
     '  , ServiceThrower(..)\n',
     '  , Service(..)\n',
-  ];
-  for (var i = 0; i < types.length; i++) {
-    lines = lines.concat([
-      '  , ', types[i], '(..)\n',
-    ]);
-  }
-  lines = lines.concat([
-    '  ) where\n',
   ]);
-  return lines.join('');
+  types.forEach(type =>
+    lines.add([
+      '  , ', type, '(..)\n',
+    ])
+  );
+  lines.add('  ) where\n');
+  return lines.collapse();
 };
 
 const mkServiceCalls = (s) => {
