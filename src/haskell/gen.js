@@ -283,108 +283,84 @@ const genVersion = (major,minor) => {
 };
 
 const genApiParser = (name, calls) => {
-  var lines = [
+  var lines = new Lines([
     '\n',
     '-- API Parser\n',
     'apiParser :: C.ApiParser ', name, '\n',
     'apiParser = C.ApiParser\n',
-  ];
+  ]);
 
   // Hollow
-  if (calls.hollow.length > 0) {
-    lines = lines.concat([
-      '  { hollow = Map.fromList\n',
-    ]);
-    lines = lines.concat([
+  if (calls.hollow.length) {
+    lines.add('  { hollow = Map.fromList\n');
+    lines.add([
       '     [ ("', calls.hollow[0].label, '", ', name, '\'', calls.hollow[0].name, ')\n',
     ]);
-    for (var i = 1; i < calls.hollow.length; i++) {
-      lines = lines.concat([
-        '     , ("', calls.hollow[i].label, '", ', name, '\'', calls.hollow[i].name, ')\n',
-      ]);
-    }
-    lines = lines.concat([
-      '     ]\n',
-    ]);
+    calls.hollow.slice(1).forEach(hollow =>
+      lines.add([
+        '     , ("', hollow.label, '", ', name, '\'', hollow.name, ')\n',
+      ])
+    );
+    lines.add('     ]\n');
   } else {
-    lines = lines.concat([
-      '  { hollow = Map.empty\n',
-    ]);
+    lines.add('  { hollow = Map.empty\n');
   }
 
   // Struct
-  if (calls.struct.length > 0) {
-    lines = lines.concat([
-      '  , struct = Map.fromList\n',
-    ]);
-    lines = lines.concat([
+  if (calls.struct.length) {
+    lines.add('  , struct = Map.fromList\n');
+    lines.add([
       '     [ ("', calls.struct[0].label, '", v ', name, '\'', calls.struct[0].name, ')\n',
     ]);
-    for (var i = 1; i < calls.struct.length; i++) {
-      lines = lines.concat([
-        '     , ("', calls.struct[i].label, '", v ', name, '\'', calls.struct[i].name, ')\n',
-      ]);
-    }
-    lines = lines.concat([
-      '     ]\n',
-    ]);
+    calls.struct.slice(1).forEach(struct =>
+      lines.add([
+        '     , ("', struct.label, '", v ', name, '\'', struct.name, ')\n',
+      ])
+    );
+    lines.add('     ]\n');
   } else {
-    lines = lines.concat([
-      '  , struct = Map.empty\n',
-    ]);
+    lines.add('  , struct = Map.empty\n');
   }
 
   // Enumeration
-  if (calls.enumeration.length > 0) {
-    lines = lines.concat([
-      '  , enumeration = Map.fromList\n',
-    ]);
-    lines = lines.concat([
+  if (calls.enumeration.length) {
+    lines.add('  , enumeration = Map.fromList\n');
+    lines.add([
       '     [ ("', calls.enumeration[0].label, '", v ', name, '\'', calls.enumeration[0].name, ')\n',
     ]);
-    for (var i = 1; i < calls.enumeration.length; i++) {
-      lines = lines.concat([
-        '     , ("', calls.enumeration[i].label, '", v ', name, '\'', calls.enumeration[i].name, ')\n',
-      ]);
-    }
-    lines = lines.concat([
-      '     ]\n',
-    ]);
+    calls.enumeration.slice(1).forEach(enumeration =>
+      lines.add([
+        '     , ("', enumeration.label, '", v ', name, '\'', enumeration.name, ')\n',
+      ])
+    );
+    lines.add('     ]\n');
   } else {
-    lines = lines.concat([
-      '  , enumeration = Map.empty\n',
-    ]);
+    lines.add('  , enumeration = Map.empty\n');
   }
 
   // Wrap
-  if (calls.wrap.length > 0) {
-    lines = lines.concat([
-      '  , wrap = Map.fromList\n',
-    ]);
-    lines = lines.concat([
+  if (calls.wrap.length) {
+    lines.add('  , wrap = Map.fromList\n');
+    lines.add([
       '     [ ("', calls.wrap[0].label, '", v ', name, '\'', calls.wrap[0].name, ')\n',
     ]);
-    for (var i = 1; i < calls.wrap.length; i++) {
-      lines = lines.concat([
-        '     , ("', calls.wrap[i].label, '", v ', name, '\'', calls.wrap[i].name, ')\n',
-      ]);
-    }
-    lines = lines.concat([
-      '     ]\n',
-    ]);
+    calls.wrap.slice(1).forEach(wrap =>
+      lines.add([
+        '     , ("', wrap.label, '", v ', name, '\'', wrap.name, ')\n',
+      ])
+    );
+    lines.add('     ]\n');
   } else {
-    lines = lines.concat([
-      '  , wrap = Map.empty\n',
-    ]);
+    lines.add('  , wrap = Map.empty\n');
   }
 
-  lines = lines.concat([
+  lines.add([
     '  }\n',
     '  where\n',
     '    v x y = x P.<$> C.fromVal y\n'
   ]);
 
-  return lines.join('');
+  return lines.collapse();
 };
 
 const genApiLookup = (name, calls) => {
