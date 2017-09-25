@@ -14,7 +14,7 @@ const genWrap = ({name, type, instances}) => {
   lines.add([
     '  deriving (P.Show, P.Eq, P.Ord, ', instances.text ? 'P.IsString, T.ToText, ' : '', instances.number ? 'P.Num, ' : '', 'A.FromJSON, A.ToJSON, C.ToVal, C.FromVal)', '\n',
   ]);
-  return lines.collapse();
+  return lines;
 };
 
 
@@ -79,7 +79,7 @@ const genStruct = ({name, members}) => {
     );
   }
 
-  return lines.collapse();
+  return lines;
 };
 
 
@@ -222,7 +222,7 @@ const genEnumeration = ({name, enumerals}) => {
     });
   }
 
-  return lines.collapse();
+  return lines;
 };
 
 
@@ -244,7 +244,7 @@ const genApi = (name, calls) => {
   lines.add([
     '  deriving (P.Show, P.Eq)\n',
   ]);
-  return lines.collapse();
+  return lines;
 };
 
 
@@ -254,7 +254,7 @@ const genServiceThrower = (error) => {
     '-- ServiceThrower\n',
     'class P.Monad m => ServiceThrower m where\n',
     '  serviceThrow :: ', error, ' -> m a\n',
-  ]).collapse();
+  ]);
 };
 
 
@@ -269,7 +269,7 @@ const genService = (calls) => {
       '  ', call.func, ' :: meta ->', call.name ? (' ' + call.name + ' ->') : '', ' m ', call.output, '\n',
     ])
   );
-  return lines.collapse();
+  return lines;
 };
 
 
@@ -279,7 +279,7 @@ const genVersion = (major,minor) => {
     '-- Version\n',
     'version :: C.Version\n',
     'version = C.Version ', major, ' ', minor, '\n',
-  ]).collapse();
+  ]);
 };
 
 const genApiParser = (name, calls) => {
@@ -360,7 +360,7 @@ const genApiParser = (name, calls) => {
     '    v x y = x P.<$> C.fromVal y\n'
   ]);
 
-  return lines.collapse();
+  return lines;
 };
 
 const genApiLookup = (name, calls) => {
@@ -382,7 +382,7 @@ const genApiLookup = (name, calls) => {
       '    ', name, '\'', filled.name, ' a\' -> C.toVal P.<$> ', filled.func, ' meta\' a\'\n',
     ])
   );
-  return lines.collapse();
+  return lines;
 };
 
 const genHandleRequest = (meta) => {
@@ -405,7 +405,7 @@ const genHandleRequest = (meta) => {
     '  calls\' <- P.maybe (C.runtimeThrow C.RuntimeError\'UnparsableCalls) P.return (P.mapM C.jsonToExpr calls)\n',
     '  vals <- P.mapM (\\v -> C.runEval (C.forceVal P.=<< C.eval v envRef) evalConfig) calls\'\n',
     '  P.return (C.Response\'Success (A.toJSON vals))\n',
-  ]).collapse();
+  ]);
 };
 
 const genImports = (prefix, importTypes) => {
@@ -431,7 +431,7 @@ const genImports = (prefix, importTypes) => {
   lines.add(importTypes.map(({ name, major }) =>
     'import ' + prefix + '.V' + major + ' (' + name + '(..))\n'
   ));
-  return lines.collapse();
+  return lines;
 };
 
 const genPragmas = () => {
@@ -450,7 +450,7 @@ const genPragmas = () => {
     '{-# LANGUAGE FlexibleInstances #-}\n',
     '{-# LANGUAGE ScopedTypeVariables #-}\n',
     '{-# LANGUAGE NoImplicitPrelude #-}\n',
-  ]).collapse();
+  ]);
 };
 
 const genModule = (prefix, version, types) => {
@@ -469,7 +469,7 @@ const genModule = (prefix, version, types) => {
     ])
   );
   lines.add('  ) where\n');
-  return lines.collapse();
+  return lines;
 };
 
 const mkServiceCalls = (s) => {
@@ -525,23 +525,23 @@ const gen = (s) => {
   const apiLookupPairs = mkApiLookupPairs(s);
   const apiCalls = mkApiCalls(s);
   const apiParserCalls = mkApiParserCalls(s);
-  return [
-    genPragmas(),
-    genModule(s.module, s.version, exportTypes),
-    genImports(s.module, importTypes),
-    genVersion(s.version.major, s.version.minor),
-    genServiceThrower(s.error),
-    genService(serviceCalls),
-    genHandleRequest(s.meta),
-    genApiLookup(s.name, apiLookupPairs),
-    genApiParser(s.name, apiParserCalls),
-    genApi(s.name, apiCalls),
-  ]
-    .concat(s.wrap.filter(currentTypeSource(s)).map(genWrap))
-    .concat(s.struct.filter(currentTypeSource(s)).map(genStruct))
-    .concat(s.enumeration.filter(currentTypeSource(s)).map(genEnumeration))
-    .concat(['\n'])
-    .join('');
+
+  var lines = new Lines();
+  lines.add(genPragmas());
+  lines.add(genModule(s.module, s.version, exportTypes));
+  lines.add(genImports(s.module, importTypes));
+  lines.add(genVersion(s.version.major, s.version.minor));
+  lines.add(genServiceThrower(s.error));
+  lines.add(genService(serviceCalls));
+  lines.add(genHandleRequest(s.meta));
+  lines.add(genApiLookup(s.name, apiLookupPairs));
+  lines.add(genApiParser(s.name, apiParserCalls));
+  lines.add(genApi(s.name, apiCalls));
+  s.wrap.filter(currentTypeSource(s)).forEach(ty => lines.add(genWrap(ty)));
+  s.struct.filter(currentTypeSource(s)).forEach(ty => lines.add(genStruct(ty)));
+  s.enumeration.filter(currentTypeSource(s)).forEach(ty => lines.add(genEnumeration(ty)));
+  lines.add('\n');
+  return lines.collapse();
 };
 
 module.exports.gen = gen;
