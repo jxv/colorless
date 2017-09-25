@@ -274,12 +274,12 @@ const genService = (calls) => {
 
 
 const genVersion = (major,minor) => {
-  return [
+  return new Lines([
     '\n',
     '-- Version\n',
     'version :: C.Version\n',
     'version = C.Version ', major, ' ', minor, '\n',
-  ].join('');
+  ]).collapse();
 };
 
 const genApiParser = (name, calls) => {
