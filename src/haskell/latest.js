@@ -8,34 +8,36 @@ const genPragmas = () => {
   ]);
 };
 
-const genModule = (prefix, exportTypes) => {
+const genModule = (prefix, major, exportTypes) => {
   var lines = new Lines([
     '\n',
     '-- Module\n',
     'module ', prefix, '\n',
     '  ( mkHandleRequestMap\n',
     '  , MetaMiddlewares(..)\n',
-    '  , handleRequest_V0\n',
   ]);
   lines.add([
-    '  , V0.Service(..)\n',
-    '  , V0.ServiceThrower(..)\n',
+    '  , V', major, '.Service(..)\n',
+    '  , V', major, '.ServiceThrower(..)\n',
   ]);
-  lines.add(exportTypes.map(type => '  , V0.' + type + '(..)\n'))
+  lines.add(exportTypes.map(type => '  , V' + major  + '.' + type + '(..)\n'))
   lines.add('  ) where\n');
   return lines;
 };
 
-const genImports = (prefix, exportTypes) => {
-  var lines = new Lines([
+const genCommonImports = () => {
+  return new Lines([
     '\n',
     'import qualified Data.Map as Map\n',
     'import qualified Colorless.Types as C (RuntimeThrower, Options, Request, Response, Major, Minor)\n',
     'import qualified Control.Monad.IO.Class as M (MonadIO)\n',
   ]);
-  lines.add([
+};
+
+const genVersionImports = (prefix, major, exportTypes) => {
+  var lines = new Lines([
     '\n',
-    'import ', prefix, '.V0 as V0\n',
+    'import qualified ', prefix, '.V', major, ' as V', major, '\n',
   ]);
   lines.add([
     '  ( Service(..)\n',
@@ -48,29 +50,27 @@ const genImports = (prefix, exportTypes) => {
   return lines;
 };
 
-const genHandleRequest = (meta) => {
+const genMetaMiddlewares = (specs) => {
   var lines = new Lines([
     '\n',
-    'handleRequest_V0 :: (V0.Service meta m, C.RuntimeThrower m, M.MonadIO m) => C.Options -> (', meta ,' -> m meta) -> C.Request -> m C.Response\n',
-    'handleRequest_V0 = V0.handleRequest\n'
+    'data MetaMiddlewares m',
   ]);
-  return lines;
-}
-
-const genMetaMiddlewares = (meta) => {
-  var lines = new Lines([
+  lines.add(specs.map(({version}) =>
+    ' meta' + version.major
+  ))
+  lines.add([
     '\n',
-    'data MetaMiddlewares\n',
-    '    m\n',
-    '    meta_V0\n',
     '  = MetaMiddlewares\n',
   ]);
-  lines.add(['  { metaMiddleware_V0 :: ', meta, ' -> m meta_V0\n']);
+  lines.add(['  { metaMiddleware', specs[0].version.major ,' :: ', specs[0].metaVersion, ' -> m meta', specs[0].version.major,'\n']);
+  specs.slice(1).forEach(spec =>
+    lines.add(['  , metaMiddleware', spec.version.major ,' :: ', spec.metaVersion, ' -> m meta', spec.version.major,'\n'])
+  );
   lines.add('  }\n');
   return lines;
 }
 
-const genMkHandleRequestMap = () => {
+const genMkHandleRequestMap = (versions) => {
   var lines = new Lines();
   lines.add([
     '\n',
@@ -78,29 +78,50 @@ const genMkHandleRequestMap = () => {
     '  ::\n',
     '    ( M.MonadIO m\n',
     '    , C.RuntimeThrower m\n',
-    '    , V0.Service meta_V0 m\n',
+  ]);
+  lines.add(versions.map(version =>
+    '    , V' + version.major + '.Service meta' + version.major + ' m\n',
+  ));
+  lines.add([
     '    )\n',
     '  => C.Options\n',
-    '  -> MetaMiddlewares\n',
-    '      m\n',
-    '      meta_V0\n',
+    '  -> MetaMiddlewares m',
+  ]);
+  lines.add(versions.map(version =>
+    ' meta' + version.major
+  ));
+  lines.add([
+    '\n',
     '  -> Map.Map C.Major (C.Minor, C.Request -> m C.Response)\n',
     'mkHandleRequestMap options metaMiddlewares = Map.fromList\n',
-    '    [ (0, (0, V0.handleRequest options $ metaMiddleware_V0 metaMiddlewares))\n',
-    '    ]\n'
   ]);
+
+  lines.add(
+    '    [ (' + versions[0].major + ', (' + versions[0].minor + ', V' + versions[0].major + '.handleRequest options $ metaMiddleware' + versions[0].major + ' metaMiddlewares))\n'
+  );
+  lines.add(versions.slice(1).map(version =>
+    '    , (' + version.major + ', (' + version.minor + ', V' + version.major + '.handleRequest options $ metaMiddleware' + version.major + ' metaMiddlewares))\n'
+  ));
+  lines.add(
+    '    ]\n'
+  );
   return lines;
 }
 
-const latest = (spec) => {
+const latest = (specs) => {
+  const spec = specs[specs.length - 1];
   const exportTypes = mkExportTypes(spec);
+  const versions = specs.map(s => s.version);
+
   var lines = new Lines();
   lines.add(genPragmas());
-  lines.add(genModule(spec.module, exportTypes));
-  lines.add(genImports(spec.module, exportTypes));
-  lines.add(genHandleRequest(spec.meta));
-  lines.add(genMetaMiddlewares(spec.meta));
-  lines.add(genMkHandleRequestMap());
+  lines.add(genModule(spec.module, spec.version.major, exportTypes));
+  lines.add(genCommonImports());
+  specs.forEach(spec =>
+    lines.add(genVersionImports(spec.module, spec.version.major, mkExportTypes(spec)))
+  );
+  lines.add(genMetaMiddlewares(specs));
+  lines.add(genMkHandleRequestMap(versions));
   lines.add('\n');
   return lines.collapse();
 };

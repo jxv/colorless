@@ -1,3 +1,5 @@
+var R = require('ramda');
+
 const primMap = {
   'Unit': '()',
   'Bool': 'P.Bool',
@@ -36,24 +38,30 @@ const isNumber = n => (
 
 const langTypeName = n => primMap[n] || n; // convert types to haskell acceptable names.
 
+const langTypeNameVersion = R.curry((major, n) => primMap[n] || ('V' + major + '.' + n)); // convert types to haskell acceptable names and qualified by version.
+
 const langTypeLabel = n => n; // convert types to haskell acceptable names. Nearly always identity.
 
-const langType = ty => {
+const langTypeGeneric = R.curry((tyName, ty) => {
   if (typeof ty === 'string') {
-    return langTypeName(ty);
+    return tyName(ty);
   }
   if (typeof ty === 'object') {
     if (ty.n === 'List') {
-      return '[' + langType(ty.p) + ']'
+      return '[' + langTypeGeneric(tyName, ty.p) + ']'
     }
     if (ty.n === 'Option') {
-      return '(P.Maybe ' + langType(ty.p) + ')'
+      return '(P.Maybe ' + langTypeGeneric(tyName, ty.p) + ')'
     }
     if (ty.n === 'Either') {
-      return '(P.Either (' + langType(ty.p[0]) + ') (' + langType(ty.p[1]) + '))'
+      return '(P.Either (' + langTypeGeneric(tyName, ty.p[0]) + ') (' + langTypeGeneric(tyName, ty.p[1]) + '))'
     }
   }
-};
+});
+
+const langType = langTypeGeneric(langTypeName);
+
+const langTypeVersion = (major, n) => langTypeGeneric(langTypeNameVersion(major))(n);
 
 const hollow = (types) => types.filter(type => type.n && !type.m && !type.e && !type.w).map(type => ({
   name: langTypeName(type.n),
@@ -123,6 +131,7 @@ const spec = (prefix, version, s) => ({
   version: version,
   error: langType(s.pull.error),
   meta: langType(s.pull.meta),
+  metaVersion: langTypeVersion(version.major, s.pull.meta),
   name: s.pull.name,
   hollow: hollow(s.types),
   struct: struct(s.types),

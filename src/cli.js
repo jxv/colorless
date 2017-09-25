@@ -16,6 +16,7 @@ program
   .option('-l --lang [type]', 'Language of code')
   .option('-m --prefix [type]', 'Prefix or module name')
   .option('-e --side [type]', '\'client\' or \'server\' side code', 'client')
+  .option('-v --major [type]', 'Oldest supported major version', '0')
   .parse(process.argv);
 
 const hasJsonExtension = (name) => {
@@ -63,8 +64,12 @@ const hasJsonExtension = (name) => {
 
         const reqTyVers = dropLowMinors(tyVers);
         const reqSpecs = attachTypeSources(specs, reqTyVers);
-
-        const latest = Haskell.latest(reqSpecs[reqSpecs.length - 1]);
+        const supportedSpecs = specs.filter(({version}) => version.major >= +program.major);
+        if (!supportedSpecs.length) {
+          console.log('Spec support is too high')
+          return;
+        }
+        const latest = Haskell.latest(supportedSpecs);
 
         mkdirp(program.dest, function (err) {
           if (err) { console.error(err)
