@@ -1,4 +1,5 @@
 const R = require('ramda');
+var Lines = require('../lines.js').Lines;
 
 var { enumeralNameTagMember, mkExportTypes, mkImportTypes } = require('./common.js');
 
@@ -18,63 +19,67 @@ const genWrap = ({name, type, instances}) => {
 
 
 const genStruct = ({name, members}) => {
-  // Data type declaration
-  const declName = [
-    '\n',
-    '-- Struct: ', name, '\n',
-    'data ', name, ' = ', name, '\n',
-  ];
-  var declMembers = ['  { ', members[0].name, ' :: ', members[0].type, '\n'];
-  for (var i = 1; i < members.length; i++) {
-    declMembers = declMembers.concat(['  , ', members[i].name, ' :: ', members[i].type, '\n']);
-  }
-  var declDeriving = '  } deriving (P.Show, P.Eq, P.Generic)\n';
-  const decl = declName.concat(declMembers).concat([declDeriving]);
+  var lines = new Lines();
 
-  // ToJSON instance
-  const toJSON  = [
-    '\n',
-    'instance A.ToJSON ', name, '\n',
-  ];
-
-  // ToVal instance
-  const toValDecl = [
-    '\n',
-    'instance C.ToVal ', name, ' where', '\n',
-    '  toVal ', name, '\n',
-  ];
-  var toValDecons = ['    { ', members[0].name, '\n'];
-  for (var i = 1; i < members.length; i++) {
-    toValDecons = toValDecons.concat(['    , ', members[i].name, '\n']);
+  { // Data type declaration
+    lines.add([
+      '\n',
+      '-- Struct: ', name, '\n',
+      'data ', name, ' = ', name, '\n',
+    ]);
+    lines.add(['  { ', members[0].name, ' :: ', members[0].type, '\n']);
+    for (var i = 1; i < members.length; i++) {
+      lines.add(['  , ', members[i].name, ' :: ', members[i].type, '\n']);
+    }
+    lines.add('  } deriving (P.Show, P.Eq, P.Generic)\n');
   }
-  toValDecons.push('    }');
-  var toValDef = [
-    ' = C.Val\'ApiVal P.$ C.ApiVal\'Struct P.$ C.Struct P.$ Map.fromList\n',
-    '    [ ("', members[0].label, '", C.toVal ', members[0].name, ')\n',
-  ];
-  for (var i = 1; i < members.length; i++) {
-    toValDef = toValDef.concat(['    , ("', members[i].label, '", C.toVal ', members[i].name, ')\n']);
-  }
-  toValDef.push('    ]\n\n');
-  const toVal = toValDecl.concat(toValDecons).concat(toValDef);
 
-  // FromVal instance
-  var fromVal = [
-    'instance C.FromVal ', name, ' where\n',
-    '  fromVal = \\case\n',
-    '    C.Val\'ApiVal (C.ApiVal\'Struct (C.Struct m)) -> ', name, '\n',
-    '      P.<$> C.getMember m "', members[0].label , '"\n'
-  ];
-  for (var i = 1; i < members.length; i++) {
-    fromVal = fromVal.concat([
-      '      P.<*> C.getMember m "', members[i].label, '"\n'
+  { // ToJSON instance
+    lines.add([
+      '\n',
+      'instance A.ToJSON ', name, '\n',
     ]);
   }
-  fromVal = fromVal.concat([
-    '    _ -> P.Nothing\n',
-  ]);
 
-  return decl.concat(toJSON).concat(toVal).concat(fromVal).join('');
+  { // ToVal instance
+    lines.add([
+      '\n',
+      'instance C.ToVal ', name, ' where', '\n',
+      '  toVal ', name, '\n',
+    ]);
+    lines.add(['    { ', members[0].name, '\n']);
+    members.slice(1).forEach(member =>
+      lines.add(['    , ', member.name, '\n'])
+    );
+    lines.add('    }');
+    lines.add([
+      ' = C.Val\'ApiVal P.$ C.ApiVal\'Struct P.$ C.Struct P.$ Map.fromList\n',
+      '    [ ("', members[0].label, '", C.toVal ', members[0].name, ')\n',
+    ]);
+    members.slice(1).forEach(member =>
+      lines.add(['    , ("', member.label, '", C.toVal ', member.name, ')\n'])
+    );
+    lines.add('    ]\n\n');
+  }
+
+  { // FromVal instance
+    lines.add([
+      'instance C.FromVal ', name, ' where\n',
+      '  fromVal = \\case\n',
+      '    C.Val\'ApiVal (C.ApiVal\'Struct (C.Struct m)) -> ', name, '\n',
+      '      P.<$> C.getMember m "', members[0].label , '"\n'
+    ]);
+    members.slice(1).forEach(member =>
+      lines.add([
+        '      P.<*> C.getMember m "', member.label, '"\n'
+      ])
+    );
+    lines.add(
+      '    _ -> P.Nothing\n'
+    );
+  }
+
+  return lines.collapse();
 };
 
 
