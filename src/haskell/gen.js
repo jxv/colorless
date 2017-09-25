@@ -249,27 +249,27 @@ const genApi = (name, calls) => {
 
 
 const genServiceThrower = (error) => {
-  return [
+  return new Lines([
     '\n',
     '-- ServiceThrower\n',
     'class P.Monad m => ServiceThrower m where\n',
     '  serviceThrow :: ', error, ' -> m a\n',
-  ].join('');
+  ]).collapse();
 };
 
 
 const genService = (calls) => {
-  var lines = [
+  var lines = new Lines([
     '\n',
     '-- Service\n',
     'class ServiceThrower m => Service meta m where\n'
-  ];
-  for (var i = 0; i < calls.length; i++) {
-    lines = lines.concat([
-      '  ', calls[i].func, ' :: meta ->', calls[i].name ? (' ' + calls[i].name + ' ->') : '', ' m ', calls[i].output, '\n',
-    ]);
-  }
-  return lines.join('');
+  ]);
+  calls.forEach(call =>
+    lines.add([
+      '  ', call.func, ' :: meta ->', call.name ? (' ' + call.name + ' ->') : '', ' m ', call.output, '\n',
+    ])
+  );
+  return lines.collapse();
 };
 
 
