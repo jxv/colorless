@@ -84,150 +84,145 @@ const genStruct = ({name, members}) => {
 
 
 const genEnumeration = ({name, enumerals}) => {
-  // Data type declaration
-  const declName = [
-    '\n',
-    '-- Enumeration: ', name, '\n',
-    'data ', name, '\n',
-  ];
-  function nameTag(i) {
-    return name + '\'' + enumerals[i].tag;
+  var lines = new Lines();
+
+  function nameTag(tag) {
+    return name + '\'' + tag;
   }
-  function nameTagMembers(i) {
-    return enumeralNameTagMember(name, enumerals[i].tag);
+  function nameTagMembers(tag) {
+    return enumeralNameTagMember(name, tag);
   }
-  var declEnumerals = ['  = ', nameTag(0), ' '].concat(enumerals[0].members ? [nameTagMembers(0), '\n'] : ['\n']);
-  for (var i = 1; i < enumerals.length; i++) {
-    declEnumerals = declEnumerals.concat(
-      enumerals[i].members
-        ? ['  | ', nameTag(i), ' ', nameTagMembers(i), '\n']
-        : ['  | ', nameTag(i), '\n']
+
+  { // Data type declaration
+    lines.add([
+      '\n',
+      '-- Enumeration: ', name, '\n',
+      'data ', name, '\n',
+    ]);
+    lines.add(['  = ', nameTag(enumerals[0].tag), ' '])
+    lines.add(enumerals[0].members ? [nameTagMembers(enumerals[0].tag), '\n'] : ['\n']);
+    enumerals.slice(1).forEach(enumeral =>
+      lines.add(enumeral.members
+        ? ['  | ', nameTag(enumeral.tag), ' ', nameTagMembers(enumeral.tag), '\n']
+        : ['  | ', nameTag(enumeral.tag), '\n']
+      )
     );
+    lines.add('  deriving (P.Show, P.Eq)\n');
   }
-  declEnumerals.push(['  deriving (P.Show, P.Eq)\n']);
-  const decl = declName.concat(declEnumerals);
 
-  // Data type declarations for members
-  var declMemberDecls = [];
-  for (var i = 0; i < enumerals.length; i++) {
-    const members = enumerals[i].members;
-    if (members == undefined) {
-      continue;
-    }
-    // Data type declarations for member
-    const declMemberName = [
+  { // Data type declarations for members
+    enumerals.forEach(enumeral => {
+      if (enumeral.members) {
+        // Data type declarations for member
+        lines.add([
+          '\n',
+          'data ', nameTagMembers(enumeral.tag), ' = ', nameTagMembers(enumeral.tag), '\n'
+        ]);
+        lines.add(['  { ', enumeral.members[0].name, ' :: ', enumeral.members[0].type, '\n']);
+        enumeral.members.slice(1).forEach(member =>
+          lines.add(['  , ', member.name, ' :: ', member.type, '\n'])
+        );
+        lines.add('  } deriving (P.Show, P.Eq, P.Generic)\n');
+        // ToJSON instance
+        lines.add([
+          '\n',
+          'instance A.ToJSON ', nameTagMembers(enumeral.tag), '\n'
+        ]);
+      }
+    });
+  }
+
+  { // ToJSON instance
+    lines.add([
       '\n',
-      'data ', nameTagMembers(i), ' = ', nameTagMembers(i), '\n'
-    ];
-    var declMembers = ['  { ', members[0].name, ' :: ', members[0].type, '\n'];
-    for (var j = 1; j < members.length; j++) {
-      declMembers = declMembers.concat(['  , ', members[j].name, ' :: ', members[j].type, '\n']);
-    }
-    var declDeriving = '  } deriving (P.Show, P.Eq, P.Generic)\n';
-    const declMember = declMemberName.concat(declMembers).concat([declDeriving]);
-    // ToJSON instance
-    const toJSON  = [
+      'instance A.ToJSON ', name, ' where\n',
+      '  toJSON = \\case\n',
+    ]);
+    enumerals.forEach(enumeral => {
+      lines.add([
+        '    ', nameTag(enumeral.tag), ' ',
+      ]);
+      if (enumeral.members == undefined) {
+        lines.add(['-> A.object [ "tag" A..= ("', enumeral.tag, '" :: T.Text) ]\n']);
+      } else {
+        lines.add(['m -> C.combineObjects (A.object [ "tag" A..= ("', enumeral.label, '" :: T.Text) ]) (A.toJSON m)\n']);
+      }
+    });
+  }
+
+  { // FromVal instance
+    lines.add([
       '\n',
-      'instance A.ToJSON ', nameTagMembers(i), '\n'
-    ];
-    declMemberDecls = declMemberDecls.concat(declMember).concat(toJSON);
-  }
-
-  // ToJSON instance
-  var toJSON  = [
-    '\n',
-    'instance A.ToJSON ', name, ' where\n',
-    '  toJSON = \\case\n',
-  ];
-  for (var i = 0; i < enumerals.length; i++) {
-    var line = [
-      '    ', nameTag(i), ' ',
-    ];
-    const members = enumerals[i].members;
-    if (members == undefined) {
-      line = line.concat(['-> A.object [ "tag" A..= ("', enumerals[i].tag, '" :: T.Text) ]\n']);
-    } else {
-      line = line.concat(['m -> C.combineObjects (A.object [ "tag" A..= ("', enumerals[i].label, '" :: T.Text) ]) (A.toJSON m)\n']);
-    }
-    toJSON = toJSON.concat(line);
-  }
-
-  // FromVal instance
-  var fromVal = [
-    '\n',
-    'instance C.FromVal ', name, ' where\n',
-    '  fromVal = \\case\n',
-    '    C.Val\'ApiVal (C.ApiVal\'Enumeral (C.Enumeral tag m)) -> case (tag,m) of\n',
-  ];
-  for (var i = 0; i < enumerals.length; i++) {
-    const members = enumerals[i].members;
-    if (members == undefined) {
-      fromVal = fromVal.concat([
-        '      ("', enumerals[i].label, '", P.Nothing) -> P.Just ', nameTag(i), '\n',
-      ]);
-    } else {
-      fromVal = fromVal.concat([
-        '      ("', enumerals[i].label, '", P.Just m\') -> ', nameTag(i), ' P.<$> (', nameTagMembers(i), '\n',
-      ]);
-      fromVal = fromVal.concat([
-        '          P.<$> C.getMember m\' "', members[0].label, '"\n'
-      ]);
-      for (var j = 1; j < members.length ; j++) {
-        fromVal = fromVal.concat([
-          '          P.<*> C.getMember m\' "', members[j].label, '"\n'
+      'instance C.FromVal ', name, ' where\n',
+      '  fromVal = \\case\n',
+      '    C.Val\'ApiVal (C.ApiVal\'Enumeral (C.Enumeral tag m)) -> case (tag,m) of\n',
+    ]);
+    enumerals.forEach(enumeral => {
+      if (enumeral.members == undefined) {
+        lines.add([
+          '      ("', enumeral.label, '", P.Nothing) -> P.Just ', nameTag(enumeral.tag), '\n',
         ]);
-      }
-      fromVal = fromVal.concat([
-        '        )\n',
-      ]);
-    }
-  }
-  fromVal = fromVal.concat([
-    '      _ -> P.Nothing\n',
-    '    _ -> P.Nothing\n',
-  ]);
-
-
-  // ToVal instance
-  var toVal = [
-    '\n',
-    'instance C.ToVal ', name, ' where\n',
-    '  toVal = \\case\n',
-  ];
-  for (var i = 0; i < enumerals.length; i++) {
-    const members = enumerals[i].members;
-    if (members == undefined) {
-      toVal = toVal.concat([
-        '    ', nameTag(i), ' -> C.Val\'ApiVal P.$ C.ApiVal\'Enumeral P.$ C.Enumeral "', enumerals[i].label, '" P.Nothing\n',
-      ]);
-    } else {
-      toVal = toVal.concat([
-        '    ', nameTag(i), ' ', nameTagMembers(i), '\n',
-      ]);
-      toVal = toVal.concat([
-        '      { ', members[0].name, '\n'
-      ]);
-      for (var j = 1; j < members.length; j++) {
-        toVal = toVal.concat([
-          '      , ', members[j].name, '\n'
+      } else {
+        lines.add([
+          '      ("', enumeral.label, '", P.Just m\') -> ', nameTag(enumeral.tag), ' P.<$> (', nameTagMembers(enumeral.tag), '\n',
         ]);
-      }
-      toVal = toVal.concat([
-        '      } -> C.Val\'ApiVal P.$ C.ApiVal\'Enumeral P.$ C.Enumeral "', enumerals[i].label, '" P.$ P.Just P.$ Map.fromList\n',
-      ]);
-      toVal = toVal.concat([
-        '      [ ("', members[0].label, '", C.toVal ', members[0].name, ')\n'
-      ]);
-      for (var j = 1; j < members.length; j++) {
-        toVal = toVal.concat([
-          '      , ("', members[j].label, '", C.toVal ', members[j].name, ')\n'
+        lines.add([
+          '          P.<$> C.getMember m\' "', enumeral.members[0].label, '"\n'
         ]);
+        enumeral.members.slice(1).forEach(member =>
+          lines.add([
+            '          P.<*> C.getMember m\' "', member.label, '"\n'
+          ])
+        );
+        lines.add('        )\n');
       }
-      toVal = toVal.concat(['      ]\n']);
-    }
+    });
+    lines.add([
+      '      _ -> P.Nothing\n',
+      '    _ -> P.Nothing\n',
+    ]);
   }
 
-  return decl.concat(declMemberDecls).concat(toJSON).concat(fromVal).concat(toVal).join('');
+  { // ToVal instance
+    lines.add([
+      '\n',
+      'instance C.ToVal ', name, ' where\n',
+      '  toVal = \\case\n',
+    ]);
+    enumerals.forEach(enumeral => {
+      if (enumeral.members == undefined) {
+        lines.add([
+          '    ', nameTag(enumeral.tag), ' -> C.Val\'ApiVal P.$ C.ApiVal\'Enumeral P.$ C.Enumeral "', enumeral.label, '" P.Nothing\n',
+        ]);
+      } else {
+        lines.add([
+          '    ', nameTag(enumeral.tag), ' ', nameTagMembers(enumeral.tag), '\n',
+        ]);
+        lines.add([
+          '      { ', enumeral.members[0].name, '\n'
+        ]);
+        enumeral.members.slice(1).forEach(member =>
+          lines.add([
+            '      , ', member.name, '\n'
+          ])
+        );
+        lines.add([
+          '      } -> C.Val\'ApiVal P.$ C.ApiVal\'Enumeral P.$ C.Enumeral "', enumeral.label, '" P.$ P.Just P.$ Map.fromList\n',
+        ]);
+        lines.add([
+          '      [ ("', enumeral.members[0].label, '", C.toVal ', enumeral.members[0].name, ')\n'
+        ]);
+        enumeral.members.slice(1).forEach(member =>
+          lines.add([
+            '      , ("', member.label, '", C.toVal ', member.name, ')\n'
+          ])
+        );
+        lines.add('      ]\n');
+      }
+    });
+  }
+
+  return lines.collapse();
 };
 
 
