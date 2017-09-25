@@ -6,15 +6,15 @@ var { enumeralNameTagMember, mkExportTypes, mkImportTypes } = require('./common.
 const isFunc = x => x.func && x.output;
 
 const genWrap = ({name, type, instances}) => {
-  var lines = [
+  var lines = new Lines([
     '\n',
     '-- Wrap: ', name , '\n',
     'newtype ', name , ' = ', name, ' ', type, '\n',
-  ];
-  lines = lines.concat([
+  ]);
+  lines.add([
     '  deriving (P.Show, P.Eq, P.Ord, ', instances.text ? 'P.IsString, T.ToText, ' : '', instances.number ? 'P.Num, ' : '', 'A.FromJSON, A.ToJSON, C.ToVal, C.FromVal)', '\n',
   ]);
-  return lines.join('');
+  return lines.collapse();
 };
 
 
