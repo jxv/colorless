@@ -64,7 +64,7 @@ const hasJsonExtension = (name) => {
 
         const reqTyVers = dropLowMinors(tyVers);
         const reqSpecs = attachTypeSources(specs, reqTyVers);
-        const supportedSpecs = specs.filter(({version}) => version.major >= +program.major);
+        const supportedSpecs = reqSpecs.filter(({version}) => version.major >= +program.major);
         if (!supportedSpecs.length) {
           console.log('Spec support is too high')
           return;
