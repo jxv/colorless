@@ -15,10 +15,10 @@
 
 -- Module
 module Colorless.Examples.Phonebook.V0
-  ( version
-  , handleRequest
-  , ServiceThrower(..)
-  , Service(..)
+  ( phonebook'Version
+  , phonebook'Handler
+  , Phonebook'Thrower(..)
+  , Phonebook'Service(..)
   , PersonId(..)
   , Name(..)
   , Phone(..)
@@ -50,21 +50,21 @@ import qualified Colorless.Runtime.Val as C (ToVal(..), FromVal(..), getMember, 
 
 
 -- Version
-version :: C.Version
-version = C.Version 0 0
+phonebook'Version :: C.Version
+phonebook'Version = C.Version 0 0
 
--- ServiceThrower
-class P.Monad m => ServiceThrower m where
-  serviceThrow :: () -> m a
+-- Thrower
+class P.Monad m => Phonebook'Thrower m where
+  phonebook'Throw :: () -> m a
 
 -- Service
-class ServiceThrower m => Service meta m where
+class Phonebook'Thrower m => Phonebook'Service meta m where
   lookupPerson :: meta -> LookupPerson -> m (P.Maybe Person)
   lookupPersonByName :: meta -> LookupPersonByName -> m [Person]
 
--- Handle Request
-handleRequest :: (Service meta m, C.RuntimeThrower m, IO.MonadIO m) => C.Options -> (() -> m meta) -> C.Request -> m C.Response
-handleRequest options metaMiddleware C.Request{meta,calls} = do
+-- Handler
+phonebook'Handler :: (Phonebook'Service meta m, C.RuntimeThrower m, IO.MonadIO m) => C.Options -> (() -> m meta) -> C.Request -> m C.Response
+phonebook'Handler options metaMiddleware C.Request{meta,calls} = do
   meta' <- P.maybe (C.runtimeThrow C.RuntimeError'UnparsableMeta) P.return (C.fromValFromJson meta)
   xformMeta <- metaMiddleware meta'
   envRef <- IO.liftIO C.emptyEnv
@@ -74,27 +74,27 @@ handleRequest options metaMiddleware C.Request{meta,calls} = do
         }
   let evalConfig = C.EvalConfig
         { C.options = options'
-        , C.apiCall = api xformMeta
+        , C.apiCall = phonebook'ApiCall xformMeta
         }
   calls' <- P.maybe (C.runtimeThrow C.RuntimeError'UnparsableCalls) P.return (P.mapM C.jsonToExpr calls)
   vals <- P.mapM (\v -> C.runEval (C.forceVal P.=<< C.eval v envRef) evalConfig) calls'
   P.return (C.Response'Success (A.toJSON vals))
 
 -- API
-api :: (Service meta m, C.RuntimeThrower m) => meta -> C.ApiCall -> m C.Val
-api meta' apiCall' = case C.parseApiCall apiParser apiCall' of
+phonebook'ApiCall :: (Phonebook'Service meta m, C.RuntimeThrower m) => meta -> C.ApiCall -> m C.Val
+phonebook'ApiCall meta' apiCall' = case C.parseApiCall phonebook'ApiParser apiCall' of
   P.Nothing -> C.runtimeThrow C.RuntimeError'UnrecognizedCall
   P.Just x' -> case x' of
-    Phonebook'LookupPerson a' -> C.toVal P.<$> lookupPerson meta' a'
-    Phonebook'LookupPersonByName a' -> C.toVal P.<$> lookupPersonByName meta' a'
+    Phonebook'Api'LookupPerson a' -> C.toVal P.<$> lookupPerson meta' a'
+    Phonebook'Api'LookupPersonByName a' -> C.toVal P.<$> lookupPersonByName meta' a'
 
 -- API Parser
-apiParser :: C.ApiParser Phonebook
-apiParser = C.ApiParser
+phonebook'ApiParser :: C.ApiParser Phonebook'Api
+phonebook'ApiParser = C.ApiParser
   { hollow = Map.empty
   , struct = Map.fromList
-     [ ("LookupPerson", v Phonebook'LookupPerson)
-     , ("LookupPersonByName", v Phonebook'LookupPersonByName)
+     [ ("LookupPerson", v Phonebook'Api'LookupPerson)
+     , ("LookupPersonByName", v Phonebook'Api'LookupPersonByName)
      ]
   , enumeration = Map.empty
   , wrap = Map.empty
@@ -102,10 +102,10 @@ apiParser = C.ApiParser
   where
     v x y = x P.<$> C.fromVal y
 
--- API: Phonebook
-data Phonebook
-  = Phonebook'LookupPerson LookupPerson
-  | Phonebook'LookupPersonByName LookupPersonByName
+-- Api
+data Phonebook'Api
+  = Phonebook'Api'LookupPerson LookupPerson
+  | Phonebook'Api'LookupPersonByName LookupPersonByName
   deriving (P.Show, P.Eq)
 
 -- Wrap: PersonId

@@ -3,10 +3,10 @@
 
 -- Module
 module Colorless.Examples.Phonebook
-  ( mkHandleRequestMap
-  , MetaMiddlewares(..)
-  , V0.Service(..)
-  , V0.ServiceThrower(..)
+  ( handler'Map
+  , Meta'Middlewares(..)
+  , V0.Phonebook'Service(..)
+  , V0.Phonebook'Thrower(..)
   , V0.PersonId(..)
   , V0.Name(..)
   , V0.Phone(..)
@@ -25,10 +25,10 @@ import qualified Colorless.Types as C (RuntimeThrower, Options, Request, Respons
 import qualified Control.Monad.IO.Class as M (MonadIO)
 
 import qualified Colorless.Examples.Phonebook.V0 as V0
-  ( Service(..)
-  , ServiceThrower(..)
-  , handleRequest
-  , version
+  ( Phonebook'Service(..)
+  , Phonebook'Thrower(..)
+  , phonebook'Handler
+  , phonebook'Version
   , PersonId(..)
   , Name(..)
   , Phone(..)
@@ -42,21 +42,21 @@ import qualified Colorless.Examples.Phonebook.V0 as V0
   , State(..)
   )
 
-data MetaMiddlewares m meta0
-  = MetaMiddlewares
-  { metaMiddleware0 :: () -> m meta0
+data Meta'Middlewares m meta0
+  = Meta'Middlewares
+  { meta'Middleware0 :: () -> m meta0
   }
 
-mkHandleRequestMap
+handler'Map
   ::
     ( M.MonadIO m
     , C.RuntimeThrower m
-    , V0.Service meta0 m
+    , V0.Phonebook'Service meta0 m
     )
   => C.Options
-  -> MetaMiddlewares m meta0
+  -> Meta'Middlewares m meta0
   -> Map.Map C.Major (C.Minor, C.Request -> m C.Response)
-mkHandleRequestMap options metaMiddlewares = Map.fromList
-    [ (0, (0, V0.handleRequest options $ metaMiddleware0 metaMiddlewares))
+handler'Map options metaMiddlewares = Map.fromList
+    [ (0, (0, V0.phonebook'Handler options $ meta'Middleware0 metaMiddlewares))
     ]
 

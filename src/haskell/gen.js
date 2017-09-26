@@ -230,15 +230,15 @@ const genApi = (name, calls) => {
   var lines = new Lines();
   lines.add([
     '\n',
-    '-- API: ', name, '\n',
-    'data ', name, '\n',
+    '-- Api\n',
+    'data ', name, '\'Api\n',
   ]);
   lines.add([
-    '  = ', name, '\'', calls[0].name,  calls[0].filled ? (' ' + calls[0].name) : '', '\n',
+    '  = ', name, '\'Api\'', calls[0].name,  calls[0].filled ? (' ' + calls[0].name) : '', '\n',
   ]);
   calls.slice(1).forEach(call =>
     lines.add([
-      '  | ', name, '\'', call.name,  call.filled ? (' ' + call.name) : '', '\n'
+      '  | ', name, '\'Api\'', call.name,  call.filled ? (' ' + call.name) : '', '\n'
     ])
   );
   lines.add([
@@ -248,21 +248,21 @@ const genApi = (name, calls) => {
 };
 
 
-const genServiceThrower = (error) => {
+const genThrower = (name, lowercaseName, error) => {
   return new Lines([
     '\n',
-    '-- ServiceThrower\n',
-    'class P.Monad m => ServiceThrower m where\n',
-    '  serviceThrow :: ', error, ' -> m a\n',
+    '-- Thrower\n',
+    'class P.Monad m => ', name ,'\'Thrower m where\n',
+    '  ', lowercaseName,'\'Throw :: ', error, ' -> m a\n',
   ]);
 };
 
 
-const genService = (calls) => {
+const genService = (name, calls) => {
   var lines = new Lines([
     '\n',
     '-- Service\n',
-    'class ServiceThrower m => Service meta m where\n'
+    'class ', name,'\'Thrower m => ', name ,'\'Service meta m where\n'
   ]);
   calls.forEach(call =>
     lines.add([
@@ -273,32 +273,32 @@ const genService = (calls) => {
 };
 
 
-const genVersion = (major,minor) => {
+const genVersion = (lowercaseName, major, minor) => {
   return new Lines([
     '\n',
     '-- Version\n',
-    'version :: C.Version\n',
-    'version = C.Version ', major, ' ', minor, '\n',
+    lowercaseName, '\'Version :: C.Version\n',
+    lowercaseName, '\'Version = C.Version ', major, ' ', minor, '\n',
   ]);
 };
 
-const genApiParser = (name, calls) => {
+const genApiParser = (name, lowercaseName, calls) => {
   var lines = new Lines([
     '\n',
     '-- API Parser\n',
-    'apiParser :: C.ApiParser ', name, '\n',
-    'apiParser = C.ApiParser\n',
+    lowercaseName, '\'ApiParser :: C.ApiParser ', name, '\'Api\n',
+    lowercaseName, '\'ApiParser = C.ApiParser\n',
   ]);
 
   // Hollow
   if (calls.hollow.length) {
     lines.add('  { hollow = Map.fromList\n');
     lines.add([
-      '     [ ("', calls.hollow[0].label, '", ', name, '\'', calls.hollow[0].name, ')\n',
+      '     [ ("', calls.hollow[0].label, '", ', name, '\'Api\'', calls.hollow[0].name, ')\n',
     ]);
     calls.hollow.slice(1).forEach(hollow =>
       lines.add([
-        '     , ("', hollow.label, '", ', name, '\'', hollow.name, ')\n',
+        '     , ("', hollow.label, '", ', name, '\'Api\'', hollow.name, ')\n',
       ])
     );
     lines.add('     ]\n');
@@ -310,11 +310,11 @@ const genApiParser = (name, calls) => {
   if (calls.struct.length) {
     lines.add('  , struct = Map.fromList\n');
     lines.add([
-      '     [ ("', calls.struct[0].label, '", v ', name, '\'', calls.struct[0].name, ')\n',
+      '     [ ("', calls.struct[0].label, '", v ', name, '\'Api\'', calls.struct[0].name, ')\n',
     ]);
     calls.struct.slice(1).forEach(struct =>
       lines.add([
-        '     , ("', struct.label, '", v ', name, '\'', struct.name, ')\n',
+        '     , ("', struct.label, '", v ', name, '\'Api\'', struct.name, ')\n',
       ])
     );
     lines.add('     ]\n');
@@ -326,11 +326,11 @@ const genApiParser = (name, calls) => {
   if (calls.enumeration.length) {
     lines.add('  , enumeration = Map.fromList\n');
     lines.add([
-      '     [ ("', calls.enumeration[0].label, '", v ', name, '\'', calls.enumeration[0].name, ')\n',
+      '     [ ("', calls.enumeration[0].label, '", v ', name, '\'Api\'', calls.enumeration[0].name, ')\n',
     ]);
     calls.enumeration.slice(1).forEach(enumeration =>
       lines.add([
-        '     , ("', enumeration.label, '", v ', name, '\'', enumeration.name, ')\n',
+        '     , ("', enumeration.label, '", v ', name, '\'Api\'', enumeration.name, ')\n',
       ])
     );
     lines.add('     ]\n');
@@ -342,11 +342,11 @@ const genApiParser = (name, calls) => {
   if (calls.wrap.length) {
     lines.add('  , wrap = Map.fromList\n');
     lines.add([
-      '     [ ("', calls.wrap[0].label, '", v ', name, '\'', calls.wrap[0].name, ')\n',
+      '     [ ("', calls.wrap[0].label, '", v ', name, '\'Api\'', calls.wrap[0].name, ')\n',
     ]);
     calls.wrap.slice(1).forEach(wrap =>
       lines.add([
-        '     , ("', wrap.label, '", v ', name, '\'', wrap.name, ')\n',
+        '     , ("', wrap.label, '", v ', name, '\'Api\'', wrap.name, ')\n',
       ])
     );
     lines.add('     ]\n');
@@ -363,34 +363,34 @@ const genApiParser = (name, calls) => {
   return lines;
 };
 
-const genApiLookup = (name, calls) => {
+const genApiLookup = (name, lowercaseName, calls) => {
   var lines = new Lines([
     '\n',
     '-- API\n',
-    'api :: (Service meta m, C.RuntimeThrower m) => meta -> C.ApiCall -> m C.Val\n',
-    'api meta\' apiCall\' = case C.parseApiCall apiParser apiCall\' of\n',
+    lowercaseName, '\'ApiCall :: (', name, '\'Service meta m, C.RuntimeThrower m) => meta -> C.ApiCall -> m C.Val\n',
+    lowercaseName, '\'ApiCall meta\' apiCall\' = case C.parseApiCall ', lowercaseName,'\'ApiParser apiCall\' of\n',
     '  P.Nothing -> C.runtimeThrow C.RuntimeError\'UnrecognizedCall\n',
     '  P.Just x\' -> case x\' of\n',
   ]);
   calls.hollow.forEach(hollow =>
     lines.add([
-      '    ', name, '\'', hollow.name, ' -> C.toVal P.<$> ', hollow.func, ' meta\'\n',
+      '    ', name, '\'Api\'', hollow.name, ' -> C.toVal P.<$> ', hollow.func, ' meta\'\n',
     ])
   );
   calls.filled.forEach(filled =>
     lines.add([
-      '    ', name, '\'', filled.name, ' a\' -> C.toVal P.<$> ', filled.func, ' meta\' a\'\n',
+      '    ', name, '\'Api\'', filled.name, ' a\' -> C.toVal P.<$> ', filled.func, ' meta\' a\'\n',
     ])
   );
   return lines;
 };
 
-const genHandleRequest = (meta) => {
+const genHandleRequest = (name, lowercaseName, meta) => {
   return new Lines([
     '\n',
-    '-- Handle Request\n',
-    'handleRequest :: (Service meta m, C.RuntimeThrower m, IO.MonadIO m) => C.Options -> (', meta, ' -> m meta) -> C.Request -> m C.Response\n',
-    'handleRequest options metaMiddleware C.Request{meta,calls} = do\n',
+    '-- Handler\n',
+    lowercaseName, '\'Handler :: (', name, '\'Service meta m, C.RuntimeThrower m, IO.MonadIO m) => C.Options -> (', meta, ' -> m meta) -> C.Request -> m C.Response\n',
+    lowercaseName, '\'Handler options metaMiddleware C.Request{meta,calls} = do\n',
     '  meta\' <- P.maybe (C.runtimeThrow C.RuntimeError\'UnparsableMeta) P.return (C.fromValFromJson meta)\n',
     '  xformMeta <- metaMiddleware meta\'\n',
     '  envRef <- IO.liftIO C.emptyEnv\n',
@@ -400,7 +400,7 @@ const genHandleRequest = (meta) => {
     '        }\n',
     '  let evalConfig = C.EvalConfig\n',
     '        { C.options = options\'\n',
-    '        , C.apiCall = api xformMeta\n',
+    '        , C.apiCall = ', lowercaseName,'\'ApiCall xformMeta\n',
     '        }\n',
     '  calls\' <- P.maybe (C.runtimeThrow C.RuntimeError\'UnparsableCalls) P.return (P.mapM C.jsonToExpr calls)\n',
     '  vals <- P.mapM (\\v -> C.runEval (C.forceVal P.=<< C.eval v envRef) evalConfig) calls\'\n',
@@ -453,15 +453,15 @@ const genPragmas = () => {
   ]);
 };
 
-const genModule = (prefix, version, types) => {
+const genModule = (name, lowercaseName, prefix, version, types) => {
   var lines = new Lines([
     '\n',
     '-- Module\n',
     'module ', prefix, '.V', version.major, '\n',
-    '  ( version\n',
-    '  , handleRequest\n',
-    '  , ServiceThrower(..)\n',
-    '  , Service(..)\n',
+    '  ( ', lowercaseName, '\'Version\n',
+    '  , ', lowercaseName,'\'Handler\n',
+    '  , ', name, '\'Thrower(..)\n',
+    '  , ', name, '\'Service(..)\n',
   ]);
   types.forEach(type =>
     lines.add([
@@ -528,14 +528,14 @@ const gen = (s) => {
 
   var lines = new Lines();
   lines.add(genPragmas());
-  lines.add(genModule(s.module, s.version, exportTypes));
+  lines.add(genModule(s.name, s.lowercaseName, s.module, s.version, exportTypes));
   lines.add(genImports(s.module, importTypes));
-  lines.add(genVersion(s.version.major, s.version.minor));
-  lines.add(genServiceThrower(s.error));
-  lines.add(genService(serviceCalls));
-  lines.add(genHandleRequest(s.meta));
-  lines.add(genApiLookup(s.name, apiLookupPairs));
-  lines.add(genApiParser(s.name, apiParserCalls));
+  lines.add(genVersion(s.lowercaseName, s.version.major, s.version.minor));
+  lines.add(genThrower(s.name, s.lowercaseName, s.error));
+  lines.add(genService(s.name, serviceCalls));
+  lines.add(genHandleRequest(s.name, s.lowercaseName, s.meta));
+  lines.add(genApiLookup(s.name, s.lowercaseName, apiLookupPairs));
+  lines.add(genApiParser(s.name, s.lowercaseName, apiParserCalls));
   lines.add(genApi(s.name, apiCalls));
   s.wrap.filter(currentTypeSource(s)).forEach(ty => lines.add(genWrap(ty)));
   s.struct.filter(currentTypeSource(s)).forEach(ty => lines.add(genStruct(ty)));

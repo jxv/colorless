@@ -15,10 +15,10 @@
 
 -- Module
 module Colorless.Examples.HelloWorld.V2
-  ( version
-  , handleRequest
-  , ServiceThrower(..)
-  , Service(..)
+  ( helloWorld'Version
+  , helloWorld'Handler
+  , HelloWorld'Thrower(..)
+  , HelloWorld'Service(..)
   , Hello(..)
   , Goodbye(..)
   , Color(..)
@@ -46,21 +46,21 @@ import Colorless.Examples.HelloWorld.V1 (Color(..))
 import Colorless.Examples.HelloWorld.V1 (Color'Custom'Members(..))
 
 -- Version
-version :: C.Version
-version = C.Version 2 0
+helloWorld'Version :: C.Version
+helloWorld'Version = C.Version 2 0
 
--- ServiceThrower
-class P.Monad m => ServiceThrower m where
-  serviceThrow :: () -> m a
+-- Thrower
+class P.Monad m => HelloWorld'Thrower m where
+  helloWorld'Throw :: () -> m a
 
 -- Service
-class ServiceThrower m => Service meta m where
+class HelloWorld'Thrower m => HelloWorld'Service meta m where
   hello :: meta -> Hello -> m T.Text
   goodbye :: meta -> Goodbye -> m ()
 
--- Handle Request
-handleRequest :: (Service meta m, C.RuntimeThrower m, IO.MonadIO m) => C.Options -> (() -> m meta) -> C.Request -> m C.Response
-handleRequest options metaMiddleware C.Request{meta,calls} = do
+-- Handler
+helloWorld'Handler :: (HelloWorld'Service meta m, C.RuntimeThrower m, IO.MonadIO m) => C.Options -> (() -> m meta) -> C.Request -> m C.Response
+helloWorld'Handler options metaMiddleware C.Request{meta,calls} = do
   meta' <- P.maybe (C.runtimeThrow C.RuntimeError'UnparsableMeta) P.return (C.fromValFromJson meta)
   xformMeta <- metaMiddleware meta'
   envRef <- IO.liftIO C.emptyEnv
@@ -70,27 +70,27 @@ handleRequest options metaMiddleware C.Request{meta,calls} = do
         }
   let evalConfig = C.EvalConfig
         { C.options = options'
-        , C.apiCall = api xformMeta
+        , C.apiCall = helloWorld'ApiCall xformMeta
         }
   calls' <- P.maybe (C.runtimeThrow C.RuntimeError'UnparsableCalls) P.return (P.mapM C.jsonToExpr calls)
   vals <- P.mapM (\v -> C.runEval (C.forceVal P.=<< C.eval v envRef) evalConfig) calls'
   P.return (C.Response'Success (A.toJSON vals))
 
 -- API
-api :: (Service meta m, C.RuntimeThrower m) => meta -> C.ApiCall -> m C.Val
-api meta' apiCall' = case C.parseApiCall apiParser apiCall' of
+helloWorld'ApiCall :: (HelloWorld'Service meta m, C.RuntimeThrower m) => meta -> C.ApiCall -> m C.Val
+helloWorld'ApiCall meta' apiCall' = case C.parseApiCall helloWorld'ApiParser apiCall' of
   P.Nothing -> C.runtimeThrow C.RuntimeError'UnrecognizedCall
   P.Just x' -> case x' of
-    HelloWorld'Hello a' -> C.toVal P.<$> hello meta' a'
-    HelloWorld'Goodbye a' -> C.toVal P.<$> goodbye meta' a'
+    HelloWorld'Api'Hello a' -> C.toVal P.<$> hello meta' a'
+    HelloWorld'Api'Goodbye a' -> C.toVal P.<$> goodbye meta' a'
 
 -- API Parser
-apiParser :: C.ApiParser HelloWorld
-apiParser = C.ApiParser
+helloWorld'ApiParser :: C.ApiParser HelloWorld'Api
+helloWorld'ApiParser = C.ApiParser
   { hollow = Map.empty
   , struct = Map.fromList
-     [ ("Hello", v HelloWorld'Hello)
-     , ("Goodbye", v HelloWorld'Goodbye)
+     [ ("Hello", v HelloWorld'Api'Hello)
+     , ("Goodbye", v HelloWorld'Api'Goodbye)
      ]
   , enumeration = Map.empty
   , wrap = Map.empty
@@ -98,10 +98,10 @@ apiParser = C.ApiParser
   where
     v x y = x P.<$> C.fromVal y
 
--- API: HelloWorld
-data HelloWorld
-  = HelloWorld'Hello Hello
-  | HelloWorld'Goodbye Goodbye
+-- Api
+data HelloWorld'Api
+  = HelloWorld'Api'Hello Hello
+  | HelloWorld'Api'Goodbye Goodbye
   deriving (P.Show, P.Eq)
 
 -- Struct: Hello

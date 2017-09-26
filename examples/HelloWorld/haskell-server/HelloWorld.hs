@@ -3,10 +3,10 @@
 
 -- Module
 module Colorless.Examples.HelloWorld
-  ( mkHandleRequestMap
-  , MetaMiddlewares(..)
-  , V2.Service(..)
-  , V2.ServiceThrower(..)
+  ( handler'Map
+  , Meta'Middlewares(..)
+  , V2.HelloWorld'Service(..)
+  , V2.HelloWorld'Thrower(..)
   , V2.Hello(..)
   , V2.Goodbye(..)
   , V2.Color(..)
@@ -18,18 +18,18 @@ import qualified Colorless.Types as C (RuntimeThrower, Options, Request, Respons
 import qualified Control.Monad.IO.Class as M (MonadIO)
 
 import qualified Colorless.Examples.HelloWorld.V0 as V0
-  ( Service(..)
-  , ServiceThrower(..)
-  , handleRequest
-  , version
+  ( HelloWorld'Service(..)
+  , HelloWorld'Thrower(..)
+  , helloWorld'Handler
+  , helloWorld'Version
   , Hello(..)
   )
 
 import qualified Colorless.Examples.HelloWorld.V1 as V1
-  ( Service(..)
-  , ServiceThrower(..)
-  , handleRequest
-  , version
+  ( HelloWorld'Service(..)
+  , HelloWorld'Thrower(..)
+  , helloWorld'Handler
+  , helloWorld'Version
   , Hello(..)
   , Goodbye(..)
   , Color(..)
@@ -37,37 +37,37 @@ import qualified Colorless.Examples.HelloWorld.V1 as V1
   )
 
 import qualified Colorless.Examples.HelloWorld.V2 as V2
-  ( Service(..)
-  , ServiceThrower(..)
-  , handleRequest
-  , version
+  ( HelloWorld'Service(..)
+  , HelloWorld'Thrower(..)
+  , helloWorld'Handler
+  , helloWorld'Version
   , Hello(..)
   , Goodbye(..)
   , Color(..)
   , Color'Custom'Members(..)
   )
 
-data MetaMiddlewares m meta0 meta1 meta2
-  = MetaMiddlewares
-  { metaMiddleware0 :: () -> m meta0
-  , metaMiddleware1 :: () -> m meta1
-  , metaMiddleware2 :: () -> m meta2
+data Meta'Middlewares m meta0 meta1 meta2
+  = Meta'Middlewares
+  { meta'Middleware0 :: () -> m meta0
+  , meta'Middleware1 :: () -> m meta1
+  , meta'Middleware2 :: () -> m meta2
   }
 
-mkHandleRequestMap
+handler'Map
   ::
     ( M.MonadIO m
     , C.RuntimeThrower m
-    , V0.Service meta0 m
-    , V1.Service meta1 m
-    , V2.Service meta2 m
+    , V0.HelloWorld'Service meta0 m
+    , V1.HelloWorld'Service meta1 m
+    , V2.HelloWorld'Service meta2 m
     )
   => C.Options
-  -> MetaMiddlewares m meta0 meta1 meta2
+  -> Meta'Middlewares m meta0 meta1 meta2
   -> Map.Map C.Major (C.Minor, C.Request -> m C.Response)
-mkHandleRequestMap options metaMiddlewares = Map.fromList
-    [ (0, (1, V0.handleRequest options $ metaMiddleware0 metaMiddlewares))
-    , (1, (0, V1.handleRequest options $ metaMiddleware1 metaMiddlewares))
-    , (2, (0, V2.handleRequest options $ metaMiddleware2 metaMiddlewares))
+handler'Map options metaMiddlewares = Map.fromList
+    [ (0, (1, V0.helloWorld'Handler options $ meta'Middleware0 metaMiddlewares))
+    , (1, (0, V1.helloWorld'Handler options $ meta'Middleware1 metaMiddlewares))
+    , (2, (0, V2.helloWorld'Handler options $ meta'Middleware2 metaMiddlewares))
     ]
 

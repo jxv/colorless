@@ -133,6 +133,7 @@ const spec = (prefix, version, s) => ({
   meta: langType(s.pull.meta),
   metaVersion: langTypeVersion(version.major, s.pull.meta),
   name: s.pull.name,
+  lowercaseName: lowercaseFirstLetter(s.pull.name),
   hollow: hollow(s.types),
   struct: struct(s.types),
   enumeration: enumeration(s.types),
