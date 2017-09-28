@@ -390,7 +390,7 @@ const genHandleRequest = (name, lowercaseName, meta) => {
     '\n',
     '-- Handler\n',
     lowercaseName, '\'Handler :: (', name, '\'Service meta m, C.RuntimeThrower m, IO.MonadIO m) => C.Options -> (', meta, ' -> m meta) -> C.Request -> m C.Response\n',
-    lowercaseName, '\'Handler options metaMiddleware C.Request{meta,calls} = do\n',
+    lowercaseName, '\'Handler options metaMiddleware C.Request{meta,query} = do\n',
     '  meta\' <- P.maybe (C.runtimeThrow C.RuntimeError\'UnparsableMeta) P.return (C.fromValFromJson meta)\n',
     '  xformMeta <- metaMiddleware meta\'\n',
     '  envRef <- IO.liftIO C.emptyEnv\n',
@@ -402,8 +402,8 @@ const genHandleRequest = (name, lowercaseName, meta) => {
     '        { C.options = options\'\n',
     '        , C.apiCall = ', lowercaseName,'\'ApiCall xformMeta\n',
     '        }\n',
-    '  calls\' <- P.maybe (C.runtimeThrow C.RuntimeError\'UnparsableCalls) P.return (P.mapM C.jsonToExpr calls)\n',
-    '  vals <- P.mapM (\\v -> C.runEval (C.forceVal P.=<< C.eval v envRef) evalConfig) calls\'\n',
+    '  query\' <- P.maybe (C.runtimeThrow C.RuntimeError\'UnparsableQuery) P.return (P.mapM C.jsonToExpr query)\n',
+    '  vals <- P.mapM (\\v -> C.runEval (C.forceVal P.=<< C.eval v envRef) evalConfig) query\'\n',
     '  P.return (C.Response\'Success (A.toJSON vals))\n',
   ]);
 };

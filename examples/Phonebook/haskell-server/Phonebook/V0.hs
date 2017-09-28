@@ -64,7 +64,7 @@ class Phonebook'Thrower m => Phonebook'Service meta m where
 
 -- Handler
 phonebook'Handler :: (Phonebook'Service meta m, C.RuntimeThrower m, IO.MonadIO m) => C.Options -> (() -> m meta) -> C.Request -> m C.Response
-phonebook'Handler options metaMiddleware C.Request{meta,calls} = do
+phonebook'Handler options metaMiddleware C.Request{meta,query} = do
   meta' <- P.maybe (C.runtimeThrow C.RuntimeError'UnparsableMeta) P.return (C.fromValFromJson meta)
   xformMeta <- metaMiddleware meta'
   envRef <- IO.liftIO C.emptyEnv
@@ -76,8 +76,8 @@ phonebook'Handler options metaMiddleware C.Request{meta,calls} = do
         { C.options = options'
         , C.apiCall = phonebook'ApiCall xformMeta
         }
-  calls' <- P.maybe (C.runtimeThrow C.RuntimeError'UnparsableCalls) P.return (P.mapM C.jsonToExpr calls)
-  vals <- P.mapM (\v -> C.runEval (C.forceVal P.=<< C.eval v envRef) evalConfig) calls'
+  query' <- P.maybe (C.runtimeThrow C.RuntimeError'UnparsableQuery) P.return (P.mapM C.jsonToExpr query)
+  vals <- P.mapM (\v -> C.runEval (C.forceVal P.=<< C.eval v envRef) evalConfig) query'
   P.return (C.Response'Success (A.toJSON vals))
 
 -- API
