@@ -424,8 +424,8 @@ const genImports = (prefix, importTypes) => {
     'import qualified Data.IORef as IO\n',
     'import qualified GHC.Generics as P (Generic)\n',
     'import qualified Colorless.Types as C\n',
-    'import qualified Colorless.Runtime.Expr as C\n',
-    'import qualified Colorless.Runtime.Val as C (ToVal(..), FromVal(..), getMember, fromValFromJson, combineObjects)\n',
+    'import qualified Colorless.Server.Expr as C\n',
+    'import qualified Colorless.Server.Val as C (ToVal(..), FromVal(..), getMember, fromValFromJson, combineObjects)\n',
     '\n',
   ]);
   lines.add(importTypes.map(({ name, major }) =>
