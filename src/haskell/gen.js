@@ -402,8 +402,8 @@ const genHandleRequest = (name, lowercaseName, meta) => {
     '        { C.options = options\'\n',
     '        , C.apiCall = ', lowercaseName,'\'ApiCall xformMeta\n',
     '        }\n',
-    '  query\' <- P.maybe (C.runtimeThrow C.RuntimeError\'UnparsableQuery) P.return (P.mapM C.jsonToExpr query)\n',
-    '  vals <- P.mapM (\\v -> C.runEval (C.forceVal P.=<< C.eval v envRef) evalConfig) query\'\n',
+    '  query\' <- P.maybe (C.runtimeThrow C.RuntimeError\'UnparsableQuery) P.return (C.jsonToExpr query)\n',
+    '  vals <- C.runEval (C.forceVal P.=<< C.eval query\' envRef) evalConfig\n',
     '  P.return (C.Response\'Success (A.toJSON vals))\n',
   ]);
 };
