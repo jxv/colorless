@@ -112,7 +112,7 @@ const generateHaskellServer = (program, items) => {
     console.log('Spec support is too high')
     return;
   }
-  const latest = Haskell.latest(supportedSpecs);
+  const latest = Haskell.server.latest(supportedSpecs);
 
   mkdirp(program.dest, function (err) {
     if (err) { console.error(err)
@@ -169,7 +169,7 @@ const writeCode = (path, specs) => {
   if (!specs.length) {
     return;
   }
-  const code = Haskell.gen(specs[0]);
+  const code = Haskell.server.gen(specs[0]);
   const filePath = path + '/V' + specs[0].version.major + '.hs';
   fs.writeFile(filePath, code, function (err) {
     if (err) { console.error(err)

@@ -1,5 +1,5 @@
 const R = require('ramda');
-var Lines = require('../lines.js').Lines;
+var Lines = require('../../lines.js').Lines;
 
 var { enumeralNameTagMember, mkExportTypes, mkImportTypes } = require('./common.js');
 

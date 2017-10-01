@@ -1,4 +1,4 @@
-var Lines = require('../lines.js').Lines;
+var Lines = require('../../lines.js').Lines;
 var { mkExportTypes } = require('./common.js');
 
 const genPragmas = () => {
