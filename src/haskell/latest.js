@@ -29,7 +29,7 @@ const genCommonImports = () => {
   return new Lines([
     '\n',
     'import qualified Data.Map as Map\n',
-    'import qualified Colorless.Types as C (RuntimeThrower, Options, Request, Response, Major, Minor)\n',
+    'import qualified Colorless.Server as C (RuntimeThrower, Options, Request, Response, Major, Minor)\n',
     'import qualified Control.Monad.IO.Class as M (MonadIO)\n',
   ]);
 };

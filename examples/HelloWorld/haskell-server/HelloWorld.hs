@@ -14,7 +14,7 @@ module Colorless.Examples.HelloWorld
   ) where
 
 import qualified Data.Map as Map
-import qualified Colorless.Types as C (RuntimeThrower, Options, Request, Response, Major, Minor)
+import qualified Colorless.Server as C (RuntimeThrower, Options, Request, Response, Major, Minor)
 import qualified Control.Monad.IO.Class as M (MonadIO)
 
 import qualified Colorless.Examples.HelloWorld.V0 as V0

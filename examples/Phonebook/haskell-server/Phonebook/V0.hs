@@ -44,9 +44,7 @@ import qualified Data.Word as I
 import qualified Data.Int as I
 import qualified Data.IORef as IO
 import qualified GHC.Generics as P (Generic)
-import qualified Colorless.Types as C
-import qualified Colorless.Runtime.Expr as C
-import qualified Colorless.Runtime.Val as C (ToVal(..), FromVal(..), getMember, fromValFromJson, combineObjects)
+import qualified Colorless.Server as C
 
 
 -- Version
@@ -76,8 +74,8 @@ phonebook'Handler options metaMiddleware C.Request{meta,query} = do
         { C.options = options'
         , C.apiCall = phonebook'ApiCall xformMeta
         }
-  query' <- P.maybe (C.runtimeThrow C.RuntimeError'UnparsableQuery) P.return (P.mapM C.jsonToExpr query)
-  vals <- P.mapM (\v -> C.runEval (C.forceVal P.=<< C.eval v envRef) evalConfig) query'
+  query' <- P.maybe (C.runtimeThrow C.RuntimeError'UnparsableQuery) P.return (C.jsonToExpr query)
+  vals <- C.runEval (C.forceVal P.=<< C.eval query' envRef) evalConfig
   P.return (C.Response'Success (A.toJSON vals))
 
 -- API
