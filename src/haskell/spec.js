@@ -126,7 +126,8 @@ const wrap = (types) => types.filter(type => type.n && type.w).map(type => ({
   },
 }));
 
-const spec = (prefix, version, s) => ({
+const spec = (prefix, version, s) => {
+  return ({
   module: prefix,
   version: version,
   error: langType(s.pull.error),
@@ -139,6 +140,7 @@ const spec = (prefix, version, s) => ({
   enumeration: enumeration(s.types),
   wrap: wrap(s.types),
 });
+}
 
 module.exports = {
   spec: spec,

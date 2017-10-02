@@ -1,7 +1,7 @@
 const R = require('ramda');
 var Lines = require('../../lines.js').Lines;
 
-var { enumeralNameTagMember, mkExportTypes, mkImportTypes } = require('./common.js');
+var { enumeralNameTagMember, mkExportTypes, mkImportTypes } = require('../common.js');
 
 const isFunc = x => x.func && x.output;
 

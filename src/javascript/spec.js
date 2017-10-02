@@ -67,7 +67,7 @@ const wrap = (types) => types.filter(type => type.n && type.w).map(type => ({
   output: langType(type.o),
 }));
 
-const spec = (version, s) => ({
+const spec = (prefix, version, s) => ({
   version: version,
   error: s.pull.error,
   meta: s.pull.meta,

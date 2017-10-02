@@ -26,28 +26,29 @@ const hasJsonExtension = (name) => {
   return s[s.length - 1] === 'json';
 };
 
-const generateJavascriptClient = (program, items) => {
+const readSpecs = (path, items) => {
   const files = items.filter(hasJsonExtension);
-  const jsonSpecs = files.map(file => expandTypes(JSON.parse(fs.readFileSync(program.src + '/' + file, 'utf8'))));
+  return files.map(file => expandTypes(JSON.parse(fs.readFileSync(path + '/' + file, 'utf8'))));
+};
 
-  if (!jsonSpecs.length) {
-    console.log('No specs');
-    return;
-  }
-
-  // diff the specs
+const diffSpecs = (specs) => {
   var diffs = [];
-  for (var i = 0; i < jsonSpecs.length - 1; i++) {
-    diffs.push(diff.diff(jsonSpecs[i], jsonSpecs[i + 1]));
+  for (var i = 0; i < specs.length - 1; i++) {
+    diffs.push(diff.diff(specs[i], specs[i + 1]));
   }
+  return diffs;
+};
 
-  // by major version, extract the req specs and decide where to place the types
+const supportedSpecs = (prefix, specForLang, diffs, jsonSpecs) => {
+  // assert(diffs.length == jsonSpecs.length - 1)
+
+ // by major version, extract the req specs and decide where to place the types
   var version = { major: 0, minor: 0 };
   var specs = [];
   var tyVers = [initTypeVersions(jsonSpecs[0].types.map(ty => ty.n))];
 
   for (var i = 0; i < jsonSpecs.length; i++) {
-    specs.push(JavaScript.spec(version, jsonSpecs[i]));
+    specs.push(specForLang(prefix, version, jsonSpecs[i]));
     if (i < diffs.length) {
       const change = typeChanges(diffs[i]);
       version = nextVersion(version, versionChange(change));
@@ -55,128 +56,9 @@ const generateJavascriptClient = (program, items) => {
     }
   }
 
-  const reqTyVers = dropLowMinors(tyVers);
-  const reqSpecs = attachTypeSources(specs, reqTyVers);
-  const supportedSpecs = reqSpecs.filter(({version}) => version.major >= +program.major);
-  if (!supportedSpecs.length) {
-    console.log('Spec support is too high')
-    return;
-  }
-  const latest = JavaScript.clientLatest(supportedSpecs);
-
-  mkdirp(program.dest, function (err) {
-    if (err) { console.error(err)
-    } else {
-      const path = program.dest + '/' + program.name;
-      fs.writeFile(path + '.js', latest, function (err) {
-        if (err) { console.error(err)
-        } else {
-        }
-      });
-    }
-  });
-};
-
-const generateHaskellServer = (program, items) => {
-  const files = items.filter(hasJsonExtension);
-  const jsonSpecs = files.map(file => expandTypes(JSON.parse(fs.readFileSync(program.src + '/' + file, 'utf8'))));
-
-  if (!jsonSpecs.length) {
-    console.log('No specs');
-    return;
-  }
-
-  // diff the specs
-  var diffs = [];
-  for (var i = 0; i < jsonSpecs.length - 1; i++) {
-    diffs.push(diff.diff(jsonSpecs[i], jsonSpecs[i + 1]));
-  }
-
-  // by major version, extract the req specs and decide where to place the types
-  var version = { major: 0, minor: 0 };
-  var specs = [];
-  var tyVers = [initTypeVersions(jsonSpecs[0].types.map(ty => ty.n))];
-  for (var i = 0; i < jsonSpecs.length; i++) {
-    specs.push(Haskell.spec(program.prefix, version, jsonSpecs[i]));
-    if (i < diffs.length) {
-      const change = typeChanges(diffs[i]);
-      version = nextVersion(version, versionChange(change));
-      tyVers.push(nextTypeVersion(tyVers[i], version, change));
-    }
-  }
-
-  const reqTyVers = dropLowMinors(tyVers);
-  const reqSpecs = attachTypeSources(specs, reqTyVers);
-  const supportedSpecs = reqSpecs.filter(({version}) => version.major >= +program.major);
-  if (!supportedSpecs.length) {
-    console.log('Spec support is too high')
-    return;
-  }
-  const latest = Haskell.server.latest(supportedSpecs);
-
-  mkdirp(program.dest, function (err) {
-    if (err) { console.error(err)
-    } else {
-      const path = program.dest + '/' + program.name;
-      mkdirp(path, function (err) {
-        if (err) { console.error(err)
-        } else {
-          fs.writeFile(path + '.hs', latest, function (err) {
-            if (err) { console.error(err)
-            } else {
-              writeCode(path, reqSpecs);
-            }
-          });
-        }
-      });
-    }
-  });
-};
-
-(function() {
-  if (program.lang === 'javascript' && program.side === 'client' &&
-      program.name && program.name.length &&
-      program.dest && program.dest.length &&
-      program.src && program.src.length) {
-    fs.readdir(program.src, function (err, items) {
-      if (err) {
-        console.log(err)
-      } else {
-        generateJavascriptClient(program, items);
-      }
-    });
-    return;
-  }
-
-  if (program.lang === 'haskell' && program.side === 'server' &&
-      program.name && program.name.length &&
-      program.dest && program.dest.length &&
-      program.src && program.src.length) {
-    fs.readdir(program.src, function (err, items) {
-      if (err) {
-        console.log(err)
-      } else {
-        generateHaskellServer(program, items);
-      }
-    });
-    return;
-  }
-
-  console.log('Bad args');
-})();
-
-const writeCode = (path, specs) => {
-  if (!specs.length) {
-    return;
-  }
-  const code = Haskell.server.gen(specs[0]);
-  const filePath = path + '/V' + specs[0].version.major + '.hs';
-  fs.writeFile(filePath, code, function (err) {
-    if (err) { console.error(err)
-    } else {
-      writeCode(path, specs.slice(1));
-    }
-  });
+  // attach the versioned type to each spec
+  return attachTypeSources(specs, dropLowMinors(tyVers))
+    .filter(({version}) => version.major >= +program.major);
 };
 
 const versionChange = changes => {
@@ -270,3 +152,163 @@ const attachTypeSources = (specs, typeSources) => {
   }
   return attached;
 };
+
+const writeCode = (gen, pathBuilder, path, specs) => {
+  if (!specs.length) {
+    return;
+  }
+  const code = gen(specs[0]);
+  const filePath = pathBuilder(path, specs[0].version.major);
+  fs.writeFile(filePath, code, function (err) {
+    if (err) { console.error(err)
+    } else {
+      writeCode(gen, pathBuilder, path, specs.slice(1));
+    }
+  });
+};
+
+const generateJavascriptClient = (program, items) => {
+  const jsonSpecs = readSpecs(program.src, items);
+
+  if (!jsonSpecs.length) {
+    console.log('No specs');
+    return;
+  }
+
+  const diffs = diffSpecs(jsonSpecs);
+
+  const specs = supportedSpecs(program.prefix, JavaScript.spec, diffs, jsonSpecs);
+   if (!specs.length) {
+    console.log('Spec support is too high')
+    return;
+  }
+
+  const latest = JavaScript.clientLatest(specs);
+
+  mkdirp(program.dest, function (err) {
+    if (err) { console.error(err)
+    } else {
+      const path = program.dest + '/' + program.name;
+      fs.writeFile(path + '.js', latest, function (err) {
+        if (err) { console.error(err)
+        } else {
+        }
+      });
+    }
+  });
+};
+
+const generateHaskellClient = (program, items) => {
+  const jsonSpecs = readSpecs(program.src, items);
+
+  if (!jsonSpecs.length) {
+    console.log('No specs');
+    return;
+  }
+
+  const diffs = diffSpecs(jsonSpecs);
+
+  const specs = supportedSpecs(program.prefix, Haskell.spec, diffs, jsonSpecs);
+  if (!specs.length) {
+    console.log('Spec support is too high')
+    return;
+  }
+
+  const code = Haskell.client.gen(specs);
+
+  mkdirp(program.dest, function (err) {
+    if (err) { console.error(err)
+    } else {
+      const path = program.dest + '/' + program.name;
+      fs.writeFile(path + '.hs', code, function (err) {
+        if (err) { console.error(err)
+        } else {
+        }
+      });
+    }
+  });
+};
+
+const generateHaskellServer = (program, items) => {
+  const jsonSpecs = readSpecs(program.src, items);
+
+  if (!jsonSpecs.length) {
+    console.log('No specs');
+    return;
+  }
+
+  const diffs = diffSpecs(jsonSpecs);
+
+  const specs = supportedSpecs(program.prefix, Haskell.spec, diffs, jsonSpecs);
+  if (!specs.length) {
+    console.log('Spec support is too high')
+    return;
+  }
+
+  const latest = Haskell.server.latest(specs);
+
+  const haskellPathBuilder = (path, major) => path + '/V' + major + '.hs';
+
+  mkdirp(program.dest, function (err) {
+    if (err) { console.error(err)
+    } else {
+      const path = program.dest + '/' + program.name;
+      mkdirp(path, function (err) {
+        if (err) { console.error(err)
+        } else {
+          fs.writeFile(path + '.hs', latest, function (err) {
+            if (err) { console.error(err)
+            } else {
+              writeCode(Haskell.server.gen, haskellPathBuilder, path, specs);
+            }
+          });
+        }
+      });
+    }
+  });
+};
+
+(function() {
+  if (program.lang === 'javascript' && program.side === 'client' &&
+      program.name && program.name.length &&
+      program.dest && program.dest.length &&
+      program.src && program.src.length) {
+    fs.readdir(program.src, function (err, items) {
+      if (err) {
+        console.log(err)
+      } else {
+        generateJavascriptClient(program, items);
+      }
+    });
+    return;
+  }
+
+  if (program.lang === 'haskell' && program.side === 'server' &&
+      program.name && program.name.length &&
+      program.dest && program.dest.length &&
+      program.src && program.src.length) {
+    fs.readdir(program.src, function (err, items) {
+      if (err) {
+        console.log(err)
+      } else {
+        generateHaskellServer(program, items);
+      }
+    });
+    return;
+  }
+
+  if (program.lang === 'haskell' && program.side === 'client' &&
+      program.name && program.name.length &&
+      program.dest && program.dest.length &&
+      program.src && program.src.length) {
+    fs.readdir(program.src, function (err, items) {
+      if (err) {
+        console.log(err)
+      } else {
+        generateHaskellClient(program, items);
+      }
+    });
+    return;
+  }
+  console.log('Bad args');
+})();
