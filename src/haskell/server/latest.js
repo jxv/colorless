@@ -1,12 +1,8 @@
 var Lines = require('../../lines.js').Lines;
-var { mkExportTypes } = require('./common.js');
-
-const genPragmas = () => {
-  return new Lines([
-    '-- Pragmas\n',
-    '{-# OPTIONS_GHC -fno-warn-unused-imports #-}\n'
-  ]);
-};
+var {
+  mkExportTypes,
+  genPragmas,
+} = require('../common.js');
 
 const genModule = (prefix, name, major, exportTypes) => {
   var lines = new Lines([
