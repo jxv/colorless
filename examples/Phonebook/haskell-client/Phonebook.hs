@@ -27,6 +27,8 @@ module Colorless.Examples.Phonebook
   , LookupPerson(..)
   , LookupPersonByName(..)
   , State(..)
+  , lookupPerson'Call
+  , lookupPersonByName'Call
   ) where
 
 -- Imports
@@ -42,6 +44,7 @@ import qualified Data.Int as I
 import qualified Data.IORef as IO
 import qualified GHC.Generics as P (Generic)
 import qualified Colorless.Client as C
+import qualified Colorless.Client.Expr as C
 import qualified Colorless.Ast as Ast
 
 -- Version
@@ -203,4 +206,10 @@ instance C.ToVal State where
     State'CA -> C.Val'ApiVal P.$ C.ApiVal'Enumeral P.$ C.Enumeral "CA" P.Nothing
     State'NY -> C.Val'ApiVal P.$ C.ApiVal'Enumeral P.$ C.Enumeral "NY" P.Nothing
     State'TX -> C.Val'ApiVal P.$ C.ApiVal'Enumeral P.$ C.Enumeral "TX" P.Nothing
+
+lookupPerson'Call :: C.Expr LookupPerson -> C.Expr (P.Maybe Person)
+lookupPerson'Call expr'' = C.unsafeExpr (Ast.Ast'StructCall (Ast.StructCall "LookupPerson" (Ast.toAst expr'')))
+
+lookupPersonByName'Call :: C.Expr LookupPersonByName -> C.Expr [Person]
+lookupPersonByName'Call expr'' = C.unsafeExpr (Ast.Ast'StructCall (Ast.StructCall "LookupPersonByName" (Ast.toAst expr'')))
 

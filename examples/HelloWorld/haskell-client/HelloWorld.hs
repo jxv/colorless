@@ -20,6 +20,8 @@ module Colorless.Examples.HelloWorld
   , Goodbye(..)
   , Color(..)
   , Color'Custom'Members(..)
+  , hello'Call
+  , goodbye'Call
   ) where
 
 -- Imports
@@ -35,6 +37,7 @@ import qualified Data.Int as I
 import qualified Data.IORef as IO
 import qualified GHC.Generics as P (Generic)
 import qualified Colorless.Client as C
+import qualified Colorless.Client.Expr as C
 import qualified Colorless.Ast as Ast
 
 -- Version
@@ -136,4 +139,10 @@ instance C.ToVal Color where
       , ("g", C.toVal g)
       , ("b", C.toVal b)
       ]
+
+hello'Call :: C.Expr Hello -> C.Expr T.Text
+hello'Call expr'' = C.unsafeExpr (Ast.Ast'StructCall (Ast.StructCall "Hello" (Ast.toAst expr'')))
+
+goodbye'Call :: C.Expr Goodbye -> C.Expr ()
+goodbye'Call expr'' = C.unsafeExpr (Ast.Ast'StructCall (Ast.StructCall "Goodbye" (Ast.toAst expr'')))
 
