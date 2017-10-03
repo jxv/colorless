@@ -55,25 +55,43 @@ phonebook'Version = C.Version 0 0
 newtype PersonId = PersonId T.Text
   deriving (P.Show, P.Eq, P.Ord, P.IsString, T.ToText, A.FromJSON, A.ToJSON, C.ToVal, C.FromVal)
 
+instance C.HasType PersonId where
+  getType _ = "PersonId"
+
 -- Wrap: Name
 newtype Name = Name T.Text
   deriving (P.Show, P.Eq, P.Ord, P.IsString, T.ToText, A.FromJSON, A.ToJSON, C.ToVal, C.FromVal)
+
+instance C.HasType Name where
+  getType _ = "Name"
 
 -- Wrap: Phone
 newtype Phone = Phone T.Text
   deriving (P.Show, P.Eq, P.Ord, P.IsString, T.ToText, A.FromJSON, A.ToJSON, C.ToVal, C.FromVal)
 
+instance C.HasType Phone where
+  getType _ = "Phone"
+
 -- Wrap: Street
 newtype Street = Street T.Text
   deriving (P.Show, P.Eq, P.Ord, P.IsString, T.ToText, A.FromJSON, A.ToJSON, C.ToVal, C.FromVal)
+
+instance C.HasType Street where
+  getType _ = "Street"
 
 -- Wrap: City
 newtype City = City T.Text
   deriving (P.Show, P.Eq, P.Ord, P.IsString, T.ToText, A.FromJSON, A.ToJSON, C.ToVal, C.FromVal)
 
+instance C.HasType City where
+  getType _ = "City"
+
 -- Wrap: Zipcode
 newtype Zipcode = Zipcode T.Text
   deriving (P.Show, P.Eq, P.Ord, P.IsString, T.ToText, A.FromJSON, A.ToJSON, C.ToVal, C.FromVal)
+
+instance C.HasType Zipcode where
+  getType _ = "Zipcode"
 
 -- Struct: Address
 data Address = Address
@@ -82,6 +100,9 @@ data Address = Address
   , zipcode :: Zipcode
   , state :: State
   } deriving (P.Show, P.Eq, P.Generic)
+
+instance C.HasType Address where
+  getType _ = "Address"
 
 instance A.ToJSON Address
 
@@ -115,6 +136,9 @@ data Person = Person
   , friends :: [PersonId]
   } deriving (P.Show, P.Eq, P.Generic)
 
+instance C.HasType Person where
+  getType _ = "Person"
+
 instance A.ToJSON Person
 
 instance C.ToVal Person where
@@ -144,6 +168,9 @@ data LookupPerson = LookupPerson
   { id :: PersonId
   } deriving (P.Show, P.Eq, P.Generic)
 
+instance C.HasType LookupPerson where
+  getType _ = "LookupPerson"
+
 instance A.ToJSON LookupPerson
 
 instance C.ToVal LookupPerson where
@@ -163,6 +190,9 @@ instance C.FromVal LookupPerson where
 data LookupPersonByName = LookupPersonByName
   { name :: T.Text
   } deriving (P.Show, P.Eq, P.Generic)
+
+instance C.HasType LookupPersonByName where
+  getType _ = "LookupPersonByName"
 
 instance A.ToJSON LookupPersonByName
 
@@ -185,6 +215,9 @@ data State
   | State'NY
   | State'TX
   deriving (P.Show, P.Eq)
+
+instance C.HasType State where
+  getType _ = "State"
 
 instance A.ToJSON State where
   toJSON = \case

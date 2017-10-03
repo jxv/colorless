@@ -52,7 +52,7 @@ const genVersion = (lowercaseName, major, minor) => {
   ]);
 };
 
-const genWrap = ({name, type, instances}) => {
+const genWrap = ({name, label, type, instances}) => {
   var lines = new Lines([
     '\n',
     '-- Wrap: ', name , '\n',
@@ -61,10 +61,16 @@ const genWrap = ({name, type, instances}) => {
   lines.add([
     '  deriving (P.Show, P.Eq, P.Ord, ', instances.text ? 'P.IsString, T.ToText, ' : '', instances.number ? 'P.Num, ' : '', 'A.FromJSON, A.ToJSON, C.ToVal, C.FromVal)', '\n',
   ]);
+  lines.add([
+    '\n',
+    'instance C.HasType ', name,' where\n',
+    '  getType _ = "', label,'"\n',
+  ]);
   return lines;
 };
 
-const genStruct = ({name, members}) => {
+
+const genStruct = ({name, label, members}) => {
   var lines = new Lines();
 
   { // Data type declaration
@@ -78,6 +84,14 @@ const genStruct = ({name, members}) => {
       lines.add(['  , ', members[i].name, ' :: ', members[i].type, '\n']);
     }
     lines.add('  } deriving (P.Show, P.Eq, P.Generic)\n');
+  }
+
+  { // HasType instance
+    lines.add([
+      '\n',
+      'instance C.HasType ', name,' where\n',
+      '  getType _ = "', label,'"\n',
+    ]);
   }
 
   { // ToJSON instance
@@ -129,7 +143,7 @@ const genStruct = ({name, members}) => {
 };
 
 
-const genEnumeration = ({name, enumerals}) => {
+const genEnumeration = ({name, label, enumerals}) => {
   var lines = new Lines();
 
   function nameTag(tag) {
@@ -154,6 +168,14 @@ const genEnumeration = ({name, enumerals}) => {
       )
     );
     lines.add('  deriving (P.Show, P.Eq)\n');
+  }
+
+  { // HasType instance
+    lines.add([
+      '\n',
+      'instance C.HasType ', name,' where\n',
+      '  getType _ = "', label,'"\n',
+    ]);
   }
 
   { // Data type declarations for members

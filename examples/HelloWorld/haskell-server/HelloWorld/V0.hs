@@ -102,6 +102,9 @@ data Hello = Hello
   { target :: T.Text
   } deriving (P.Show, P.Eq, P.Generic)
 
+instance C.HasType Hello where
+  getType _ = "Hello"
+
 instance A.ToJSON Hello
 
 instance C.ToVal Hello where

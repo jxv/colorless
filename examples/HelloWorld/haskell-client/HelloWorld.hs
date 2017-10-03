@@ -49,6 +49,9 @@ data Hello = Hello
   { who :: T.Text
   } deriving (P.Show, P.Eq, P.Generic)
 
+instance C.HasType Hello where
+  getType _ = "Hello"
+
 instance A.ToJSON Hello
 
 instance C.ToVal Hello where
@@ -68,6 +71,9 @@ instance C.FromVal Hello where
 data Goodbye = Goodbye
   { target :: T.Text
   } deriving (P.Show, P.Eq, P.Generic)
+
+instance C.HasType Goodbye where
+  getType _ = "Goodbye"
 
 instance A.ToJSON Goodbye
 
@@ -92,6 +98,9 @@ data Color
   | Color'Yellow
   | Color'Custom Color'Custom'Members
   deriving (P.Show, P.Eq)
+
+instance C.HasType Color where
+  getType _ = "Color"
 
 data Color'Custom'Members = Color'Custom'Members
   { r :: I.Word8

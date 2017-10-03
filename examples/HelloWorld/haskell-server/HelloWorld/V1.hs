@@ -105,6 +105,9 @@ data Goodbye = Goodbye
   { target :: T.Text
   } deriving (P.Show, P.Eq, P.Generic)
 
+instance C.HasType Goodbye where
+  getType _ = "Goodbye"
+
 instance A.ToJSON Goodbye
 
 instance C.ToVal Goodbye where
@@ -128,6 +131,9 @@ data Color
   | Color'Custom Color'Custom'Members
   | Color'Yellow
   deriving (P.Show, P.Eq)
+
+instance C.HasType Color where
+  getType _ = "Color"
 
 data Color'Custom'Members = Color'Custom'Members
   { r :: I.Word8
