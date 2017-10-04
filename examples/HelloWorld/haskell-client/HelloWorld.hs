@@ -20,8 +20,18 @@ module Colorless.Examples.HelloWorld
   , Goodbye(..)
   , Color(..)
   , Color'Custom'Members(..)
-  , hello'Call
-  , goodbye'Call
+  , hello
+  , goodbye
+  , hello'Mk
+  , goodbye'Mk
+  , color'Red'Mk
+  , color'Blue'Mk
+  , color'Green'Mk
+  , color'Yellow'Mk
+  , color'Custom'Mk
+  , hello'Pure
+  , goodbye'Pure
+  , color'Pure
   ) where
 
 -- Imports
@@ -43,6 +53,12 @@ import qualified Colorless.Ast as Ast
 -- Version
 helloWorld'Version :: C.Version
 helloWorld'Version = C.Version 2 0
+
+hello :: C.Expr Hello -> C.Expr T.Text
+hello expr'' = C.unsafeExpr (Ast.Ast'StructCall (Ast.StructCall "Hello" (Ast.toAst expr'')))
+
+goodbye :: C.Expr Goodbye -> C.Expr ()
+goodbye expr'' = C.unsafeExpr (Ast.Ast'StructCall (Ast.StructCall "Goodbye" (Ast.toAst expr'')))
 
 -- Struct: Hello
 data Hello = Hello
@@ -67,6 +83,19 @@ instance C.FromVal Hello where
       P.<$> C.getMember m "who"
     _ -> P.Nothing
 
+instance Ast.ToAst Hello where
+  toAst Hello
+    { who
+    } = Ast.Struct P.$ Map.fromList
+    [ ("who", Ast.toAst who)
+    ]
+
+hello'Mk :: C.Expr (T.Text -> Hello)
+hello'Mk = C.unsafeStructExpr ["who"]
+
+hello'Pure :: Hello -> C.Expr Hello
+hello'Pure = C.unsafeExpr . Ast.toAst
+
 -- Struct: Goodbye
 data Goodbye = Goodbye
   { target :: T.Text
@@ -89,6 +118,19 @@ instance C.FromVal Goodbye where
     C.Val'ApiVal (C.ApiVal'Struct (C.Struct m)) -> Goodbye
       P.<$> C.getMember m "target"
     _ -> P.Nothing
+
+instance Ast.ToAst Goodbye where
+  toAst Goodbye
+    { target
+    } = Ast.Struct P.$ Map.fromList
+    [ ("target", Ast.toAst target)
+    ]
+
+goodbye'Mk :: C.Expr (T.Text -> Goodbye)
+goodbye'Mk = C.unsafeStructExpr ["target"]
+
+goodbye'Pure :: Goodbye -> C.Expr Goodbye
+goodbye'Pure = C.unsafeExpr . Ast.toAst
 
 -- Enumeration: Color
 data Color
@@ -149,9 +191,37 @@ instance C.ToVal Color where
       , ("b", C.toVal b)
       ]
 
-hello'Call :: C.Expr Hello -> C.Expr T.Text
-hello'Call expr'' = C.unsafeExpr (Ast.Ast'StructCall (Ast.StructCall "Hello" (Ast.toAst expr'')))
+instance Ast.ToAst Color where
+  toAst = \case
+    Color'Red -> Ast.Ast'Enumeral P.$ Ast.Enumeral "Red" P.Nothing
+    Color'Blue -> Ast.Ast'Enumeral P.$ Ast.Enumeral "Blue" P.Nothing
+    Color'Green -> Ast.Ast'Enumeral P.$ Ast.Enumeral "Green" P.Nothing
+    Color'Yellow -> Ast.Ast'Enumeral P.$ Ast.Enumeral "Yellow" P.Nothing
+    Color'Custom Color'Custom'Members
+      { r
+      , g
+      , b
+      } -> Ast.Ast'Enumeral P.$ Ast.Enumeral "Custom" P.$ P.Just P.$ Map.fromList
+      [ ("r", Ast.toAst r)
+      , ("g", Ast.toAst g)
+      , ("b", Ast.toAst b)
+      ]
 
-goodbye'Call :: C.Expr Goodbye -> C.Expr ()
-goodbye'Call expr'' = C.unsafeExpr (Ast.Ast'StructCall (Ast.StructCall "Goodbye" (Ast.toAst expr'')))
+color'Red'Mk :: C.Expr Color
+color'Red'Mk = C.unsafeExpr . Ast.toAst $ Color'Red
+
+color'Blue'Mk :: C.Expr Color
+color'Blue'Mk = C.unsafeExpr . Ast.toAst $ Color'Blue
+
+color'Green'Mk :: C.Expr Color
+color'Green'Mk = C.unsafeExpr . Ast.toAst $ Color'Green
+
+color'Yellow'Mk :: C.Expr Color
+color'Yellow'Mk = C.unsafeExpr . Ast.toAst $ Color'Yellow
+
+color'Custom'Mk :: C.Expr (I.Word8 -> I.Word8 -> I.Word8 -> Color)
+color'Custom'Mk = C.unsafeEnumeralExpr "Custom" ["r", "g", "b"]
+
+color'Pure :: Color -> C.Expr Color
+color'Pure = C.unsafeExpr . Ast.toAst
 

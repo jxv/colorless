@@ -27,8 +27,20 @@ module Colorless.Examples.Phonebook
   , LookupPerson(..)
   , LookupPersonByName(..)
   , State(..)
-  , lookupPerson'Call
-  , lookupPersonByName'Call
+  , lookupPerson
+  , lookupPersonByName
+  , address'Mk
+  , person'Mk
+  , lookupPerson'Mk
+  , lookupPersonByName'Mk
+  , state'CA'Mk
+  , state'NY'Mk
+  , state'TX'Mk
+  , address'Pure
+  , person'Pure
+  , lookupPerson'Pure
+  , lookupPersonByName'Pure
+  , state'Pure
   ) where
 
 -- Imports
@@ -51,46 +63,52 @@ import qualified Colorless.Ast as Ast
 phonebook'Version :: C.Version
 phonebook'Version = C.Version 0 0
 
+lookupPerson :: C.Expr LookupPerson -> C.Expr (P.Maybe Person)
+lookupPerson expr'' = C.unsafeExpr (Ast.Ast'StructCall (Ast.StructCall "LookupPerson" (Ast.toAst expr'')))
+
+lookupPersonByName :: C.Expr LookupPersonByName -> C.Expr [Person]
+lookupPersonByName expr'' = C.unsafeExpr (Ast.Ast'StructCall (Ast.StructCall "LookupPersonByName" (Ast.toAst expr'')))
+
 -- Wrap: PersonId
 newtype PersonId = PersonId T.Text
   deriving (P.Show, P.Eq, P.Ord, P.IsString, T.ToText, A.FromJSON, A.ToJSON, C.ToVal, C.FromVal)
 
-instance C.HasType PersonId where
+instance HasType  where
   getType _ = "PersonId"
 
 -- Wrap: Name
 newtype Name = Name T.Text
   deriving (P.Show, P.Eq, P.Ord, P.IsString, T.ToText, A.FromJSON, A.ToJSON, C.ToVal, C.FromVal)
 
-instance C.HasType Name where
+instance HasType  where
   getType _ = "Name"
 
 -- Wrap: Phone
 newtype Phone = Phone T.Text
   deriving (P.Show, P.Eq, P.Ord, P.IsString, T.ToText, A.FromJSON, A.ToJSON, C.ToVal, C.FromVal)
 
-instance C.HasType Phone where
+instance HasType  where
   getType _ = "Phone"
 
 -- Wrap: Street
 newtype Street = Street T.Text
   deriving (P.Show, P.Eq, P.Ord, P.IsString, T.ToText, A.FromJSON, A.ToJSON, C.ToVal, C.FromVal)
 
-instance C.HasType Street where
+instance HasType  where
   getType _ = "Street"
 
 -- Wrap: City
 newtype City = City T.Text
   deriving (P.Show, P.Eq, P.Ord, P.IsString, T.ToText, A.FromJSON, A.ToJSON, C.ToVal, C.FromVal)
 
-instance C.HasType City where
+instance HasType  where
   getType _ = "City"
 
 -- Wrap: Zipcode
 newtype Zipcode = Zipcode T.Text
   deriving (P.Show, P.Eq, P.Ord, P.IsString, T.ToText, A.FromJSON, A.ToJSON, C.ToVal, C.FromVal)
 
-instance C.HasType Zipcode where
+instance HasType  where
   getType _ = "Zipcode"
 
 -- Struct: Address
@@ -128,6 +146,25 @@ instance C.FromVal Address where
       P.<*> C.getMember m "state"
     _ -> P.Nothing
 
+instance Ast.ToAst Address where
+  toAst Address
+    { street
+    , city
+    , zipcode
+    , state
+    } = Ast.Struct P.$ Map.fromList
+    [ ("street", Ast.toAst street)
+    , ("city", Ast.toAst city)
+    , ("zipcode", Ast.toAst zipcode)
+    , ("state", Ast.toAst state)
+    ]
+
+address'Mk :: C.Expr (Street -> City -> Zipcode -> State -> Address)
+address'Mk = C.unsafeStructExpr ["street", "city", "zipcode", "state"]
+
+address'Pure :: Address -> C.Expr Address
+address'Pure = C.unsafeExpr . Ast.toAst
+
 -- Struct: Person
 data Person = Person
   { name :: Name
@@ -163,6 +200,25 @@ instance C.FromVal Person where
       P.<*> C.getMember m "friends"
     _ -> P.Nothing
 
+instance Ast.ToAst Person where
+  toAst Person
+    { name
+    , phone
+    , address
+    , friends
+    } = Ast.Struct P.$ Map.fromList
+    [ ("name", Ast.toAst name)
+    , ("phone", Ast.toAst phone)
+    , ("address", Ast.toAst address)
+    , ("friends", Ast.toAst friends)
+    ]
+
+person'Mk :: C.Expr (Name -> Phone -> (P.Maybe Address) -> [PersonId] -> Person)
+person'Mk = C.unsafeStructExpr ["name", "phone", "address", "friends"]
+
+person'Pure :: Person -> C.Expr Person
+person'Pure = C.unsafeExpr . Ast.toAst
+
 -- Struct: LookupPerson
 data LookupPerson = LookupPerson
   { id :: PersonId
@@ -186,6 +242,19 @@ instance C.FromVal LookupPerson where
       P.<$> C.getMember m "id"
     _ -> P.Nothing
 
+instance Ast.ToAst LookupPerson where
+  toAst LookupPerson
+    { id
+    } = Ast.Struct P.$ Map.fromList
+    [ ("id", Ast.toAst id)
+    ]
+
+lookupPerson'Mk :: C.Expr (PersonId -> LookupPerson)
+lookupPerson'Mk = C.unsafeStructExpr ["id"]
+
+lookupPerson'Pure :: LookupPerson -> C.Expr LookupPerson
+lookupPerson'Pure = C.unsafeExpr . Ast.toAst
+
 -- Struct: LookupPersonByName
 data LookupPersonByName = LookupPersonByName
   { name :: T.Text
@@ -208,6 +277,19 @@ instance C.FromVal LookupPersonByName where
     C.Val'ApiVal (C.ApiVal'Struct (C.Struct m)) -> LookupPersonByName
       P.<$> C.getMember m "name"
     _ -> P.Nothing
+
+instance Ast.ToAst LookupPersonByName where
+  toAst LookupPersonByName
+    { name
+    } = Ast.Struct P.$ Map.fromList
+    [ ("name", Ast.toAst name)
+    ]
+
+lookupPersonByName'Mk :: C.Expr (T.Text -> LookupPersonByName)
+lookupPersonByName'Mk = C.unsafeStructExpr ["name"]
+
+lookupPersonByName'Pure :: LookupPersonByName -> C.Expr LookupPersonByName
+lookupPersonByName'Pure = C.unsafeExpr . Ast.toAst
 
 -- Enumeration: State
 data State
@@ -240,9 +322,21 @@ instance C.ToVal State where
     State'NY -> C.Val'ApiVal P.$ C.ApiVal'Enumeral P.$ C.Enumeral "NY" P.Nothing
     State'TX -> C.Val'ApiVal P.$ C.ApiVal'Enumeral P.$ C.Enumeral "TX" P.Nothing
 
-lookupPerson'Call :: C.Expr LookupPerson -> C.Expr (P.Maybe Person)
-lookupPerson'Call expr'' = C.unsafeExpr (Ast.Ast'StructCall (Ast.StructCall "LookupPerson" (Ast.toAst expr'')))
+instance Ast.ToAst State where
+  toAst = \case
+    State'CA -> Ast.Ast'Enumeral P.$ Ast.Enumeral "CA" P.Nothing
+    State'NY -> Ast.Ast'Enumeral P.$ Ast.Enumeral "NY" P.Nothing
+    State'TX -> Ast.Ast'Enumeral P.$ Ast.Enumeral "TX" P.Nothing
 
-lookupPersonByName'Call :: C.Expr LookupPersonByName -> C.Expr [Person]
-lookupPersonByName'Call expr'' = C.unsafeExpr (Ast.Ast'StructCall (Ast.StructCall "LookupPersonByName" (Ast.toAst expr'')))
+state'CA'Mk :: C.Expr State
+state'CA'Mk = C.unsafeExpr . Ast.toAst $ State'CA
+
+state'NY'Mk :: C.Expr State
+state'NY'Mk = C.unsafeExpr . Ast.toAst $ State'NY
+
+state'TX'Mk :: C.Expr State
+state'TX'Mk = C.unsafeExpr . Ast.toAst $ State'TX
+
+state'Pure :: State -> C.Expr State
+state'Pure = C.unsafeExpr . Ast.toAst
 

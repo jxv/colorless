@@ -7,6 +7,7 @@ var {
   genEnumeration,
   genVersion,
   isFunc,
+  enumeralNameTagMember,
 } = require('../common.js');
 
 const genPragmas = () => {
@@ -76,61 +77,230 @@ const genService = (s) => {
   s.hollow.filter(isFunc).forEach(call => {
     lines.add([
       '\n',
-      call.func, '\'Call :: C.Expr ', call.output, '\n',
-      call.func, '\'Call = C.unsafeExpr (Ast.Ast\'HollowCall (Ast.HollowCall "', call.label, '"))\n',
+      call.func, ' :: C.Expr ', call.output, '\n',
+      call.func, ' = C.unsafeExpr (Ast.Ast\'HollowCall (Ast.HollowCall "', call.label, '"))\n',
     ]);
   });
 
   s.wrap.filter(isFunc).forEach(call => {
     lines.add([
       '\n',
-      call.func, '\'Call :: C.Expr ', call.name, ' -> C.Expr ', call.output, '\n',
-      call.func, '\'Call expr\'\' = C.unsafeExpr (Ast.Ast\'WrapCall (Ast.WrapCall "', call.label, '" (Ast.toAst expr\'\')))\n',
+      call.func, ' :: C.Expr ', call.name, ' -> C.Expr ', call.output, '\n',
+      call.func, ' expr\'\' = C.unsafeExpr (Ast.Ast\'WrapCall (Ast.WrapCall "', call.label, '" (Ast.toAst expr\'\')))\n',
     ]);
   });
 
   s.struct.filter(isFunc).forEach(call => {
     lines.add([
       '\n',
-      call.func, '\'Call :: C.Expr ', call.name, ' -> C.Expr ', call.output, '\n',
-      call.func, '\'Call expr\'\' = C.unsafeExpr (Ast.Ast\'StructCall (Ast.StructCall "', call.label, '" (Ast.toAst expr\'\')))\n',
+      call.func, ' :: C.Expr ', call.name, ' -> C.Expr ', call.output, '\n',
+      call.func, ' expr\'\' = C.unsafeExpr (Ast.Ast\'StructCall (Ast.StructCall "', call.label, '" (Ast.toAst expr\'\')))\n',
     ]);
   });
 
   s.enumeration.filter(isFunc).forEach(call => {
     lines.add([
       '\n',
-      call.func, '\'Call :: C.Expr ', call.name, ' -> C.Expr ', call.output, '\n',
-      call.func, '\'Call expr\'\' = C.unsafeExpr (Ast.Ast\'EnumerationCall (Ast.EnumerationCall "', call.label, '" (Ast.toAst expr\'\')))\n',
+      call.func, ' :: C.Expr ', call.name, ' -> C.Expr ', call.output, '\n',
+      call.func, ' expr\'\' = C.unsafeExpr (Ast.Ast\'EnumerationCall (Ast.EnumerationCall "', call.label, '" (Ast.toAst expr\'\')))\n',
     ]);
   });
 
   return lines;
 };
 
-
-const mkExportCalls = (s) => {
-  return []
-    .concat(s.hollow).concat(s.wrap).concat(s.struct).concat(s.enumeration)
+const mkExportValues = (s) => {
+  var calls =
+    [].concat(s.hollow).concat(s.wrap).concat(s.struct).concat(s.enumeration)
       .filter(isFunc)
-      .map(x => x.func + '\'Call')
+      .map(x => x.lowercaseName);
+
+  var exprMk =
+    [].concat(s.struct)
+    .map(x => x.lowercaseName + '\'Mk');
+  s.enumeration.forEach(({lowercaseName, enumerals}) =>
+    enumerals.forEach(({tag}) =>
+      exprMk.push(lowercaseName + '\'' + tag + '\'Mk')
+    )
+  );
+
+  var exprPure =
+    [].concat(s.struct)
+    .map(x => x.lowercaseName + '\'Pure');
+  exprPure = exprPure.concat(s.enumeration.map(({lowercaseName}) => lowercaseName + '\'Pure'));
+
+  return calls.concat(exprMk).concat(exprPure);
 };
 
+const genStructToAst = ({name, label, members}) => {
+  var lines = new Lines();
+
+  lines.add([
+    '\n',
+    'instance Ast.ToAst ', name, ' where', '\n',
+    '  toAst ', name, '\n',
+  ]);
+  lines.add(['    { ', members[0].name, '\n']);
+  members.slice(1).forEach(member =>
+    lines.add(['    , ', member.name, '\n'])
+  );
+  lines.add('    }');
+  lines.add([
+    ' = Ast.Struct P.$ Map.fromList\n',
+    '    [ ("', members[0].label, '", Ast.toAst ', members[0].name, ')\n',
+  ]);
+  members.slice(1).forEach(member =>
+    lines.add(['    , ("', member.label, '", Ast.toAst ', member.name, ')\n'])
+  );
+  lines.add('    ]\n');
+
+  return lines.collapse();
+};
+
+const genStructExpr = ({name, lowercaseName, members}) => {
+  var lines = new Lines();
+
+  lines.add([
+    '\n',
+    lowercaseName, '\'Mk :: C.Expr (', members[0].type,
+  ]);
+  members.slice(1).forEach(member =>
+    lines.add([' -> ', member.type])
+  );
+  lines.add([' -> ', name, ')\n']);
+
+  lines.add([
+    lowercaseName, '\'Mk = C.unsafeStructExpr ["', members[0].label, '"',
+  ]);
+  members.slice(1).forEach(member =>
+    lines.add([', "', member.label, '"'])
+  );
+  lines.add(']\n');
+
+  lines.add([
+    '\n',
+    lowercaseName, '\'Pure :: ', name,' -> C.Expr ', name, '\n',
+    lowercaseName, '\'Pure = C.unsafeExpr . Ast.toAst\n',
+  ]);
+
+  return lines.collapse();
+};
+
+const genEnumerationToAst = ({name, enumerals}) => {
+  var lines = new Lines();
+
+  lines.add([
+    '\n',
+    'instance Ast.ToAst ', name, ' where', '\n',
+    '  toAst = \\case\n',
+  ]);
+
+  function nameTag(tag) {
+    return name + '\'' + tag;
+  }
+  function nameTagMembers(tag) {
+    return enumeralNameTagMember(name, tag);
+  }
+
+  enumerals.forEach(enumeral => {
+    if (!enumeral.members) {
+      lines.add([
+        '    ', nameTag(enumeral.tag), ' -> Ast.Ast\'Enumeral P.$ Ast.Enumeral "', enumeral.label, '" P.Nothing\n',
+      ]);
+    } else {
+      lines.add([
+        '    ', nameTag(enumeral.tag), ' ', nameTagMembers(enumeral.tag), '\n',
+      ]);
+      lines.add([
+        '      { ', enumeral.members[0].name, '\n'
+      ]);
+      enumeral.members.slice(1).forEach(member =>
+        lines.add([
+          '      , ', member.name, '\n'
+        ])
+      );
+      lines.add([
+        '      } -> Ast.Ast\'Enumeral P.$ Ast.Enumeral "', enumeral.label, '" P.$ P.Just P.$ Map.fromList\n',
+      ]);
+      lines.add([
+        '      [ ("', enumeral.members[0].label, '", Ast.toAst ', enumeral.members[0].name, ')\n'
+      ]);
+      enumeral.members.slice(1).forEach(member =>
+        lines.add([
+          '      , ("', member.label, '", Ast.toAst ', member.name, ')\n'
+        ])
+      );
+      lines.add('      ]\n');
+    }
+  });
+
+  return lines.collapse();
+};
+
+const genEnumeralExpr = ({name, lowercaseName, enumerals}) => {
+  var lines = new Lines();
+
+  enumerals.forEach(enumeral => {
+    if (!enumeral.members) {
+      lines.add([
+        '\n',
+        lowercaseName, '\'', enumeral.tag,'\'Mk :: C.Expr ', name,
+      ]);
+      lines.add([
+        '\n',
+        lowercaseName, '\'', enumeral.tag,'\'Mk = C.unsafeExpr . Ast.toAst $ ', name, '\'', enumeral.tag,'\n',
+      ]);
+    } else {
+      lines.add([
+        '\n',
+        lowercaseName, '\'', enumeral.tag,'\'Mk :: C.Expr (', enumeral.members[0].type,
+      ]);
+      enumeral.members.slice(1).forEach(member =>
+        lines.add([' -> ', member.type])
+      );
+      lines.add([' -> ', name, ')\n']);
+
+      lines.add([
+        lowercaseName, '\'', enumeral.tag,'\'Mk = C.unsafeEnumeralExpr "', enumeral.label, '" ["', enumeral.members[0].label, '"',
+      ]);
+      enumeral.members.slice(1).forEach(member =>
+        lines.add([', "', member.label, '"'])
+      );
+      lines.add(']\n');
+    }
+
+  });
+
+  lines.add([
+    '\n',
+    lowercaseName, '\'Pure :: ', name,' -> C.Expr ', name, '\n',
+    lowercaseName, '\'Pure = C.unsafeExpr . Ast.toAst\n',
+  ]);
+  return lines.collapse();
+};
 
 const gen = (specs) => {
   const spec = specs[specs.length - 1];
   const exportTypes = mkExportTypes(spec);
-  const exportValues = mkExportCalls(spec);
+  const exportValues = mkExportValues(spec);
 
   var lines = new Lines();
   lines.add(genPragmas());
   lines.add(genModule(spec.name, spec.lowercaseName, spec.module, spec.version, exportTypes, exportValues));
   lines.add(genImports());
   lines.add(genVersion(spec.lowercaseName, spec.version.major, spec.version.minor));
-  spec.wrap.forEach(ty => lines.add(genWrap(ty)));
-  spec.struct.forEach(ty => lines.add(genStruct(ty)));
-  spec.enumeration.forEach(ty => lines.add(genEnumeration(ty)));
   lines.add(genService(spec));
+  spec.wrap.forEach(ty => lines.add(genWrap(ty)));
+  spec.struct.forEach(ty => {
+    lines.add(genStruct(ty));
+    lines.add(genStructToAst(ty));
+    lines.add(genStructExpr(ty));
+  });
+  spec.enumeration.forEach(ty => {
+    lines.add(genEnumeration(ty));
+    lines.add(genEnumerationToAst(ty));
+    lines.add(genEnumeralExpr(ty));
+  });
   lines.add('\n');
   return lines.collapse();
 };

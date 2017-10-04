@@ -52,7 +52,7 @@ const genVersion = (lowercaseName, major, minor) => {
   ]);
 };
 
-const genWrap = ({name, label, type, instances}) => {
+const genWrap = ({name, type, label, instances}) => {
   var lines = new Lines([
     '\n',
     '-- Wrap: ', name , '\n',
@@ -63,7 +63,7 @@ const genWrap = ({name, label, type, instances}) => {
   ]);
   lines.add([
     '\n',
-    'instance C.HasType ', name,' where\n',
+    'instance HasType ',,' where\n',
     '  getType _ = "', label,'"\n',
   ]);
   return lines;
@@ -89,8 +89,8 @@ const genStruct = ({name, label, members}) => {
   { // HasType instance
     lines.add([
       '\n',
-      'instance C.HasType ', name,' where\n',
-      '  getType _ = "', label,'"\n',
+      'instance C.HasType ', name, ' where\n',
+      '  getType _ = "', label, '"\n',
     ]);
   }
 
@@ -173,8 +173,8 @@ const genEnumeration = ({name, label, enumerals}) => {
   { // HasType instance
     lines.add([
       '\n',
-      'instance C.HasType ', name,' where\n',
-      '  getType _ = "', label,'"\n',
+      'instance C.HasType ', name, ' where\n',
+      '  getType _ = "', label, '"\n',
     ]);
   }
 

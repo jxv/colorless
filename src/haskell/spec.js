@@ -66,12 +66,14 @@ const langTypeVersion = (major, n) => langTypeGeneric(langTypeNameVersion(major)
 const hollow = (types) => types.filter(type => type.n && !type.m && !type.e && !type.w).map(type => ({
   name: langTypeName(type.n),
   label: langTypeLabel(type.n),
+  lowercaseName: lowercaseFirstLetter(langTypeName(type.n)),
   func: type.o && lowercaseFirstLetter(langTypeName(type.n)),
   output: langType(type.o),
 }));
 
 const struct = (types) => types.filter(type => type.n && type.m).map(type => ({
   name: langTypeName(type.n),
+  lowercaseName: lowercaseFirstLetter(langTypeName(type.n)),
   label: langTypeLabel(type.n),
   members: type.m.map(member => {
     const key = Object.keys(member);
@@ -87,6 +89,7 @@ const struct = (types) => types.filter(type => type.n && type.m).map(type => ({
 
 const enumeration = (types) => types.filter(type => type.n && type.e).map(type => ({
   name: langTypeName(type.n),
+  lowercaseName: lowercaseFirstLetter(langTypeName(type.n)),
   label: langTypeLabel(type.n),
   enumerals: type.e.map(enumeral => {
     if (typeof enumeral === 'string') {
