@@ -1,6 +1,5 @@
 -- Pragmas
 {-# OPTIONS_GHC -fno-warn-unused-imports #-}
-{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -34,7 +33,6 @@ import qualified Data.Word as I
 import qualified Data.Int as I
 import qualified Data.IORef as IO
 import qualified Data.String as P (IsString)
-import qualified GHC.Generics as P (Generic)
 import qualified Control.Monad.IO.Class as IO
 import qualified Data.Aeson as A
 import qualified Data.Map as Map
@@ -109,7 +107,7 @@ data HelloWorld'Api
 -- Struct: Goodbye
 data Goodbye = Goodbye
   { target :: T.Text
-  } deriving (P.Show, P.Eq, P.Generic)
+  } deriving (P.Show, P.Eq)
 
 instance C.ToVal Goodbye where
   toVal Goodbye
@@ -147,7 +145,7 @@ data Color'Custom'Members = Color'Custom'Members
   { r :: I.Word8
   , g :: I.Word8
   , b :: I.Word8
-  } deriving (P.Show, P.Eq, P.Generic)
+  } deriving (P.Show, P.Eq)
 
 instance C.ToVal Color where
   toVal = \case

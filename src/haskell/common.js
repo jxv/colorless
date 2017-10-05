@@ -119,7 +119,7 @@ const genStruct = ({name, label, members}) => {
   for (var i = 1; i < members.length; i++) {
     lines.add(['  , ', members[i].name, ' :: ', members[i].type, '\n']);
   }
-  lines.add('  } deriving (P.Show, P.Eq, P.Generic)\n');
+  lines.add('  } deriving (P.Show, P.Eq)\n');
   return lines;
 };
 
@@ -197,7 +197,7 @@ const genEnumeration = ({name, label, enumerals}) => {
       enumeral.members.slice(1).forEach(member =>
         lines.add(['  , ', member.name, ' :: ', member.type, '\n'])
       );
-      lines.add('  } deriving (P.Show, P.Eq, P.Generic)\n');
+      lines.add('  } deriving (P.Show, P.Eq)\n');
     }
   });
   return lines;

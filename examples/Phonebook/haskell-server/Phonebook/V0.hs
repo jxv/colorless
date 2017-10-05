@@ -1,6 +1,5 @@
 -- Pragmas
 {-# OPTIONS_GHC -fno-warn-unused-imports #-}
-{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -41,7 +40,6 @@ import qualified Data.Word as I
 import qualified Data.Int as I
 import qualified Data.IORef as IO
 import qualified Data.String as P (IsString)
-import qualified GHC.Generics as P (Generic)
 import qualified Control.Monad.IO.Class as IO
 import qualified Data.Aeson as A
 import qualified Data.Map as Map
@@ -238,7 +236,7 @@ data Address = Address
   , city :: City
   , zipcode :: Zipcode
   , state :: State
-  } deriving (P.Show, P.Eq, P.Generic)
+  } deriving (P.Show, P.Eq)
 
 instance C.ToVal Address where
   toVal Address
@@ -278,7 +276,7 @@ data Person = Person
   , phone :: Phone
   , address :: (P.Maybe Address)
   , friends :: [PersonId]
-  } deriving (P.Show, P.Eq, P.Generic)
+  } deriving (P.Show, P.Eq)
 
 instance C.ToVal Person where
   toVal Person
@@ -315,7 +313,7 @@ instance A.FromJSON Person where
 -- Struct: LookupPerson
 data LookupPerson = LookupPerson
   { id :: PersonId
-  } deriving (P.Show, P.Eq, P.Generic)
+  } deriving (P.Show, P.Eq)
 
 instance C.ToVal LookupPerson where
   toVal LookupPerson
@@ -343,7 +341,7 @@ instance A.FromJSON LookupPerson where
 -- Struct: LookupPersonByName
 data LookupPersonByName = LookupPersonByName
   { name :: T.Text
-  } deriving (P.Show, P.Eq, P.Generic)
+  } deriving (P.Show, P.Eq)
 
 instance C.ToVal LookupPersonByName where
   toVal LookupPersonByName

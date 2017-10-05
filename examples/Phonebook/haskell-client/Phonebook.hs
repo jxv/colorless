@@ -1,6 +1,5 @@
 -- Pragmas
 {-# OPTIONS_GHC -fno-warn-unused-imports #-}
-{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -78,7 +77,6 @@ import qualified Data.String as P (IsString)
 import qualified Data.Word as I
 import qualified Data.Int as I
 import qualified Data.IORef as IO
-import qualified GHC.Generics as P (Generic)
 import qualified Colorless.Client as C
 import qualified Colorless.Client.Expr as C
 import qualified Colorless.Ast as Ast
@@ -294,7 +292,7 @@ data Address = Address
   , city :: City
   , zipcode :: Zipcode
   , state :: State
-  } deriving (P.Show, P.Eq, P.Generic)
+  } deriving (P.Show, P.Eq)
 
 instance C.HasType Address where
   getType _ = "Address"
@@ -368,7 +366,7 @@ data Person = Person
   , phone :: Phone
   , address :: (P.Maybe Address)
   , friends :: [PersonId]
-  } deriving (P.Show, P.Eq, P.Generic)
+  } deriving (P.Show, P.Eq)
 
 instance C.HasType Person where
   getType _ = "Person"
@@ -439,7 +437,7 @@ person' = C.unsafeExpr P.. Ast.toAst
 -- Struct: LookupPerson
 data LookupPerson = LookupPerson
   { id :: PersonId
-  } deriving (P.Show, P.Eq, P.Generic)
+  } deriving (P.Show, P.Eq)
 
 instance C.HasType LookupPerson where
   getType _ = "LookupPerson"
@@ -486,7 +484,7 @@ lookupPerson' = C.unsafeExpr P.. Ast.toAst
 -- Struct: LookupPersonByName
 data LookupPersonByName = LookupPersonByName
   { name :: T.Text
-  } deriving (P.Show, P.Eq, P.Generic)
+  } deriving (P.Show, P.Eq)
 
 instance C.HasType LookupPersonByName where
   getType _ = "LookupPersonByName"

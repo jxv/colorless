@@ -1,6 +1,5 @@
 -- Pragmas
 {-# OPTIONS_GHC -fno-warn-unused-imports #-}
-{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -49,7 +48,6 @@ import qualified Data.String as P (IsString)
 import qualified Data.Word as I
 import qualified Data.Int as I
 import qualified Data.IORef as IO
-import qualified GHC.Generics as P (Generic)
 import qualified Colorless.Client as C
 import qualified Colorless.Client.Expr as C
 import qualified Colorless.Ast as Ast
@@ -70,7 +68,7 @@ goodbye = C.unsafeExpr P.. Ast.Ast'StructCall P.. Ast.StructCall "Goodbye" P.. A
 -- Struct: Hello
 data Hello = Hello
   { who :: T.Text
-  } deriving (P.Show, P.Eq, P.Generic)
+  } deriving (P.Show, P.Eq)
 
 instance C.HasType Hello where
   getType _ = "Hello"
@@ -117,7 +115,7 @@ hello' = C.unsafeExpr P.. Ast.toAst
 -- Struct: Goodbye
 data Goodbye = Goodbye
   { target :: T.Text
-  } deriving (P.Show, P.Eq, P.Generic)
+  } deriving (P.Show, P.Eq)
 
 instance C.HasType Goodbye where
   getType _ = "Goodbye"
@@ -174,7 +172,7 @@ data Color'Custom'Members = Color'Custom'Members
   { r :: I.Word8
   , g :: I.Word8
   , b :: I.Word8
-  } deriving (P.Show, P.Eq, P.Generic)
+  } deriving (P.Show, P.Eq)
 
 instance C.HasType Color where
   getType _ = "Color"

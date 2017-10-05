@@ -216,7 +216,6 @@ const genImports = (prefix, importTypes) => {
     'import qualified Data.Int as I\n',
     'import qualified Data.IORef as IO\n',
     'import qualified Data.String as P (IsString)\n',
-    'import qualified GHC.Generics as P (Generic)\n',
 
     'import qualified Control.Monad.IO.Class as IO\n',
     'import qualified Data.Aeson as A\n',
@@ -237,7 +236,6 @@ const genPragmas = () => {
   return new Lines([
     '-- Pragmas\n',
     '{-# OPTIONS_GHC -fno-warn-unused-imports #-}\n',
-    '{-# LANGUAGE DeriveGeneric #-}\n',
     '{-# LANGUAGE DuplicateRecordFields #-}\n',
     '{-# LANGUAGE LambdaCase #-}\n',
     '{-# LANGUAGE OverloadedStrings #-}\n',

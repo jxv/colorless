@@ -23,7 +23,6 @@ const genPragmas = () => {
   return new Lines([
     '-- Pragmas\n',
     '{-# OPTIONS_GHC -fno-warn-unused-imports #-}\n',
-    '{-# LANGUAGE DeriveGeneric #-}\n',
     '{-# LANGUAGE DuplicateRecordFields #-}\n',
     '{-# LANGUAGE LambdaCase #-}\n',
     '{-# LANGUAGE OverloadedStrings #-}\n',
@@ -75,7 +74,6 @@ const genImports = () => {
     'import qualified Data.Word as I\n',
     'import qualified Data.Int as I\n',
     'import qualified Data.IORef as IO\n',
-    'import qualified GHC.Generics as P (Generic)\n',
     'import qualified Colorless.Client as C\n',
     'import qualified Colorless.Client.Expr as C\n',
     'import qualified Colorless.Ast as Ast\n',

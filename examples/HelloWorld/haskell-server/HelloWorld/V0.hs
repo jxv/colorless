@@ -1,6 +1,5 @@
 -- Pragmas
 {-# OPTIONS_GHC -fno-warn-unused-imports #-}
-{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -31,7 +30,6 @@ import qualified Data.Word as I
 import qualified Data.Int as I
 import qualified Data.IORef as IO
 import qualified Data.String as P (IsString)
-import qualified GHC.Generics as P (Generic)
 import qualified Control.Monad.IO.Class as IO
 import qualified Data.Aeson as A
 import qualified Data.Map as Map
@@ -106,7 +104,7 @@ data HelloWorld'Api
 -- Struct: Hello
 data Hello = Hello
   { target :: T.Text
-  } deriving (P.Show, P.Eq, P.Generic)
+  } deriving (P.Show, P.Eq)
 
 instance C.ToVal Hello where
   toVal Hello
