@@ -116,7 +116,7 @@ const mkExportValues = (s) => {
       .map(x => x.lowercaseName);
 
   var exprMk =
-    [].concat(s.struct)
+    [].concat(s.struct).concat(s.wrap)
     .map(x => x.lowercaseName + '\'Mk');
   s.enumeration.forEach(({lowercaseName, enumerals}) =>
     enumerals.forEach(({tag}) =>
@@ -124,12 +124,46 @@ const mkExportValues = (s) => {
     )
   );
 
-  var exprPure =
-    [].concat(s.struct)
-    .map(x => x.lowercaseName + '\'Pure');
-  exprPure = exprPure.concat(s.enumeration.map(({lowercaseName}) => lowercaseName + '\'Pure'));
+  var expr =
+    [].concat(s.struct).concat(s.wrap)
+    .map(x => x.lowercaseName + '\'');
+  expr = expr.concat(s.enumeration.map(({lowercaseName}) => lowercaseName + '\''));
 
-  return calls.concat(exprMk).concat(exprPure);
+  return calls.concat(exprMk).concat(expr);
+};
+
+const genWrapExpr = ({name, lowercaseName, type}) => {
+  var lines = new Lines();
+
+  lines.add([
+    '\n',
+    lowercaseName, '\'Mk :: C.Expr (', type,
+  ]);
+  lines.add([' -> ', name, ')\n']);
+
+  lines.add([
+    lowercaseName, '\'Mk = C.unsafeWrapExpr\n',
+  ]);
+
+  lines.add([
+    '\n',
+    lowercaseName, '\' :: ', name,' -> C.Expr ', name, '\n',
+    lowercaseName, '\' = C.unsafeExpr P.. Ast.toAst\n',
+  ]);
+
+  return lines.collapse();
+};
+
+const genWrapToAst = ({name}) => {
+ var lines = new Lines();
+
+  lines.add([
+    '\n',
+    'instance Ast.ToAst ', name, ' where\n',
+    '  toAst (', name, ' w) = Ast.toAst w\n',
+  ]);
+
+  return lines;
 };
 
 const genStructToAst = ({name, label, members}) => {
@@ -146,7 +180,7 @@ const genStructToAst = ({name, label, members}) => {
   );
   lines.add('    }');
   lines.add([
-    ' = Ast.Struct P.$ Map.fromList\n',
+    ' = Ast.Ast\'Struct P.. Ast.Struct P.$ Map.fromList\n',
     '    [ ("', members[0].label, '", Ast.toAst ', members[0].name, ')\n',
   ]);
   members.slice(1).forEach(member =>
@@ -179,8 +213,8 @@ const genStructExpr = ({name, lowercaseName, members}) => {
 
   lines.add([
     '\n',
-    lowercaseName, '\'Pure :: ', name,' -> C.Expr ', name, '\n',
-    lowercaseName, '\'Pure = C.unsafeExpr . Ast.toAst\n',
+    lowercaseName, '\' :: ', name,' -> C.Expr ', name, '\n',
+    lowercaseName, '\' = C.unsafeExpr P.. Ast.toAst\n',
   ]);
 
   return lines.collapse();
@@ -248,7 +282,7 @@ const genEnumeralExpr = ({name, lowercaseName, enumerals}) => {
       ]);
       lines.add([
         '\n',
-        lowercaseName, '\'', enumeral.tag,'\'Mk = C.unsafeExpr . Ast.toAst $ ', name, '\'', enumeral.tag,'\n',
+        lowercaseName, '\'', enumeral.tag,'\'Mk = C.unsafeExpr P.. Ast.toAst P.$ ', name, '\'', enumeral.tag,'\n',
       ]);
     } else {
       lines.add([
@@ -273,8 +307,8 @@ const genEnumeralExpr = ({name, lowercaseName, enumerals}) => {
 
   lines.add([
     '\n',
-    lowercaseName, '\'Pure :: ', name,' -> C.Expr ', name, '\n',
-    lowercaseName, '\'Pure = C.unsafeExpr . Ast.toAst\n',
+    lowercaseName, '\' :: ', name,' -> C.Expr ', name, '\n',
+    lowercaseName, '\' = C.unsafeExpr P.. Ast.toAst\n',
   ]);
   return lines.collapse();
 };
@@ -290,7 +324,11 @@ const gen = (specs) => {
   lines.add(genImports());
   lines.add(genVersion(spec.lowercaseName, spec.version.major, spec.version.minor));
   lines.add(genService(spec));
-  spec.wrap.forEach(ty => lines.add(genWrap(ty)));
+  spec.wrap.forEach(ty => {
+    lines.add(genWrap(ty));
+    lines.add(genWrapToAst(ty));
+    lines.add(genWrapExpr(ty));
+  });
   spec.struct.forEach(ty => {
     lines.add(genStruct(ty));
     lines.add(genStructToAst(ty));

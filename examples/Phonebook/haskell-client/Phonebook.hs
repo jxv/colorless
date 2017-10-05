@@ -33,14 +33,26 @@ module Colorless.Examples.Phonebook
   , person'Mk
   , lookupPerson'Mk
   , lookupPersonByName'Mk
+  , personId'Mk
+  , name'Mk
+  , phone'Mk
+  , street'Mk
+  , city'Mk
+  , zipcode'Mk
   , state'CA'Mk
   , state'NY'Mk
   , state'TX'Mk
-  , address'Pure
-  , person'Pure
-  , lookupPerson'Pure
-  , lookupPersonByName'Pure
-  , state'Pure
+  , address'
+  , person'
+  , lookupPerson'
+  , lookupPersonByName'
+  , personId'
+  , name'
+  , phone'
+  , street'
+  , city'
+  , zipcode'
+  , state'
   ) where
 
 -- Imports
@@ -73,43 +85,97 @@ lookupPersonByName expr'' = C.unsafeExpr (Ast.Ast'StructCall (Ast.StructCall "Lo
 newtype PersonId = PersonId T.Text
   deriving (P.Show, P.Eq, P.Ord, P.IsString, T.ToText, A.FromJSON, A.ToJSON, C.ToVal, C.FromVal)
 
-instance HasType  where
+instance C.HasType PersonId where
   getType _ = "PersonId"
+
+instance Ast.ToAst PersonId where
+  toAst (PersonId w) = Ast.toAst w
+
+personId'Mk :: C.Expr (T.Text -> PersonId)
+personId'Mk = C.unsafeWrapExpr
+
+personId' :: PersonId -> C.Expr PersonId
+personId' = C.unsafeExpr P.. Ast.toAst
 
 -- Wrap: Name
 newtype Name = Name T.Text
   deriving (P.Show, P.Eq, P.Ord, P.IsString, T.ToText, A.FromJSON, A.ToJSON, C.ToVal, C.FromVal)
 
-instance HasType  where
+instance C.HasType Name where
   getType _ = "Name"
+
+instance Ast.ToAst Name where
+  toAst (Name w) = Ast.toAst w
+
+name'Mk :: C.Expr (T.Text -> Name)
+name'Mk = C.unsafeWrapExpr
+
+name' :: Name -> C.Expr Name
+name' = C.unsafeExpr P.. Ast.toAst
 
 -- Wrap: Phone
 newtype Phone = Phone T.Text
   deriving (P.Show, P.Eq, P.Ord, P.IsString, T.ToText, A.FromJSON, A.ToJSON, C.ToVal, C.FromVal)
 
-instance HasType  where
+instance C.HasType Phone where
   getType _ = "Phone"
+
+instance Ast.ToAst Phone where
+  toAst (Phone w) = Ast.toAst w
+
+phone'Mk :: C.Expr (T.Text -> Phone)
+phone'Mk = C.unsafeWrapExpr
+
+phone' :: Phone -> C.Expr Phone
+phone' = C.unsafeExpr P.. Ast.toAst
 
 -- Wrap: Street
 newtype Street = Street T.Text
   deriving (P.Show, P.Eq, P.Ord, P.IsString, T.ToText, A.FromJSON, A.ToJSON, C.ToVal, C.FromVal)
 
-instance HasType  where
+instance C.HasType Street where
   getType _ = "Street"
+
+instance Ast.ToAst Street where
+  toAst (Street w) = Ast.toAst w
+
+street'Mk :: C.Expr (T.Text -> Street)
+street'Mk = C.unsafeWrapExpr
+
+street' :: Street -> C.Expr Street
+street' = C.unsafeExpr P.. Ast.toAst
 
 -- Wrap: City
 newtype City = City T.Text
   deriving (P.Show, P.Eq, P.Ord, P.IsString, T.ToText, A.FromJSON, A.ToJSON, C.ToVal, C.FromVal)
 
-instance HasType  where
+instance C.HasType City where
   getType _ = "City"
+
+instance Ast.ToAst City where
+  toAst (City w) = Ast.toAst w
+
+city'Mk :: C.Expr (T.Text -> City)
+city'Mk = C.unsafeWrapExpr
+
+city' :: City -> C.Expr City
+city' = C.unsafeExpr P.. Ast.toAst
 
 -- Wrap: Zipcode
 newtype Zipcode = Zipcode T.Text
   deriving (P.Show, P.Eq, P.Ord, P.IsString, T.ToText, A.FromJSON, A.ToJSON, C.ToVal, C.FromVal)
 
-instance HasType  where
+instance C.HasType Zipcode where
   getType _ = "Zipcode"
+
+instance Ast.ToAst Zipcode where
+  toAst (Zipcode w) = Ast.toAst w
+
+zipcode'Mk :: C.Expr (T.Text -> Zipcode)
+zipcode'Mk = C.unsafeWrapExpr
+
+zipcode' :: Zipcode -> C.Expr Zipcode
+zipcode' = C.unsafeExpr P.. Ast.toAst
 
 -- Struct: Address
 data Address = Address
@@ -152,7 +218,7 @@ instance Ast.ToAst Address where
     , city
     , zipcode
     , state
-    } = Ast.Struct P.$ Map.fromList
+    } = Ast.Ast'Struct P.. Ast.Struct P.$ Map.fromList
     [ ("street", Ast.toAst street)
     , ("city", Ast.toAst city)
     , ("zipcode", Ast.toAst zipcode)
@@ -162,8 +228,8 @@ instance Ast.ToAst Address where
 address'Mk :: C.Expr (Street -> City -> Zipcode -> State -> Address)
 address'Mk = C.unsafeStructExpr ["street", "city", "zipcode", "state"]
 
-address'Pure :: Address -> C.Expr Address
-address'Pure = C.unsafeExpr . Ast.toAst
+address' :: Address -> C.Expr Address
+address' = C.unsafeExpr P.. Ast.toAst
 
 -- Struct: Person
 data Person = Person
@@ -206,7 +272,7 @@ instance Ast.ToAst Person where
     , phone
     , address
     , friends
-    } = Ast.Struct P.$ Map.fromList
+    } = Ast.Ast'Struct P.. Ast.Struct P.$ Map.fromList
     [ ("name", Ast.toAst name)
     , ("phone", Ast.toAst phone)
     , ("address", Ast.toAst address)
@@ -216,8 +282,8 @@ instance Ast.ToAst Person where
 person'Mk :: C.Expr (Name -> Phone -> (P.Maybe Address) -> [PersonId] -> Person)
 person'Mk = C.unsafeStructExpr ["name", "phone", "address", "friends"]
 
-person'Pure :: Person -> C.Expr Person
-person'Pure = C.unsafeExpr . Ast.toAst
+person' :: Person -> C.Expr Person
+person' = C.unsafeExpr P.. Ast.toAst
 
 -- Struct: LookupPerson
 data LookupPerson = LookupPerson
@@ -245,15 +311,15 @@ instance C.FromVal LookupPerson where
 instance Ast.ToAst LookupPerson where
   toAst LookupPerson
     { id
-    } = Ast.Struct P.$ Map.fromList
+    } = Ast.Ast'Struct P.. Ast.Struct P.$ Map.fromList
     [ ("id", Ast.toAst id)
     ]
 
 lookupPerson'Mk :: C.Expr (PersonId -> LookupPerson)
 lookupPerson'Mk = C.unsafeStructExpr ["id"]
 
-lookupPerson'Pure :: LookupPerson -> C.Expr LookupPerson
-lookupPerson'Pure = C.unsafeExpr . Ast.toAst
+lookupPerson' :: LookupPerson -> C.Expr LookupPerson
+lookupPerson' = C.unsafeExpr P.. Ast.toAst
 
 -- Struct: LookupPersonByName
 data LookupPersonByName = LookupPersonByName
@@ -281,15 +347,15 @@ instance C.FromVal LookupPersonByName where
 instance Ast.ToAst LookupPersonByName where
   toAst LookupPersonByName
     { name
-    } = Ast.Struct P.$ Map.fromList
+    } = Ast.Ast'Struct P.. Ast.Struct P.$ Map.fromList
     [ ("name", Ast.toAst name)
     ]
 
 lookupPersonByName'Mk :: C.Expr (T.Text -> LookupPersonByName)
 lookupPersonByName'Mk = C.unsafeStructExpr ["name"]
 
-lookupPersonByName'Pure :: LookupPersonByName -> C.Expr LookupPersonByName
-lookupPersonByName'Pure = C.unsafeExpr . Ast.toAst
+lookupPersonByName' :: LookupPersonByName -> C.Expr LookupPersonByName
+lookupPersonByName' = C.unsafeExpr P.. Ast.toAst
 
 -- Enumeration: State
 data State
@@ -329,14 +395,14 @@ instance Ast.ToAst State where
     State'TX -> Ast.Ast'Enumeral P.$ Ast.Enumeral "TX" P.Nothing
 
 state'CA'Mk :: C.Expr State
-state'CA'Mk = C.unsafeExpr . Ast.toAst $ State'CA
+state'CA'Mk = C.unsafeExpr P.. Ast.toAst P.$ State'CA
 
 state'NY'Mk :: C.Expr State
-state'NY'Mk = C.unsafeExpr . Ast.toAst $ State'NY
+state'NY'Mk = C.unsafeExpr P.. Ast.toAst P.$ State'NY
 
 state'TX'Mk :: C.Expr State
-state'TX'Mk = C.unsafeExpr . Ast.toAst $ State'TX
+state'TX'Mk = C.unsafeExpr P.. Ast.toAst P.$ State'TX
 
-state'Pure :: State -> C.Expr State
-state'Pure = C.unsafeExpr . Ast.toAst
+state' :: State -> C.Expr State
+state' = C.unsafeExpr P.. Ast.toAst
 

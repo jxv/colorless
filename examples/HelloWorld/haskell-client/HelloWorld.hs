@@ -29,9 +29,9 @@ module Colorless.Examples.HelloWorld
   , color'Green'Mk
   , color'Yellow'Mk
   , color'Custom'Mk
-  , hello'Pure
-  , goodbye'Pure
-  , color'Pure
+  , hello'
+  , goodbye'
+  , color'
   ) where
 
 -- Imports
@@ -86,15 +86,15 @@ instance C.FromVal Hello where
 instance Ast.ToAst Hello where
   toAst Hello
     { who
-    } = Ast.Struct P.$ Map.fromList
+    } = Ast.Ast'Struct P.. Ast.Struct P.$ Map.fromList
     [ ("who", Ast.toAst who)
     ]
 
 hello'Mk :: C.Expr (T.Text -> Hello)
 hello'Mk = C.unsafeStructExpr ["who"]
 
-hello'Pure :: Hello -> C.Expr Hello
-hello'Pure = C.unsafeExpr . Ast.toAst
+hello' :: Hello -> C.Expr Hello
+hello' = C.unsafeExpr P.. Ast.toAst
 
 -- Struct: Goodbye
 data Goodbye = Goodbye
@@ -122,15 +122,15 @@ instance C.FromVal Goodbye where
 instance Ast.ToAst Goodbye where
   toAst Goodbye
     { target
-    } = Ast.Struct P.$ Map.fromList
+    } = Ast.Ast'Struct P.. Ast.Struct P.$ Map.fromList
     [ ("target", Ast.toAst target)
     ]
 
 goodbye'Mk :: C.Expr (T.Text -> Goodbye)
 goodbye'Mk = C.unsafeStructExpr ["target"]
 
-goodbye'Pure :: Goodbye -> C.Expr Goodbye
-goodbye'Pure = C.unsafeExpr . Ast.toAst
+goodbye' :: Goodbye -> C.Expr Goodbye
+goodbye' = C.unsafeExpr P.. Ast.toAst
 
 -- Enumeration: Color
 data Color
@@ -208,20 +208,20 @@ instance Ast.ToAst Color where
       ]
 
 color'Red'Mk :: C.Expr Color
-color'Red'Mk = C.unsafeExpr . Ast.toAst $ Color'Red
+color'Red'Mk = C.unsafeExpr P.. Ast.toAst P.$ Color'Red
 
 color'Blue'Mk :: C.Expr Color
-color'Blue'Mk = C.unsafeExpr . Ast.toAst $ Color'Blue
+color'Blue'Mk = C.unsafeExpr P.. Ast.toAst P.$ Color'Blue
 
 color'Green'Mk :: C.Expr Color
-color'Green'Mk = C.unsafeExpr . Ast.toAst $ Color'Green
+color'Green'Mk = C.unsafeExpr P.. Ast.toAst P.$ Color'Green
 
 color'Yellow'Mk :: C.Expr Color
-color'Yellow'Mk = C.unsafeExpr . Ast.toAst $ Color'Yellow
+color'Yellow'Mk = C.unsafeExpr P.. Ast.toAst P.$ Color'Yellow
 
 color'Custom'Mk :: C.Expr (I.Word8 -> I.Word8 -> I.Word8 -> Color)
 color'Custom'Mk = C.unsafeEnumeralExpr "Custom" ["r", "g", "b"]
 
-color'Pure :: Color -> C.Expr Color
-color'Pure = C.unsafeExpr . Ast.toAst
+color' :: Color -> C.Expr Color
+color' = C.unsafeExpr P.. Ast.toAst
 

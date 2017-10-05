@@ -63,7 +63,7 @@ const genWrap = ({name, type, label, instances}) => {
   ]);
   lines.add([
     '\n',
-    'instance HasType ',,' where\n',
+    'instance C.HasType ', name,' where\n',
     '  getType _ = "', label,'"\n',
   ]);
   return lines;

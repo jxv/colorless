@@ -110,42 +110,42 @@ data Phonebook'Api
 newtype PersonId = PersonId T.Text
   deriving (P.Show, P.Eq, P.Ord, P.IsString, T.ToText, A.FromJSON, A.ToJSON, C.ToVal, C.FromVal)
 
-instance HasType  where
+instance C.HasType PersonId where
   getType _ = "PersonId"
 
 -- Wrap: Name
 newtype Name = Name T.Text
   deriving (P.Show, P.Eq, P.Ord, P.IsString, T.ToText, A.FromJSON, A.ToJSON, C.ToVal, C.FromVal)
 
-instance HasType  where
+instance C.HasType Name where
   getType _ = "Name"
 
 -- Wrap: Phone
 newtype Phone = Phone T.Text
   deriving (P.Show, P.Eq, P.Ord, P.IsString, T.ToText, A.FromJSON, A.ToJSON, C.ToVal, C.FromVal)
 
-instance HasType  where
+instance C.HasType Phone where
   getType _ = "Phone"
 
 -- Wrap: Street
 newtype Street = Street T.Text
   deriving (P.Show, P.Eq, P.Ord, P.IsString, T.ToText, A.FromJSON, A.ToJSON, C.ToVal, C.FromVal)
 
-instance HasType  where
+instance C.HasType Street where
   getType _ = "Street"
 
 -- Wrap: City
 newtype City = City T.Text
   deriving (P.Show, P.Eq, P.Ord, P.IsString, T.ToText, A.FromJSON, A.ToJSON, C.ToVal, C.FromVal)
 
-instance HasType  where
+instance C.HasType City where
   getType _ = "City"
 
 -- Wrap: Zipcode
 newtype Zipcode = Zipcode T.Text
   deriving (P.Show, P.Eq, P.Ord, P.IsString, T.ToText, A.FromJSON, A.ToJSON, C.ToVal, C.FromVal)
 
-instance HasType  where
+instance C.HasType Zipcode where
   getType _ = "Zipcode"
 
 -- Struct: Address

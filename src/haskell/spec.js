@@ -120,6 +120,7 @@ const enumeration = (types) => types.filter(type => type.n && type.e).map(type =
 const wrap = (types) => types.filter(type => type.n && type.w).map(type => ({
   name: langTypeName(type.n),
   label: langTypeLabel(type.n),
+  lowercaseName: lowercaseFirstLetter(langTypeName(type.n)),
   type: langType(type.w),
   func: type.o && lowercaseFirstLetter(langTypeName(type.n)),
   output: langType(type.o),
