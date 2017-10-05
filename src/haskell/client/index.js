@@ -129,7 +129,12 @@ const mkExportValues = (s) => {
     .map(x => x.lowercaseName + '\'');
   expr = expr.concat(s.enumeration.map(({lowercaseName}) => lowercaseName + '\''));
 
-  return calls.concat(exprMk).concat(expr);
+  var paths = [];
+  s.struct.forEach(struct =>
+    struct.members.forEach(member =>
+      paths.push(struct.lowercaseName + '\'' + member.name)));
+
+  return calls.concat(exprMk).concat(expr).concat(paths);
 };
 
 const genWrapExpr = ({name, lowercaseName, type}) => {
@@ -162,6 +167,20 @@ const genWrapToAst = ({name}) => {
     'instance Ast.ToAst ', name, ' where\n',
     '  toAst (', name, ' w) = Ast.toAst w\n',
   ]);
+
+  return lines;
+};
+
+const genStructPath = ({name, lowercaseName, members}) => {
+  var lines = new Lines();
+
+  members.forEach(member =>
+    lines.add([
+      '\n',
+      lowercaseName, '\'', member.name, ' :: C.Path (', name, ' -> ', member.type, ')\n',
+      lowercaseName, '\'', member.name, ' = C.unsafePath ["', member.label ,'"]\n',
+    ])
+  );
 
   return lines;
 };
@@ -331,6 +350,7 @@ const gen = (specs) => {
   });
   spec.struct.forEach(ty => {
     lines.add(genStruct(ty));
+    lines.add(genStructPath(ty));
     lines.add(genStructToAst(ty));
     lines.add(genStructExpr(ty));
   });

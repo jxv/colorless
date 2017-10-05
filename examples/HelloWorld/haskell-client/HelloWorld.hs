@@ -32,6 +32,8 @@ module Colorless.Examples.HelloWorld
   , hello'
   , goodbye'
   , color'
+  , hello'who
+  , goodbye'target
   ) where
 
 -- Imports
@@ -83,6 +85,9 @@ instance C.FromVal Hello where
       P.<$> C.getMember m "who"
     _ -> P.Nothing
 
+hello'who :: C.Path (Hello -> T.Text)
+hello'who = C.unsafePath ["who"]
+
 instance Ast.ToAst Hello where
   toAst Hello
     { who
@@ -118,6 +123,9 @@ instance C.FromVal Goodbye where
     C.Val'ApiVal (C.ApiVal'Struct (C.Struct m)) -> Goodbye
       P.<$> C.getMember m "target"
     _ -> P.Nothing
+
+goodbye'target :: C.Path (Goodbye -> T.Text)
+goodbye'target = C.unsafePath ["target"]
 
 instance Ast.ToAst Goodbye where
   toAst Goodbye

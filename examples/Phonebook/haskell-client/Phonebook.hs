@@ -53,6 +53,16 @@ module Colorless.Examples.Phonebook
   , city'
   , zipcode'
   , state'
+  , address'street
+  , address'city
+  , address'zipcode
+  , address'state
+  , person'name
+  , person'phone
+  , person'address
+  , person'friends
+  , lookupPerson'id
+  , lookupPersonByName'name
   ) where
 
 -- Imports
@@ -212,6 +222,18 @@ instance C.FromVal Address where
       P.<*> C.getMember m "state"
     _ -> P.Nothing
 
+address'street :: C.Path (Address -> Street)
+address'street = C.unsafePath ["street"]
+
+address'city :: C.Path (Address -> City)
+address'city = C.unsafePath ["city"]
+
+address'zipcode :: C.Path (Address -> Zipcode)
+address'zipcode = C.unsafePath ["zipcode"]
+
+address'state :: C.Path (Address -> State)
+address'state = C.unsafePath ["state"]
+
 instance Ast.ToAst Address where
   toAst Address
     { street
@@ -266,6 +288,18 @@ instance C.FromVal Person where
       P.<*> C.getMember m "friends"
     _ -> P.Nothing
 
+person'name :: C.Path (Person -> Name)
+person'name = C.unsafePath ["name"]
+
+person'phone :: C.Path (Person -> Phone)
+person'phone = C.unsafePath ["phone"]
+
+person'address :: C.Path (Person -> (P.Maybe Address))
+person'address = C.unsafePath ["address"]
+
+person'friends :: C.Path (Person -> [PersonId])
+person'friends = C.unsafePath ["friends"]
+
 instance Ast.ToAst Person where
   toAst Person
     { name
@@ -308,6 +342,9 @@ instance C.FromVal LookupPerson where
       P.<$> C.getMember m "id"
     _ -> P.Nothing
 
+lookupPerson'id :: C.Path (LookupPerson -> PersonId)
+lookupPerson'id = C.unsafePath ["id"]
+
 instance Ast.ToAst LookupPerson where
   toAst LookupPerson
     { id
@@ -343,6 +380,9 @@ instance C.FromVal LookupPersonByName where
     C.Val'ApiVal (C.ApiVal'Struct (C.Struct m)) -> LookupPersonByName
       P.<$> C.getMember m "name"
     _ -> P.Nothing
+
+lookupPersonByName'name :: C.Path (LookupPersonByName -> T.Text)
+lookupPersonByName'name = C.unsafePath ["name"]
 
 instance Ast.ToAst LookupPersonByName where
   toAst LookupPersonByName
