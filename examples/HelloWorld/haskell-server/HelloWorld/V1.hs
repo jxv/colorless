@@ -29,16 +29,16 @@ module Colorless.Examples.HelloWorld.V1
 
 -- Imports
 import qualified Prelude as P
+import qualified Data.Word as I
+import qualified Data.Int as I
+import qualified Data.IORef as IO
+import qualified Data.String as P (IsString)
+import qualified GHC.Generics as P (Generic)
 import qualified Data.Map as Map
 import qualified Control.Monad.IO.Class as IO
 import qualified Data.Aeson as A
 import qualified Data.Text as T
 import qualified Data.Text.Conversions as T
-import qualified Data.String as P (IsString)
-import qualified Data.Word as I
-import qualified Data.Int as I
-import qualified Data.IORef as IO
-import qualified GHC.Generics as P (Generic)
 import qualified Colorless.Server as C
 
 import Colorless.Examples.HelloWorld.V0 (Hello(..))
@@ -110,11 +110,6 @@ data Goodbye = Goodbye
   { target :: T.Text
   } deriving (P.Show, P.Eq, P.Generic)
 
-instance C.HasType Goodbye where
-  getType _ = "Goodbye"
-
-instance A.ToJSON Goodbye
-
 instance C.ToVal Goodbye where
   toVal Goodbye
     { target
@@ -128,6 +123,8 @@ instance C.FromVal Goodbye where
       P.<$> C.getMember m "target"
     _ -> P.Nothing
 
+instance A.ToJSON Goodbye
+
 -- Enumeration: Color
 data Color
   = Color'Red 
@@ -137,39 +134,11 @@ data Color
   | Color'Yellow
   deriving (P.Show, P.Eq)
 
-instance C.HasType Color where
-  getType _ = "Color"
-
 data Color'Custom'Members = Color'Custom'Members
   { r :: I.Word8
   , g :: I.Word8
   , b :: I.Word8
   } deriving (P.Show, P.Eq, P.Generic)
-
-instance A.ToJSON Color'Custom'Members
-
-instance A.ToJSON Color where
-  toJSON = \case
-    Color'Red -> A.object [ "tag" A..= ("Red" :: T.Text) ]
-    Color'Green -> A.object [ "tag" A..= ("Green" :: T.Text) ]
-    Color'Blue -> A.object [ "tag" A..= ("Blue" :: T.Text) ]
-    Color'Custom m -> C.combineObjects (A.object [ "tag" A..= ("Custom" :: T.Text) ]) (A.toJSON m)
-    Color'Yellow -> A.object [ "tag" A..= ("Yellow" :: T.Text) ]
-
-instance C.FromVal Color where
-  fromVal = \case
-    C.Val'ApiVal (C.ApiVal'Enumeral (C.Enumeral tag m)) -> case (tag,m) of
-      ("Red", P.Nothing) -> P.Just Color'Red
-      ("Green", P.Nothing) -> P.Just Color'Green
-      ("Blue", P.Nothing) -> P.Just Color'Blue
-      ("Custom", P.Just m') -> Color'Custom P.<$> (Color'Custom'Members
-          P.<$> C.getMember m' "r"
-          P.<*> C.getMember m' "g"
-          P.<*> C.getMember m' "b"
-        )
-      ("Yellow", P.Nothing) -> P.Just Color'Yellow
-      _ -> P.Nothing
-    _ -> P.Nothing
 
 instance C.ToVal Color where
   toVal = \case
@@ -186,6 +155,31 @@ instance C.ToVal Color where
       , ("b", C.toVal b)
       ]
     Color'Yellow -> C.Val'ApiVal P.$ C.ApiVal'Enumeral P.$ C.Enumeral "Yellow" P.Nothing
+
+instance C.FromVal Color where
+  fromVal = \case
+    C.Val'ApiVal (C.ApiVal'Enumeral (C.Enumeral tag m)) -> case (tag,m) of
+      ("Red", P.Nothing) -> P.Just Color'Red
+      ("Green", P.Nothing) -> P.Just Color'Green
+      ("Blue", P.Nothing) -> P.Just Color'Blue
+      ("Custom", P.Just m') -> Color'Custom P.<$> (Color'Custom'Members
+          P.<$> C.getMember m' "r"
+          P.<*> C.getMember m' "g"
+          P.<*> C.getMember m' "b"
+        )
+      ("Yellow", P.Nothing) -> P.Just Color'Yellow
+      _ -> P.Nothing
+    _ -> P.Nothing
+
+instance A.ToJSON Color where
+  toJSON = \case
+    Color'Red -> A.object [ "tag" A..= ("Red" :: T.Text) ]
+    Color'Green -> A.object [ "tag" A..= ("Green" :: T.Text) ]
+    Color'Blue -> A.object [ "tag" A..= ("Blue" :: T.Text) ]
+    Color'Custom m -> C.combineObjects (A.object [ "tag" A..= ("Custom" :: T.Text) ]) (A.toJSON m)
+    Color'Yellow -> A.object [ "tag" A..= ("Yellow" :: T.Text) ]
+
+instance A.ToJSON Color'Custom'Members
 
 helloWorld'Spec :: A.Value
 helloWorld'Spec = v

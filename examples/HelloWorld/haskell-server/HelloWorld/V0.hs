@@ -26,16 +26,16 @@ module Colorless.Examples.HelloWorld.V0
 
 -- Imports
 import qualified Prelude as P
+import qualified Data.Word as I
+import qualified Data.Int as I
+import qualified Data.IORef as IO
+import qualified Data.String as P (IsString)
+import qualified GHC.Generics as P (Generic)
 import qualified Data.Map as Map
 import qualified Control.Monad.IO.Class as IO
 import qualified Data.Aeson as A
 import qualified Data.Text as T
 import qualified Data.Text.Conversions as T
-import qualified Data.String as P (IsString)
-import qualified Data.Word as I
-import qualified Data.Int as I
-import qualified Data.IORef as IO
-import qualified GHC.Generics as P (Generic)
 import qualified Colorless.Server as C
 
 
@@ -107,11 +107,6 @@ data Hello = Hello
   { target :: T.Text
   } deriving (P.Show, P.Eq, P.Generic)
 
-instance C.HasType Hello where
-  getType _ = "Hello"
-
-instance A.ToJSON Hello
-
 instance C.ToVal Hello where
   toVal Hello
     { target
@@ -124,6 +119,8 @@ instance C.FromVal Hello where
     C.Val'ApiVal (C.ApiVal'Struct (C.Struct m)) -> Hello
       P.<$> C.getMember m "target"
     _ -> P.Nothing
+
+instance A.ToJSON Hello
 
 helloWorld'Spec :: A.Value
 helloWorld'Spec = v

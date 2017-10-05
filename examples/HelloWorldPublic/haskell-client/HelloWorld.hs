@@ -61,10 +61,10 @@ helloWorld'Pull :: C.Pull
 helloWorld'Pull = C.Pull "http" "127.0.0.1" "/" 8080
 
 hello :: C.Expr Hello -> C.Expr T.Text
-hello expr'' = C.unsafeExpr (Ast.Ast'StructCall (Ast.StructCall "Hello" (Ast.toAst expr'')))
+hello = C.unsafeExpr P.. Ast.Ast'StructCall P.. Ast.StructCall "Hello" P.. Ast.toAst
 
 goodbye :: C.Expr Goodbye -> C.Expr ()
-goodbye expr'' = C.unsafeExpr (Ast.Ast'StructCall (Ast.StructCall "Goodbye" (Ast.toAst expr'')))
+goodbye = C.unsafeExpr P.. Ast.Ast'StructCall P.. Ast.StructCall "Goodbye" P.. Ast.toAst
 
 -- Struct: Hello
 data Hello = Hello
@@ -73,8 +73,6 @@ data Hello = Hello
 
 instance C.HasType Hello where
   getType _ = "Hello"
-
-instance A.ToJSON Hello
 
 instance C.ToVal Hello where
   toVal Hello
@@ -112,8 +110,6 @@ data Goodbye = Goodbye
 
 instance C.HasType Goodbye where
   getType _ = "Goodbye"
-
-instance A.ToJSON Goodbye
 
 instance C.ToVal Goodbye where
   toVal Goodbye
@@ -153,39 +149,14 @@ data Color
   | Color'Custom Color'Custom'Members
   deriving (P.Show, P.Eq)
 
-instance C.HasType Color where
-  getType _ = "Color"
-
 data Color'Custom'Members = Color'Custom'Members
   { r :: I.Word8
   , g :: I.Word8
   , b :: I.Word8
   } deriving (P.Show, P.Eq, P.Generic)
 
-instance A.ToJSON Color'Custom'Members
-
-instance A.ToJSON Color where
-  toJSON = \case
-    Color'Red -> A.object [ "tag" A..= ("Red" :: T.Text) ]
-    Color'Blue -> A.object [ "tag" A..= ("Blue" :: T.Text) ]
-    Color'Green -> A.object [ "tag" A..= ("Green" :: T.Text) ]
-    Color'Yellow -> A.object [ "tag" A..= ("Yellow" :: T.Text) ]
-    Color'Custom m -> C.combineObjects (A.object [ "tag" A..= ("Custom" :: T.Text) ]) (A.toJSON m)
-
-instance C.FromVal Color where
-  fromVal = \case
-    C.Val'ApiVal (C.ApiVal'Enumeral (C.Enumeral tag m)) -> case (tag,m) of
-      ("Red", P.Nothing) -> P.Just Color'Red
-      ("Blue", P.Nothing) -> P.Just Color'Blue
-      ("Green", P.Nothing) -> P.Just Color'Green
-      ("Yellow", P.Nothing) -> P.Just Color'Yellow
-      ("Custom", P.Just m') -> Color'Custom P.<$> (Color'Custom'Members
-          P.<$> C.getMember m' "r"
-          P.<*> C.getMember m' "g"
-          P.<*> C.getMember m' "b"
-        )
-      _ -> P.Nothing
-    _ -> P.Nothing
+instance C.HasType Color where
+  getType _ = "Color"
 
 instance C.ToVal Color where
   toVal = \case
@@ -202,6 +173,21 @@ instance C.ToVal Color where
       , ("g", C.toVal g)
       , ("b", C.toVal b)
       ]
+
+instance C.FromVal Color where
+  fromVal = \case
+    C.Val'ApiVal (C.ApiVal'Enumeral (C.Enumeral tag m)) -> case (tag,m) of
+      ("Red", P.Nothing) -> P.Just Color'Red
+      ("Blue", P.Nothing) -> P.Just Color'Blue
+      ("Green", P.Nothing) -> P.Just Color'Green
+      ("Yellow", P.Nothing) -> P.Just Color'Yellow
+      ("Custom", P.Just m') -> Color'Custom P.<$> (Color'Custom'Members
+          P.<$> C.getMember m' "r"
+          P.<*> C.getMember m' "g"
+          P.<*> C.getMember m' "b"
+        )
+      _ -> P.Nothing
+    _ -> P.Nothing
 
 instance Ast.ToAst Color where
   toAst = \case

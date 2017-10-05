@@ -90,17 +90,23 @@ phonebook'Pull :: C.Pull
 phonebook'Pull = C.Pull "http" "127.0.0.1" "/" 8000
 
 lookupPerson :: C.Expr LookupPerson -> C.Expr (P.Maybe Person)
-lookupPerson expr'' = C.unsafeExpr (Ast.Ast'StructCall (Ast.StructCall "LookupPerson" (Ast.toAst expr'')))
+lookupPerson = C.unsafeExpr P.. Ast.Ast'StructCall P.. Ast.StructCall "LookupPerson" P.. Ast.toAst
 
 lookupPersonByName :: C.Expr LookupPersonByName -> C.Expr [Person]
-lookupPersonByName expr'' = C.unsafeExpr (Ast.Ast'StructCall (Ast.StructCall "LookupPersonByName" (Ast.toAst expr'')))
+lookupPersonByName = C.unsafeExpr P.. Ast.Ast'StructCall P.. Ast.StructCall "LookupPersonByName" P.. Ast.toAst
 
 -- Wrap: PersonId
 newtype PersonId = PersonId T.Text
-  deriving (P.Show, P.Eq, P.Ord, P.IsString, T.ToText, A.FromJSON, A.ToJSON, C.ToVal, C.FromVal)
+  deriving (P.Eq, P.Ord, P.IsString, T.ToText,  P.Show)
 
 instance C.HasType PersonId where
   getType _ = "PersonId"
+
+instance C.ToVal PersonId where
+  toVal (PersonId w) = C.toVal w
+
+instance C.FromVal PersonId where
+  fromVal v = PersonId P.<$> C.fromVal v
 
 instance Ast.ToAst PersonId where
   toAst (PersonId w) = Ast.toAst w
@@ -113,10 +119,16 @@ personId' = C.unsafeExpr P.. Ast.toAst
 
 -- Wrap: Name
 newtype Name = Name T.Text
-  deriving (P.Show, P.Eq, P.Ord, P.IsString, T.ToText, A.FromJSON, A.ToJSON, C.ToVal, C.FromVal)
+  deriving (P.Eq, P.Ord, P.IsString, T.ToText,  P.Show)
 
 instance C.HasType Name where
   getType _ = "Name"
+
+instance C.ToVal Name where
+  toVal (Name w) = C.toVal w
+
+instance C.FromVal Name where
+  fromVal v = Name P.<$> C.fromVal v
 
 instance Ast.ToAst Name where
   toAst (Name w) = Ast.toAst w
@@ -129,10 +141,16 @@ name' = C.unsafeExpr P.. Ast.toAst
 
 -- Wrap: Phone
 newtype Phone = Phone T.Text
-  deriving (P.Show, P.Eq, P.Ord, P.IsString, T.ToText, A.FromJSON, A.ToJSON, C.ToVal, C.FromVal)
+  deriving (P.Eq, P.Ord, P.IsString, T.ToText,  P.Show)
 
 instance C.HasType Phone where
   getType _ = "Phone"
+
+instance C.ToVal Phone where
+  toVal (Phone w) = C.toVal w
+
+instance C.FromVal Phone where
+  fromVal v = Phone P.<$> C.fromVal v
 
 instance Ast.ToAst Phone where
   toAst (Phone w) = Ast.toAst w
@@ -145,10 +163,16 @@ phone' = C.unsafeExpr P.. Ast.toAst
 
 -- Wrap: Street
 newtype Street = Street T.Text
-  deriving (P.Show, P.Eq, P.Ord, P.IsString, T.ToText, A.FromJSON, A.ToJSON, C.ToVal, C.FromVal)
+  deriving (P.Eq, P.Ord, P.IsString, T.ToText,  P.Show)
 
 instance C.HasType Street where
   getType _ = "Street"
+
+instance C.ToVal Street where
+  toVal (Street w) = C.toVal w
+
+instance C.FromVal Street where
+  fromVal v = Street P.<$> C.fromVal v
 
 instance Ast.ToAst Street where
   toAst (Street w) = Ast.toAst w
@@ -161,10 +185,16 @@ street' = C.unsafeExpr P.. Ast.toAst
 
 -- Wrap: City
 newtype City = City T.Text
-  deriving (P.Show, P.Eq, P.Ord, P.IsString, T.ToText, A.FromJSON, A.ToJSON, C.ToVal, C.FromVal)
+  deriving (P.Eq, P.Ord, P.IsString, T.ToText,  P.Show)
 
 instance C.HasType City where
   getType _ = "City"
+
+instance C.ToVal City where
+  toVal (City w) = C.toVal w
+
+instance C.FromVal City where
+  fromVal v = City P.<$> C.fromVal v
 
 instance Ast.ToAst City where
   toAst (City w) = Ast.toAst w
@@ -177,10 +207,16 @@ city' = C.unsafeExpr P.. Ast.toAst
 
 -- Wrap: Zipcode
 newtype Zipcode = Zipcode T.Text
-  deriving (P.Show, P.Eq, P.Ord, P.IsString, T.ToText, A.FromJSON, A.ToJSON, C.ToVal, C.FromVal)
+  deriving (P.Eq, P.Ord, P.IsString, T.ToText,  P.Show)
 
 instance C.HasType Zipcode where
   getType _ = "Zipcode"
+
+instance C.ToVal Zipcode where
+  toVal (Zipcode w) = C.toVal w
+
+instance C.FromVal Zipcode where
+  fromVal v = Zipcode P.<$> C.fromVal v
 
 instance Ast.ToAst Zipcode where
   toAst (Zipcode w) = Ast.toAst w
@@ -201,8 +237,6 @@ data Address = Address
 
 instance C.HasType Address where
   getType _ = "Address"
-
-instance A.ToJSON Address
 
 instance C.ToVal Address where
   toVal Address
@@ -268,8 +302,6 @@ data Person = Person
 instance C.HasType Person where
   getType _ = "Person"
 
-instance A.ToJSON Person
-
 instance C.ToVal Person where
   toVal Person
     { name
@@ -331,8 +363,6 @@ data LookupPerson = LookupPerson
 instance C.HasType LookupPerson where
   getType _ = "LookupPerson"
 
-instance A.ToJSON LookupPerson
-
 instance C.ToVal LookupPerson where
   toVal LookupPerson
     { id
@@ -369,8 +399,6 @@ data LookupPersonByName = LookupPersonByName
 
 instance C.HasType LookupPersonByName where
   getType _ = "LookupPersonByName"
-
-instance A.ToJSON LookupPersonByName
 
 instance C.ToVal LookupPersonByName where
   toVal LookupPersonByName
@@ -411,11 +439,11 @@ data State
 instance C.HasType State where
   getType _ = "State"
 
-instance A.ToJSON State where
-  toJSON = \case
-    State'CA -> A.object [ "tag" A..= ("CA" :: T.Text) ]
-    State'NY -> A.object [ "tag" A..= ("NY" :: T.Text) ]
-    State'TX -> A.object [ "tag" A..= ("TX" :: T.Text) ]
+instance C.ToVal State where
+  toVal = \case
+    State'CA -> C.Val'ApiVal P.$ C.ApiVal'Enumeral P.$ C.Enumeral "CA" P.Nothing
+    State'NY -> C.Val'ApiVal P.$ C.ApiVal'Enumeral P.$ C.Enumeral "NY" P.Nothing
+    State'TX -> C.Val'ApiVal P.$ C.ApiVal'Enumeral P.$ C.Enumeral "TX" P.Nothing
 
 instance C.FromVal State where
   fromVal = \case
@@ -425,12 +453,6 @@ instance C.FromVal State where
       ("TX", P.Nothing) -> P.Just State'TX
       _ -> P.Nothing
     _ -> P.Nothing
-
-instance C.ToVal State where
-  toVal = \case
-    State'CA -> C.Val'ApiVal P.$ C.ApiVal'Enumeral P.$ C.Enumeral "CA" P.Nothing
-    State'NY -> C.Val'ApiVal P.$ C.ApiVal'Enumeral P.$ C.Enumeral "NY" P.Nothing
-    State'TX -> C.Val'ApiVal P.$ C.ApiVal'Enumeral P.$ C.Enumeral "TX" P.Nothing
 
 instance Ast.ToAst State where
   toAst = \case

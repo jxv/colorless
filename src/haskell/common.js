@@ -52,6 +52,14 @@ const genVersion = (lowercaseName, major, minor) => {
   ]);
 };
 
+const genHasType = ({name, label}) => {
+  return new Lines([
+    '\n',
+    'instance C.HasType ', name,' where\n',
+    '  getType _ = "', label,'"\n',
+  ]);
+};
+
 const genWrap = ({name, type, label, instances}) => {
   var lines = new Lines([
     '\n',
@@ -59,256 +67,238 @@ const genWrap = ({name, type, label, instances}) => {
     'newtype ', name , ' = ', name, ' ', type, '\n',
   ]);
   lines.add([
-    '  deriving (P.Show, P.Eq, P.Ord, ', instances.text ? 'P.IsString, T.ToText, ' : '', instances.number ? 'P.Num, ' : '', 'A.FromJSON, A.ToJSON, C.ToVal, C.FromVal)', '\n',
-  ]);
-  lines.add([
-    '\n',
-    'instance C.HasType ', name,' where\n',
-    '  getType _ = "', label,'"\n',
+    '  deriving (P.Eq, P.Ord, ', instances.text ? 'P.IsString, T.ToText, ' : '', instances.number ? 'P.Num, ' : '', ' P.Show)\n',
   ]);
   return lines;
 };
 
+const genWrapToJson = ({name}) => {
+ return new Lines([
+    '\n',
+    'instance A.ToJSON ', name,' where\n',
+    '  toJSON (', name, ' w) = A.toJSON w\n',
+  ]);
+};
+
+const genWrapFromVal = ({name}) => {
+  return new Lines([
+    '\n',
+    'instance C.FromVal ', name,' where\n',
+    '  fromVal v = ', name, ' P.<$> C.fromVal v\n',
+  ]);
+};
+
+const genWrapToVal = ({name}) => {
+ return new Lines([
+    '\n',
+    'instance C.ToVal ', name,' where\n',
+    '  toVal (', name, ' w) = C.toVal w\n',
+  ]);
+};
 
 const genStruct = ({name, label, members}) => {
   var lines = new Lines();
-
-  { // Data type declaration
-    lines.add([
-      '\n',
-      '-- Struct: ', name, '\n',
-      'data ', name, ' = ', name, '\n',
-    ]);
-    lines.add(['  { ', members[0].name, ' :: ', members[0].type, '\n']);
-    for (var i = 1; i < members.length; i++) {
-      lines.add(['  , ', members[i].name, ' :: ', members[i].type, '\n']);
-    }
-    lines.add('  } deriving (P.Show, P.Eq, P.Generic)\n');
+  lines.add([
+    '\n',
+    '-- Struct: ', name, '\n',
+    'data ', name, ' = ', name, '\n',
+  ]);
+  lines.add(['  { ', members[0].name, ' :: ', members[0].type, '\n']);
+  for (var i = 1; i < members.length; i++) {
+    lines.add(['  , ', members[i].name, ' :: ', members[i].type, '\n']);
   }
-
-  { // HasType instance
-    lines.add([
-      '\n',
-      'instance C.HasType ', name, ' where\n',
-      '  getType _ = "', label, '"\n',
-    ]);
-  }
-
-  { // ToJSON instance
-    lines.add([
-      '\n',
-      'instance A.ToJSON ', name, '\n',
-    ]);
-  }
-
-  { // ToVal instance
-    lines.add([
-      '\n',
-      'instance C.ToVal ', name, ' where', '\n',
-      '  toVal ', name, '\n',
-    ]);
-    lines.add(['    { ', members[0].name, '\n']);
-    members.slice(1).forEach(member =>
-      lines.add(['    , ', member.name, '\n'])
-    );
-    lines.add('    }');
-    lines.add([
-      ' = C.Val\'ApiVal P.$ C.ApiVal\'Struct P.$ C.Struct P.$ Map.fromList\n',
-      '    [ ("', members[0].label, '", C.toVal ', members[0].name, ')\n',
-    ]);
-    members.slice(1).forEach(member =>
-      lines.add(['    , ("', member.label, '", C.toVal ', member.name, ')\n'])
-    );
-    lines.add('    ]\n\n');
-  }
-
-  { // FromVal instance
-    lines.add([
-      'instance C.FromVal ', name, ' where\n',
-      '  fromVal = \\case\n',
-      '    C.Val\'ApiVal (C.ApiVal\'Struct (C.Struct m)) -> ', name, '\n',
-      '      P.<$> C.getMember m "', members[0].label , '"\n'
-    ]);
-    members.slice(1).forEach(member =>
-      lines.add([
-        '      P.<*> C.getMember m "', member.label, '"\n'
-      ])
-    );
-    lines.add(
-      '    _ -> P.Nothing\n'
-    );
-  }
-
+  lines.add('  } deriving (P.Show, P.Eq, P.Generic)\n');
   return lines;
 };
 
+const genStructToJson = ({name}) => {
+  return new Lines([
+      '\n',
+      'instance A.ToJSON ', name, '\n',
+  ]);
+};
+
+const genStructToVal = ({name, label, members}) => {
+  var lines = new Lines([
+    '\n',
+    'instance C.ToVal ', name, ' where', '\n',
+    '  toVal ', name, '\n',
+  ]);
+  lines.add(['    { ', members[0].name, '\n']);
+  members.slice(1).forEach(member =>
+    lines.add(['    , ', member.name, '\n'])
+  );
+  lines.add('    }');
+  lines.add([
+    ' = C.Val\'ApiVal P.$ C.ApiVal\'Struct P.$ C.Struct P.$ Map.fromList\n',
+    '    [ ("', members[0].label, '", C.toVal ', members[0].name, ')\n',
+  ]);
+  members.slice(1).forEach(member =>
+    lines.add(['    , ("', member.label, '", C.toVal ', member.name, ')\n'])
+  );
+  lines.add('    ]\n\n');
+  return lines;
+};
+
+const genStructFromVal = ({name, label, members}) => {
+  var lines = new Lines([
+    'instance C.FromVal ', name, ' where\n',
+    '  fromVal = \\case\n',
+    '    C.Val\'ApiVal (C.ApiVal\'Struct (C.Struct m)) -> ', name, '\n',
+    '      P.<$> C.getMember m "', members[0].label , '"\n'
+  ]);
+  members.slice(1).forEach(member =>
+    lines.add([
+      '      P.<*> C.getMember m "', member.label, '"\n'
+    ])
+  );
+  lines.add(
+    '    _ -> P.Nothing\n'
+  );
+  return lines;
+};
 
 const genEnumeration = ({name, label, enumerals}) => {
   var lines = new Lines();
-
-  function nameTag(tag) {
-    return name + '\'' + tag;
-  }
-  function nameTagMembers(tag) {
-    return enumeralNameTagMember(name, tag);
-  }
-
-  { // Data type declaration
-    lines.add([
-      '\n',
-      '-- Enumeration: ', name, '\n',
-      'data ', name, '\n',
-    ]);
-    lines.add(['  = ', nameTag(enumerals[0].tag), ' '])
-    lines.add(enumerals[0].members ? [nameTagMembers(enumerals[0].tag), '\n'] : ['\n']);
-    enumerals.slice(1).forEach(enumeral =>
-      lines.add(enumeral.members
-        ? ['  | ', nameTag(enumeral.tag), ' ', nameTagMembers(enumeral.tag), '\n']
-        : ['  | ', nameTag(enumeral.tag), '\n']
-      )
-    );
-    lines.add('  deriving (P.Show, P.Eq)\n');
-  }
-
-  { // HasType instance
-    lines.add([
-      '\n',
-      'instance C.HasType ', name, ' where\n',
-      '  getType _ = "', label, '"\n',
-    ]);
-  }
-
-  { // Data type declarations for members
-    enumerals.forEach(enumeral => {
-      if (enumeral.members) {
-        // Data type declarations for member
-        lines.add([
-          '\n',
-          'data ', nameTagMembers(enumeral.tag), ' = ', nameTagMembers(enumeral.tag), '\n'
-        ]);
-        lines.add(['  { ', enumeral.members[0].name, ' :: ', enumeral.members[0].type, '\n']);
-        enumeral.members.slice(1).forEach(member =>
-          lines.add(['  , ', member.name, ' :: ', member.type, '\n'])
-        );
-        lines.add('  } deriving (P.Show, P.Eq, P.Generic)\n');
-        // ToJSON instance
-        lines.add([
-          '\n',
-          'instance A.ToJSON ', nameTagMembers(enumeral.tag), '\n'
-        ]);
-      }
-    });
-  }
-
-  { // ToJSON instance
-    lines.add([
-      '\n',
-      'instance A.ToJSON ', name, ' where\n',
-      '  toJSON = \\case\n',
-    ]);
-    enumerals.forEach(enumeral => {
+  lines.add([
+    '\n',
+    '-- Enumeration: ', name, '\n',
+    'data ', name, '\n',
+  ]);
+  lines.add(['  = ', name, '\'', enumerals[0].tag, ' '])
+  lines.add(enumerals[0].members ? [name, '\'', enumerals[0].tag, '\'Members\n'] : ['\n']);
+  enumerals.slice(1).forEach(enumeral =>
+    lines.add(enumeral.members
+      ? ['  | ', name, '\'', enumeral.tag, ' ', name, '\'', enumeral.tag, '\'Members\n']
+      : ['  | ', name, '\'', enumeral.tag, '\n']
+    )
+  );
+  lines.add('  deriving (P.Show, P.Eq)\n');
+  enumerals.forEach(enumeral => {
+    if (enumeral.members) {
+      // Data type declarations for member
       lines.add([
-        '    ', nameTag(enumeral.tag), ' ',
+        '\n',
+        'data ', name, '\'', enumeral.tag, '\'Members = ', name, '\'', enumeral.tag, '\'Members\n'
       ]);
-      if (!enumeral.members) {
-        lines.add(['-> A.object [ "tag" A..= ("', enumeral.tag, '" :: T.Text) ]\n']);
-      } else {
-        lines.add(['m -> C.combineObjects (A.object [ "tag" A..= ("', enumeral.label, '" :: T.Text) ]) (A.toJSON m)\n']);
-      }
-    });
-  }
+      lines.add(['  { ', enumeral.members[0].name, ' :: ', enumeral.members[0].type, '\n']);
+      enumeral.members.slice(1).forEach(member =>
+        lines.add(['  , ', member.name, ' :: ', member.type, '\n'])
+      );
+      lines.add('  } deriving (P.Show, P.Eq, P.Generic)\n');
+    }
+  });
+  return lines;
+}
 
-  function nameTag(tag) {
-    return name + '\'' + tag;
-  }
-  function nameTagMembers(tag) {
-    return enumeralNameTagMember(name, tag);
-  }
-
-  { // FromVal instance
+const genEnumerationToJson = ({name, label, enumerals}) => {
+  var lines = new Lines([
+    '\n',
+    'instance A.ToJSON ', name, ' where\n',
+    '  toJSON = \\case\n',
+  ]);
+  enumerals.forEach(enumeral => {
     lines.add([
-      '\n',
-      'instance C.FromVal ', name, ' where\n',
-      '  fromVal = \\case\n',
-      '    C.Val\'ApiVal (C.ApiVal\'Enumeral (C.Enumeral tag m)) -> case (tag,m) of\n',
+      '    ', name, '\'', enumeral.tag, ' ',
     ]);
-    enumerals.forEach(enumeral => {
-      if (!enumeral.members) {
-        lines.add([
-          '      ("', enumeral.label, '", P.Nothing) -> P.Just ', nameTag(enumeral.tag), '\n',
-        ]);
-      } else {
-        lines.add([
-          '      ("', enumeral.label, '", P.Just m\') -> ', nameTag(enumeral.tag), ' P.<$> (', nameTagMembers(enumeral.tag), '\n',
-        ]);
-        lines.add([
-          '          P.<$> C.getMember m\' "', enumeral.members[0].label, '"\n'
-        ]);
-        enumeral.members.slice(1).forEach(member =>
-          lines.add([
-            '          P.<*> C.getMember m\' "', member.label, '"\n'
-          ])
-        );
-        lines.add('        )\n');
-      }
-    });
-    lines.add([
-      '      _ -> P.Nothing\n',
-      '    _ -> P.Nothing\n',
-    ]);
-  }
+    if (!enumeral.members) {
+      lines.add(['-> A.object [ "tag" A..= ("', enumeral.tag, '" :: T.Text) ]\n']);
+    } else {
+      lines.add(['m -> C.combineObjects (A.object [ "tag" A..= ("', enumeral.label, '" :: T.Text) ]) (A.toJSON m)\n']);
+    }
+  });
+  enumerals.forEach(enumeral => {
+    if (enumeral.members) {
+      lines.add([
+        '\n',
+        'instance A.ToJSON ', name, '\'', enumeral.tag, '\'Members\n'
+      ]);
+    }
+  });
+  return lines;
+};
 
-  { // ToVal instance
-    lines.add([
-      '\n',
-      'instance C.ToVal ', name, ' where\n',
-      '  toVal = \\case\n',
-    ]);
-    enumerals.forEach(enumeral => {
-      if (!enumeral.members) {
+const genEnumerationFromVal = ({name, enumerals}) => {
+  var lines = new Lines([
+    '\n',
+    'instance C.FromVal ', name, ' where\n',
+    '  fromVal = \\case\n',
+    '    C.Val\'ApiVal (C.ApiVal\'Enumeral (C.Enumeral tag m)) -> case (tag,m) of\n',
+  ]);
+  enumerals.forEach(enumeral => {
+    if (!enumeral.members) {
+      lines.add([
+        '      ("', enumeral.label, '", P.Nothing) -> P.Just ', name, '\'', enumeral.tag, '\n',
+      ]);
+    } else {
+      lines.add([
+        '      ("', enumeral.label, '", P.Just m\') -> ', name, '\'', enumeral.tag, ' P.<$> (', name, '\'', enumeral.tag, '\'Members\n',
+      ]);
+      lines.add([
+        '          P.<$> C.getMember m\' "', enumeral.members[0].label, '"\n'
+      ]);
+      enumeral.members.slice(1).forEach(member =>
         lines.add([
-          '    ', nameTag(enumeral.tag), ' -> C.Val\'ApiVal P.$ C.ApiVal\'Enumeral P.$ C.Enumeral "', enumeral.label, '" P.Nothing\n',
-        ]);
-      } else {
-        lines.add([
-          '    ', nameTag(enumeral.tag), ' ', nameTagMembers(enumeral.tag), '\n',
-        ]);
-        lines.add([
-          '      { ', enumeral.members[0].name, '\n'
-        ]);
-        enumeral.members.slice(1).forEach(member =>
-          lines.add([
-            '      , ', member.name, '\n'
-          ])
-        );
-        lines.add([
-          '      } -> C.Val\'ApiVal P.$ C.ApiVal\'Enumeral P.$ C.Enumeral "', enumeral.label, '" P.$ P.Just P.$ Map.fromList\n',
-        ]);
-        lines.add([
-          '      [ ("', enumeral.members[0].label, '", C.toVal ', enumeral.members[0].name, ')\n'
-        ]);
-        enumeral.members.slice(1).forEach(member =>
-          lines.add([
-            '      , ("', member.label, '", C.toVal ', member.name, ')\n'
-          ])
-        );
-        lines.add('      ]\n');
-      }
-    });
-  }
+          '          P.<*> C.getMember m\' "', member.label, '"\n'
+        ])
+      );
+      lines.add('        )\n');
+    }
+  });
+  lines.add([
+    '      _ -> P.Nothing\n',
+    '    _ -> P.Nothing\n',
+  ]);
+  return lines;
+};
 
+const genEnumerationToVal = ({name, enumerals}) => {
+  var lines = new Lines([
+    '\n',
+    'instance C.ToVal ', name, ' where\n',
+    '  toVal = \\case\n',
+  ]);
+  enumerals.forEach(enumeral => {
+    if (!enumeral.members) {
+      lines.add([
+        '    ', name, '\'', enumeral.tag, ' -> C.Val\'ApiVal P.$ C.ApiVal\'Enumeral P.$ C.Enumeral "', enumeral.label, '" P.Nothing\n',
+      ]);
+    } else {
+      lines.add([
+        '    ', name, '\'', enumeral.tag, ' ', name, '\'', enumeral.tag, '\'Members', '\n',
+      ]);
+      lines.add([
+        '      { ', enumeral.members[0].name, '\n'
+      ]);
+      enumeral.members.slice(1).forEach(member =>
+        lines.add([
+          '      , ', member.name, '\n'
+        ])
+      );
+      lines.add([
+        '      } -> C.Val\'ApiVal P.$ C.ApiVal\'Enumeral P.$ C.Enumeral "', enumeral.label, '" P.$ P.Just P.$ Map.fromList\n',
+      ]);
+      lines.add([
+        '      [ ("', enumeral.members[0].label, '", C.toVal ', enumeral.members[0].name, ')\n'
+      ]);
+      enumeral.members.slice(1).forEach(member =>
+        lines.add([
+          '      , ("', member.label, '", C.toVal ', member.name, ')\n'
+        ])
+      );
+      lines.add('      ]\n');
+    }
+  });
   return lines;
 };
 
 const genPull = ({lowercaseName, pull}) => {
   var lines = new Lines();
-
   lines.add([
     '\n',
     lowercaseName, '\'Pull :: C.Pull\n',
     lowercaseName, '\'Pull = C.Pull "', pull.protocol, '" "', pull.address, '" "', pull.path, '" ', pull.port, '\n',
   ]);
-
   return lines;
 };
 
@@ -317,9 +307,19 @@ module.exports = {
   mkExportTypes,
   mkImportTypes,
   genPragmas,
+  genHasType,
   genWrap,
+  genWrapToJson,
+  genWrapToVal,
+  genWrapFromVal,
   genStruct,
+  genStructToJson,
+  genStructToVal,
+  genStructFromVal,
   genEnumeration,
+  genEnumerationToJson,
+  genEnumerationToVal,
+  genEnumerationFromVal,
   genVersion,
   isFunc,
   genPull,

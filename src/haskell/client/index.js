@@ -2,12 +2,18 @@ var Lines = require('../../lines.js').Lines;
 
 var {
   mkExportTypes,
+  genHasType,
   genWrap,
+  genWrapToVal,
+  genWrapFromVal,
   genStruct,
+  genStructToVal,
+  genStructFromVal,
   genEnumeration,
+  genEnumerationToVal,
+  genEnumerationFromVal,
   genVersion,
   isFunc,
-  enumeralNameTagMember,
   genPull,
 } = require('../common.js');
 
@@ -88,7 +94,7 @@ const genService = (s) => {
     lines.add([
       '\n',
       call.func, ' :: C.Expr ', call.name, ' -> C.Expr ', call.output, '\n',
-      call.func, ' expr\'\' = C.unsafeExpr (Ast.Ast\'WrapCall (Ast.WrapCall "', call.label, '" (Ast.toAst expr\'\')))\n',
+      call.func, ' = C.unsafeExpr P.. Ast.Ast\'WrapCall P.. Ast.WrapCall "', call.label, '" P.. Ast.toAst\n',
     ]);
   });
 
@@ -96,7 +102,7 @@ const genService = (s) => {
     lines.add([
       '\n',
       call.func, ' :: C.Expr ', call.name, ' -> C.Expr ', call.output, '\n',
-      call.func, ' expr\'\' = C.unsafeExpr (Ast.Ast\'StructCall (Ast.StructCall "', call.label, '" (Ast.toAst expr\'\')))\n',
+      call.func, ' = C.unsafeExpr P.. Ast.Ast\'StructCall P.. Ast.StructCall "', call.label, '" P.. Ast.toAst\n',
     ]);
   });
 
@@ -104,7 +110,7 @@ const genService = (s) => {
     lines.add([
       '\n',
       call.func, ' :: C.Expr ', call.name, ' -> C.Expr ', call.output, '\n',
-      call.func, ' expr\'\' = C.unsafeExpr (Ast.Ast\'EnumerationCall (Ast.EnumerationCall "', call.label, '" (Ast.toAst expr\'\')))\n',
+      call.func, ' = C.unsafeExpr P.. Ast.Ast\'EnumerationCall P.. Ast.EnumerationCall "', call.label, '" P.. Ast.toAst\n',
     ]);
   });
 
@@ -158,18 +164,16 @@ const genWrapExpr = ({name, lowercaseName, type}) => {
     lowercaseName, '\' = C.unsafeExpr P.. Ast.toAst\n',
   ]);
 
-  return lines.collapse();
+  return lines;
 };
 
 const genWrapToAst = ({name}) => {
- var lines = new Lines();
-
+  var lines = new Lines();
   lines.add([
     '\n',
     'instance Ast.ToAst ', name, ' where\n',
     '  toAst (', name, ' w) = Ast.toAst w\n',
   ]);
-
   return lines;
 };
 
@@ -209,7 +213,7 @@ const genStructToAst = ({name, label, members}) => {
   );
   lines.add('    ]\n');
 
-  return lines.collapse();
+  return lines;
 };
 
 const genStructExpr = ({name, lowercaseName, members}) => {
@@ -238,33 +242,24 @@ const genStructExpr = ({name, lowercaseName, members}) => {
     lowercaseName, '\' = C.unsafeExpr P.. Ast.toAst\n',
   ]);
 
-  return lines.collapse();
+  return lines;
 };
 
 const genEnumerationToAst = ({name, enumerals}) => {
-  var lines = new Lines();
-
-  lines.add([
+  var lines = new Lines([
     '\n',
     'instance Ast.ToAst ', name, ' where', '\n',
     '  toAst = \\case\n',
   ]);
 
-  function nameTag(tag) {
-    return name + '\'' + tag;
-  }
-  function nameTagMembers(tag) {
-    return enumeralNameTagMember(name, tag);
-  }
-
   enumerals.forEach(enumeral => {
     if (!enumeral.members) {
       lines.add([
-        '    ', nameTag(enumeral.tag), ' -> Ast.Ast\'Enumeral P.$ Ast.Enumeral "', enumeral.label, '" P.Nothing\n',
+        '    ', name, '\'', enumeral.tag, ' -> Ast.Ast\'Enumeral P.$ Ast.Enumeral "', enumeral.label, '" P.Nothing\n',
       ]);
     } else {
       lines.add([
-        '    ', nameTag(enumeral.tag), ' ', nameTagMembers(enumeral.tag), '\n',
+        '    ', name, '\'', enumeral.tag, ' ', name, '\'', enumeral.tag, '\'Members\n',
       ]);
       lines.add([
         '      { ', enumeral.members[0].name, '\n'
@@ -289,7 +284,7 @@ const genEnumerationToAst = ({name, enumerals}) => {
     }
   });
 
-  return lines.collapse();
+  return lines;
 };
 
 const genEnumeralExpr = ({name, lowercaseName, enumerals}) => {
@@ -331,7 +326,7 @@ const genEnumeralExpr = ({name, lowercaseName, enumerals}) => {
     lowercaseName, '\' :: ', name,' -> C.Expr ', name, '\n',
     lowercaseName, '\' = C.unsafeExpr P.. Ast.toAst\n',
   ]);
-  return lines.collapse();
+  return lines;
 };
 
 const gen = (specs) => {
@@ -348,17 +343,26 @@ const gen = (specs) => {
   lines.add(genService(spec));
   spec.wrap.forEach(ty => {
     lines.add(genWrap(ty));
+    lines.add(genHasType(ty));
+    lines.add(genWrapToVal(ty));
+    lines.add(genWrapFromVal(ty));
     lines.add(genWrapToAst(ty));
     lines.add(genWrapExpr(ty));
   });
   spec.struct.forEach(ty => {
     lines.add(genStruct(ty));
+    lines.add(genHasType(ty));
+    lines.add(genStructToVal(ty));
+    lines.add(genStructFromVal(ty));
     lines.add(genStructPath(ty));
     lines.add(genStructToAst(ty));
     lines.add(genStructExpr(ty));
   });
   spec.enumeration.forEach(ty => {
     lines.add(genEnumeration(ty));
+    lines.add(genHasType(ty));
+    lines.add(genEnumerationToVal(ty));
+    lines.add(genEnumerationFromVal(ty));
     lines.add(genEnumerationToAst(ty));
     lines.add(genEnumeralExpr(ty));
   });
