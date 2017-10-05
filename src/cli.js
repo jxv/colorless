@@ -43,15 +43,15 @@ const supportedSpecs = (prefix, specForLang, diffs, jsonSpecs) => {
   // assert(diffs.length == jsonSpecs.length - 1)
 
  // by major version, extract the req specs and decide where to place the types
-  var version = { major: 0, minor: 0 };
+  var version = jsonSpecs[0].version || { major: 0, minor: 0 };
   var specs = [];
-  var tyVers = [initTypeVersions(jsonSpecs[0].types.map(ty => ty.n))];
+  var tyVers = [initTypeVersions(jsonSpecs[0].types.map(ty => ty.n), version)];
 
   for (var i = 0; i < jsonSpecs.length; i++) {
     specs.push(specForLang(prefix, version, jsonSpecs[i]));
     if (i < diffs.length) {
       const change = typeChanges(diffs[i]);
-      version = nextVersion(version, versionChange(change));
+      version = jsonSpecs[i + 1].version || nextVersion(version, versionChange(change));
       tyVers.push(nextTypeVersion(tyVers[i], version, change));
     }
   }
@@ -102,9 +102,9 @@ const expandTypes = s => R.merge(s, {
     )
 });
 
-const initTypeVersions = types => ({
-  version: { major: 0, minor: 0 },
-  types: R.mergeAll(types.map(ty => ({ [ty]: { major: 0, minor: 0 } }))),
+const initTypeVersions = (types, version) => ({
+  version: version,
+  types: R.mergeAll(types.map(ty => ({ [ty]: version }))),
 });
 
 const nextTypeVersion = (typeVersion, version, change) => {
@@ -122,6 +122,7 @@ const nextTypeVersion = (typeVersion, version, change) => {
   };
 };
 
+// For each major version, collapse the types of non-greatest minor versions into the greatest minor version
 const dropLowMinors = (tyVers) => {
   var lastTyVer = null;
   var dropped = [];
