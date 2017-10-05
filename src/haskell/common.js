@@ -72,11 +72,23 @@ const genWrap = ({name, type, label, instances}) => {
   return lines;
 };
 
-const genWrapToJson = ({name}) => {
+const genToJson = ({name}) => {
  return new Lines([
     '\n',
     'instance A.ToJSON ', name,' where\n',
-    '  toJSON (', name, ' w) = A.toJSON w\n',
+    '  toJSON = A.toJSON P.. C.toVal\n',
+  ]);
+};
+
+const genFromJson = ({name}) => {
+ return new Lines([
+    '\n',
+    'instance A.FromJSON ', name,' where\n',
+    '  parseJSON _v = do\n',
+    '    _x <- A.parseJSON _v\n',
+    '    case C.fromVal _x of\n',
+    '      P.Nothing -> P.mzero\n',
+    '      P.Just _y -> P.return _y\n',
   ]);
 };
 
@@ -84,7 +96,7 @@ const genWrapFromVal = ({name}) => {
   return new Lines([
     '\n',
     'instance C.FromVal ', name,' where\n',
-    '  fromVal v = ', name, ' P.<$> C.fromVal v\n',
+    '  fromVal _v = ', name, ' P.<$> C.fromVal _v\n',
   ]);
 };
 
@@ -92,7 +104,7 @@ const genWrapToVal = ({name}) => {
  return new Lines([
     '\n',
     'instance C.ToVal ', name,' where\n',
-    '  toVal (', name, ' w) = C.toVal w\n',
+    '  toVal (', name, ' _w) = C.toVal _w\n',
   ]);
 };
 
@@ -144,12 +156,12 @@ const genStructFromVal = ({name, label, members}) => {
   var lines = new Lines([
     'instance C.FromVal ', name, ' where\n',
     '  fromVal = \\case\n',
-    '    C.Val\'ApiVal (C.ApiVal\'Struct (C.Struct m)) -> ', name, '\n',
-    '      P.<$> C.getMember m "', members[0].label , '"\n'
+    '    C.Val\'ApiVal (C.ApiVal\'Struct (C.Struct _m)) -> ', name, '\n',
+    '      P.<$> C.getMember _m "', members[0].label , '"\n'
   ]);
   members.slice(1).forEach(member =>
     lines.add([
-      '      P.<*> C.getMember m "', member.label, '"\n'
+      '      P.<*> C.getMember _m "', member.label, '"\n'
     ])
   );
   lines.add(
@@ -223,7 +235,7 @@ const genEnumerationFromVal = ({name, enumerals}) => {
     '\n',
     'instance C.FromVal ', name, ' where\n',
     '  fromVal = \\case\n',
-    '    C.Val\'ApiVal (C.ApiVal\'Enumeral (C.Enumeral tag m)) -> case (tag,m) of\n',
+    '    C.Val\'ApiVal (C.ApiVal\'Enumeral (C.Enumeral _tag _m)) -> case (_tag,_m) of\n',
   ]);
   enumerals.forEach(enumeral => {
     if (!enumeral.members) {
@@ -232,14 +244,14 @@ const genEnumerationFromVal = ({name, enumerals}) => {
       ]);
     } else {
       lines.add([
-        '      ("', enumeral.label, '", P.Just m\') -> ', name, '\'', enumeral.tag, ' P.<$> (', name, '\'', enumeral.tag, '\'Members\n',
+        '      ("', enumeral.label, '", P.Just _m\') -> ', name, '\'', enumeral.tag, ' P.<$> (', name, '\'', enumeral.tag, '\'Members\n',
       ]);
       lines.add([
-        '          P.<$> C.getMember m\' "', enumeral.members[0].label, '"\n'
+        '          P.<$> C.getMember _m\' "', enumeral.members[0].label, '"\n'
       ]);
       enumeral.members.slice(1).forEach(member =>
         lines.add([
-          '          P.<*> C.getMember m\' "', member.label, '"\n'
+          '          P.<*> C.getMember _m\' "', member.label, '"\n'
         ])
       );
       lines.add('        )\n');
@@ -308,16 +320,15 @@ module.exports = {
   mkImportTypes,
   genPragmas,
   genHasType,
+  genToJson,
+  genFromJson,
   genWrap,
-  genWrapToJson,
   genWrapToVal,
   genWrapFromVal,
   genStruct,
-  genStructToJson,
   genStructToVal,
   genStructFromVal,
   genEnumeration,
-  genEnumerationToJson,
   genEnumerationToVal,
   genEnumerationFromVal,
   genVersion,

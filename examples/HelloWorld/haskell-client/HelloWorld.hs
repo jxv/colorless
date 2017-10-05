@@ -41,6 +41,7 @@ module Colorless.Examples.HelloWorld
 import qualified Prelude as P
 import qualified Data.Map as Map
 import qualified Control.Monad.IO.Class as IO
+import qualified Control.Monad as P
 import qualified Data.Aeson as A
 import qualified Data.Text as T
 import qualified Data.Text.Conversions as T
@@ -83,9 +84,19 @@ instance C.ToVal Hello where
 
 instance C.FromVal Hello where
   fromVal = \case
-    C.Val'ApiVal (C.ApiVal'Struct (C.Struct m)) -> Hello
-      P.<$> C.getMember m "who"
+    C.Val'ApiVal (C.ApiVal'Struct (C.Struct _m)) -> Hello
+      P.<$> C.getMember _m "who"
     _ -> P.Nothing
+
+instance A.ToJSON Hello where
+  toJSON = A.toJSON P.. C.toVal
+
+instance A.FromJSON Hello where
+  parseJSON _v = do
+    _x <- A.parseJSON _v
+    case C.fromVal _x of
+      P.Nothing -> P.mzero
+      P.Just _y -> P.return _y
 
 hello'who :: C.Path (Hello -> T.Text)
 hello'who = C.unsafePath ["who"]
@@ -120,9 +131,19 @@ instance C.ToVal Goodbye where
 
 instance C.FromVal Goodbye where
   fromVal = \case
-    C.Val'ApiVal (C.ApiVal'Struct (C.Struct m)) -> Goodbye
-      P.<$> C.getMember m "target"
+    C.Val'ApiVal (C.ApiVal'Struct (C.Struct _m)) -> Goodbye
+      P.<$> C.getMember _m "target"
     _ -> P.Nothing
+
+instance A.ToJSON Goodbye where
+  toJSON = A.toJSON P.. C.toVal
+
+instance A.FromJSON Goodbye where
+  parseJSON _v = do
+    _x <- A.parseJSON _v
+    case C.fromVal _x of
+      P.Nothing -> P.mzero
+      P.Just _y -> P.return _y
 
 goodbye'target :: C.Path (Goodbye -> T.Text)
 goodbye'target = C.unsafePath ["target"]
@@ -176,18 +197,28 @@ instance C.ToVal Color where
 
 instance C.FromVal Color where
   fromVal = \case
-    C.Val'ApiVal (C.ApiVal'Enumeral (C.Enumeral tag m)) -> case (tag,m) of
+    C.Val'ApiVal (C.ApiVal'Enumeral (C.Enumeral _tag _m)) -> case (_tag,_m) of
       ("Red", P.Nothing) -> P.Just Color'Red
       ("Blue", P.Nothing) -> P.Just Color'Blue
       ("Green", P.Nothing) -> P.Just Color'Green
       ("Yellow", P.Nothing) -> P.Just Color'Yellow
-      ("Custom", P.Just m') -> Color'Custom P.<$> (Color'Custom'Members
-          P.<$> C.getMember m' "r"
-          P.<*> C.getMember m' "g"
-          P.<*> C.getMember m' "b"
+      ("Custom", P.Just _m') -> Color'Custom P.<$> (Color'Custom'Members
+          P.<$> C.getMember _m' "r"
+          P.<*> C.getMember _m' "g"
+          P.<*> C.getMember _m' "b"
         )
       _ -> P.Nothing
     _ -> P.Nothing
+
+instance A.ToJSON Color where
+  toJSON = A.toJSON P.. C.toVal
+
+instance A.FromJSON Color where
+  parseJSON _v = do
+    _x <- A.parseJSON _v
+    case C.fromVal _x of
+      P.Nothing -> P.mzero
+      P.Just _y -> P.return _y
 
 instance Ast.ToAst Color where
   toAst = \case

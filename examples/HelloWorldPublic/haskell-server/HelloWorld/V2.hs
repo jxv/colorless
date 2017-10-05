@@ -29,14 +29,15 @@ module Colorless.Examples.HelloWorld.V2
 
 -- Imports
 import qualified Prelude as P
+import qualified Control.Monad as P
 import qualified Data.Word as I
 import qualified Data.Int as I
 import qualified Data.IORef as IO
 import qualified Data.String as P (IsString)
 import qualified GHC.Generics as P (Generic)
-import qualified Data.Map as Map
 import qualified Control.Monad.IO.Class as IO
 import qualified Data.Aeson as A
+import qualified Data.Map as Map
 import qualified Data.Text as T
 import qualified Data.Text.Conversions as T
 import qualified Colorless.Server as C
@@ -121,11 +122,19 @@ instance C.ToVal Hello where
 
 instance C.FromVal Hello where
   fromVal = \case
-    C.Val'ApiVal (C.ApiVal'Struct (C.Struct m)) -> Hello
-      P.<$> C.getMember m "who"
+    C.Val'ApiVal (C.ApiVal'Struct (C.Struct _m)) -> Hello
+      P.<$> C.getMember _m "who"
     _ -> P.Nothing
 
-instance A.ToJSON Hello
+instance A.ToJSON Hello where
+  toJSON = A.toJSON P.. C.toVal
+
+instance A.FromJSON Hello where
+  parseJSON _v = do
+    _x <- A.parseJSON _v
+    case C.fromVal _x of
+      P.Nothing -> P.mzero
+      P.Just _y -> P.return _y
 
 helloWorld'Spec :: A.Value
 helloWorld'Spec = v

@@ -3,6 +3,8 @@ var Lines = require('../../lines.js').Lines;
 var {
   mkExportTypes,
   genHasType,
+  genToJson,
+  genFromJson,
   genWrap,
   genWrapToVal,
   genWrapFromVal,
@@ -65,6 +67,7 @@ const genImports = () => {
     'import qualified Prelude as P\n',
     'import qualified Data.Map as Map\n',
     'import qualified Control.Monad.IO.Class as IO\n',
+    'import qualified Control.Monad as P\n',
     'import qualified Data.Aeson as A\n',
     'import qualified Data.Text as T\n',
     'import qualified Data.Text.Conversions as T\n',
@@ -346,6 +349,8 @@ const gen = (specs) => {
     lines.add(genHasType(ty));
     lines.add(genWrapToVal(ty));
     lines.add(genWrapFromVal(ty));
+    lines.add(genToJson(ty));
+    lines.add(genFromJson(ty));
     lines.add(genWrapToAst(ty));
     lines.add(genWrapExpr(ty));
   });
@@ -354,6 +359,8 @@ const gen = (specs) => {
     lines.add(genHasType(ty));
     lines.add(genStructToVal(ty));
     lines.add(genStructFromVal(ty));
+    lines.add(genToJson(ty));
+    lines.add(genFromJson(ty));
     lines.add(genStructPath(ty));
     lines.add(genStructToAst(ty));
     lines.add(genStructExpr(ty));
@@ -363,6 +370,8 @@ const gen = (specs) => {
     lines.add(genHasType(ty));
     lines.add(genEnumerationToVal(ty));
     lines.add(genEnumerationFromVal(ty));
+    lines.add(genToJson(ty));
+    lines.add(genFromJson(ty));
     lines.add(genEnumerationToAst(ty));
     lines.add(genEnumeralExpr(ty));
   });

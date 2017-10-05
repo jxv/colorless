@@ -7,15 +7,14 @@ var {
   mkImportTypes,
   genVersion,
   genWrap,
-  genWrapToJson,
+  genToJson,
+  genFromJson,
   genWrapToVal,
   genWrapFromVal,
   genStruct,
-  genStructToJson,
   genStructToVal,
   genStructFromVal,
   genEnumeration,
-  genEnumerationToJson,
   genEnumerationToVal,
   genEnumerationFromVal,
   isFunc,
@@ -212,15 +211,16 @@ const genImports = (prefix, importTypes) => {
     '\n',
     '-- Imports\n',
     'import qualified Prelude as P\n',
+    'import qualified Control.Monad as P\n',
     'import qualified Data.Word as I\n',
     'import qualified Data.Int as I\n',
     'import qualified Data.IORef as IO\n',
     'import qualified Data.String as P (IsString)\n',
     'import qualified GHC.Generics as P (Generic)\n',
 
-    'import qualified Data.Map as Map\n',
     'import qualified Control.Monad.IO.Class as IO\n',
     'import qualified Data.Aeson as A\n',
+    'import qualified Data.Map as Map\n',
     'import qualified Data.Text as T\n',
     'import qualified Data.Text.Conversions as T\n',
 
@@ -341,20 +341,23 @@ const gen = (s) => {
     lines.add(genWrap(ty));
     lines.add(genWrapToVal(ty));
     lines.add(genWrapFromVal(ty));
-    lines.add(genWrapToJson(ty));
+    lines.add(genToJson(ty));
+    lines.add(genFromJson(ty));
   });
 
   s.struct.filter(currentTypeSource(s)).forEach(ty => {
     lines.add(genStruct(ty));
     lines.add(genStructToVal(ty));
     lines.add(genStructFromVal(ty));
-    lines.add(genStructToJson(ty));
+    lines.add(genToJson(ty));
+    lines.add(genFromJson(ty));
   });
   s.enumeration.filter(currentTypeSource(s)).forEach(ty => {
     lines.add(genEnumeration(ty));
     lines.add(genEnumerationToVal(ty));
     lines.add(genEnumerationFromVal(ty));
-    lines.add(genEnumerationToJson(ty));
+    lines.add(genToJson(ty));
+    lines.add(genFromJson(ty));
   });
   lines.add(genSpec(s));
   lines.add('\n');

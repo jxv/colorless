@@ -70,6 +70,7 @@ module Colorless.Examples.Phonebook
 import qualified Prelude as P
 import qualified Data.Map as Map
 import qualified Control.Monad.IO.Class as IO
+import qualified Control.Monad as P
 import qualified Data.Aeson as A
 import qualified Data.Text as T
 import qualified Data.Text.Conversions as T
@@ -103,10 +104,20 @@ instance C.HasType PersonId where
   getType _ = "PersonId"
 
 instance C.ToVal PersonId where
-  toVal (PersonId w) = C.toVal w
+  toVal (PersonId _w) = C.toVal _w
 
 instance C.FromVal PersonId where
-  fromVal v = PersonId P.<$> C.fromVal v
+  fromVal _v = PersonId P.<$> C.fromVal _v
+
+instance A.ToJSON PersonId where
+  toJSON = A.toJSON P.. C.toVal
+
+instance A.FromJSON PersonId where
+  parseJSON _v = do
+    _x <- A.parseJSON _v
+    case C.fromVal _x of
+      P.Nothing -> P.mzero
+      P.Just _y -> P.return _y
 
 instance Ast.ToAst PersonId where
   toAst (PersonId w) = Ast.toAst w
@@ -125,10 +136,20 @@ instance C.HasType Name where
   getType _ = "Name"
 
 instance C.ToVal Name where
-  toVal (Name w) = C.toVal w
+  toVal (Name _w) = C.toVal _w
 
 instance C.FromVal Name where
-  fromVal v = Name P.<$> C.fromVal v
+  fromVal _v = Name P.<$> C.fromVal _v
+
+instance A.ToJSON Name where
+  toJSON = A.toJSON P.. C.toVal
+
+instance A.FromJSON Name where
+  parseJSON _v = do
+    _x <- A.parseJSON _v
+    case C.fromVal _x of
+      P.Nothing -> P.mzero
+      P.Just _y -> P.return _y
 
 instance Ast.ToAst Name where
   toAst (Name w) = Ast.toAst w
@@ -147,10 +168,20 @@ instance C.HasType Phone where
   getType _ = "Phone"
 
 instance C.ToVal Phone where
-  toVal (Phone w) = C.toVal w
+  toVal (Phone _w) = C.toVal _w
 
 instance C.FromVal Phone where
-  fromVal v = Phone P.<$> C.fromVal v
+  fromVal _v = Phone P.<$> C.fromVal _v
+
+instance A.ToJSON Phone where
+  toJSON = A.toJSON P.. C.toVal
+
+instance A.FromJSON Phone where
+  parseJSON _v = do
+    _x <- A.parseJSON _v
+    case C.fromVal _x of
+      P.Nothing -> P.mzero
+      P.Just _y -> P.return _y
 
 instance Ast.ToAst Phone where
   toAst (Phone w) = Ast.toAst w
@@ -169,10 +200,20 @@ instance C.HasType Street where
   getType _ = "Street"
 
 instance C.ToVal Street where
-  toVal (Street w) = C.toVal w
+  toVal (Street _w) = C.toVal _w
 
 instance C.FromVal Street where
-  fromVal v = Street P.<$> C.fromVal v
+  fromVal _v = Street P.<$> C.fromVal _v
+
+instance A.ToJSON Street where
+  toJSON = A.toJSON P.. C.toVal
+
+instance A.FromJSON Street where
+  parseJSON _v = do
+    _x <- A.parseJSON _v
+    case C.fromVal _x of
+      P.Nothing -> P.mzero
+      P.Just _y -> P.return _y
 
 instance Ast.ToAst Street where
   toAst (Street w) = Ast.toAst w
@@ -191,10 +232,20 @@ instance C.HasType City where
   getType _ = "City"
 
 instance C.ToVal City where
-  toVal (City w) = C.toVal w
+  toVal (City _w) = C.toVal _w
 
 instance C.FromVal City where
-  fromVal v = City P.<$> C.fromVal v
+  fromVal _v = City P.<$> C.fromVal _v
+
+instance A.ToJSON City where
+  toJSON = A.toJSON P.. C.toVal
+
+instance A.FromJSON City where
+  parseJSON _v = do
+    _x <- A.parseJSON _v
+    case C.fromVal _x of
+      P.Nothing -> P.mzero
+      P.Just _y -> P.return _y
 
 instance Ast.ToAst City where
   toAst (City w) = Ast.toAst w
@@ -213,10 +264,20 @@ instance C.HasType Zipcode where
   getType _ = "Zipcode"
 
 instance C.ToVal Zipcode where
-  toVal (Zipcode w) = C.toVal w
+  toVal (Zipcode _w) = C.toVal _w
 
 instance C.FromVal Zipcode where
-  fromVal v = Zipcode P.<$> C.fromVal v
+  fromVal _v = Zipcode P.<$> C.fromVal _v
+
+instance A.ToJSON Zipcode where
+  toJSON = A.toJSON P.. C.toVal
+
+instance A.FromJSON Zipcode where
+  parseJSON _v = do
+    _x <- A.parseJSON _v
+    case C.fromVal _x of
+      P.Nothing -> P.mzero
+      P.Just _y -> P.return _y
 
 instance Ast.ToAst Zipcode where
   toAst (Zipcode w) = Ast.toAst w
@@ -253,12 +314,22 @@ instance C.ToVal Address where
 
 instance C.FromVal Address where
   fromVal = \case
-    C.Val'ApiVal (C.ApiVal'Struct (C.Struct m)) -> Address
-      P.<$> C.getMember m "street"
-      P.<*> C.getMember m "city"
-      P.<*> C.getMember m "zipcode"
-      P.<*> C.getMember m "state"
+    C.Val'ApiVal (C.ApiVal'Struct (C.Struct _m)) -> Address
+      P.<$> C.getMember _m "street"
+      P.<*> C.getMember _m "city"
+      P.<*> C.getMember _m "zipcode"
+      P.<*> C.getMember _m "state"
     _ -> P.Nothing
+
+instance A.ToJSON Address where
+  toJSON = A.toJSON P.. C.toVal
+
+instance A.FromJSON Address where
+  parseJSON _v = do
+    _x <- A.parseJSON _v
+    case C.fromVal _x of
+      P.Nothing -> P.mzero
+      P.Just _y -> P.return _y
 
 address'street :: C.Path (Address -> Street)
 address'street = C.unsafePath ["street"]
@@ -317,12 +388,22 @@ instance C.ToVal Person where
 
 instance C.FromVal Person where
   fromVal = \case
-    C.Val'ApiVal (C.ApiVal'Struct (C.Struct m)) -> Person
-      P.<$> C.getMember m "name"
-      P.<*> C.getMember m "phone"
-      P.<*> C.getMember m "address"
-      P.<*> C.getMember m "friends"
+    C.Val'ApiVal (C.ApiVal'Struct (C.Struct _m)) -> Person
+      P.<$> C.getMember _m "name"
+      P.<*> C.getMember _m "phone"
+      P.<*> C.getMember _m "address"
+      P.<*> C.getMember _m "friends"
     _ -> P.Nothing
+
+instance A.ToJSON Person where
+  toJSON = A.toJSON P.. C.toVal
+
+instance A.FromJSON Person where
+  parseJSON _v = do
+    _x <- A.parseJSON _v
+    case C.fromVal _x of
+      P.Nothing -> P.mzero
+      P.Just _y -> P.return _y
 
 person'name :: C.Path (Person -> Name)
 person'name = C.unsafePath ["name"]
@@ -372,9 +453,19 @@ instance C.ToVal LookupPerson where
 
 instance C.FromVal LookupPerson where
   fromVal = \case
-    C.Val'ApiVal (C.ApiVal'Struct (C.Struct m)) -> LookupPerson
-      P.<$> C.getMember m "id"
+    C.Val'ApiVal (C.ApiVal'Struct (C.Struct _m)) -> LookupPerson
+      P.<$> C.getMember _m "id"
     _ -> P.Nothing
+
+instance A.ToJSON LookupPerson where
+  toJSON = A.toJSON P.. C.toVal
+
+instance A.FromJSON LookupPerson where
+  parseJSON _v = do
+    _x <- A.parseJSON _v
+    case C.fromVal _x of
+      P.Nothing -> P.mzero
+      P.Just _y -> P.return _y
 
 lookupPerson'id :: C.Path (LookupPerson -> PersonId)
 lookupPerson'id = C.unsafePath ["id"]
@@ -409,9 +500,19 @@ instance C.ToVal LookupPersonByName where
 
 instance C.FromVal LookupPersonByName where
   fromVal = \case
-    C.Val'ApiVal (C.ApiVal'Struct (C.Struct m)) -> LookupPersonByName
-      P.<$> C.getMember m "name"
+    C.Val'ApiVal (C.ApiVal'Struct (C.Struct _m)) -> LookupPersonByName
+      P.<$> C.getMember _m "name"
     _ -> P.Nothing
+
+instance A.ToJSON LookupPersonByName where
+  toJSON = A.toJSON P.. C.toVal
+
+instance A.FromJSON LookupPersonByName where
+  parseJSON _v = do
+    _x <- A.parseJSON _v
+    case C.fromVal _x of
+      P.Nothing -> P.mzero
+      P.Just _y -> P.return _y
 
 lookupPersonByName'name :: C.Path (LookupPersonByName -> T.Text)
 lookupPersonByName'name = C.unsafePath ["name"]
@@ -447,12 +548,22 @@ instance C.ToVal State where
 
 instance C.FromVal State where
   fromVal = \case
-    C.Val'ApiVal (C.ApiVal'Enumeral (C.Enumeral tag m)) -> case (tag,m) of
+    C.Val'ApiVal (C.ApiVal'Enumeral (C.Enumeral _tag _m)) -> case (_tag,_m) of
       ("CA", P.Nothing) -> P.Just State'CA
       ("NY", P.Nothing) -> P.Just State'NY
       ("TX", P.Nothing) -> P.Just State'TX
       _ -> P.Nothing
     _ -> P.Nothing
+
+instance A.ToJSON State where
+  toJSON = A.toJSON P.. C.toVal
+
+instance A.FromJSON State where
+  parseJSON _v = do
+    _x <- A.parseJSON _v
+    case C.fromVal _x of
+      P.Nothing -> P.mzero
+      P.Just _y -> P.return _y
 
 instance Ast.ToAst State where
   toAst = \case
