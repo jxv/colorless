@@ -8,6 +8,7 @@ var {
   genVersion,
   isFunc,
   enumeralNameTagMember,
+  genPull,
 } = require('../common.js');
 
 const genPragmas = () => {
@@ -35,6 +36,7 @@ const genModule = (name, lowercaseName, prefix, version, types, values) => {
     '-- Module\n',
     'module ', prefix, '\n',
     '  ( ', lowercaseName, '\'Version\n',
+    '  , ', lowercaseName, '\'Pull\n',
   ]);
   types.forEach(type =>
     lines.add([
@@ -342,6 +344,7 @@ const gen = (specs) => {
   lines.add(genModule(spec.name, spec.lowercaseName, spec.module, spec.version, exportTypes, exportValues));
   lines.add(genImports());
   lines.add(genVersion(spec.lowercaseName, spec.version.major, spec.version.minor));
+  lines.add(genPull(spec));
   lines.add(genService(spec));
   spec.wrap.forEach(ty => {
     lines.add(genWrap(ty));

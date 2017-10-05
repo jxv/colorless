@@ -16,6 +16,7 @@
 -- Module
 module Colorless.Examples.Phonebook
   ( phonebook'Version
+  , phonebook'Pull
   , PersonId(..)
   , Name(..)
   , Phone(..)
@@ -84,6 +85,9 @@ import qualified Colorless.Ast as Ast
 -- Version
 phonebook'Version :: C.Version
 phonebook'Version = C.Version 0 0
+
+phonebook'Pull :: C.Pull
+phonebook'Pull = C.Pull "http" "127.0.0.1" "/" 8000
 
 lookupPerson :: C.Expr LookupPerson -> C.Expr (P.Maybe Person)
 lookupPerson expr'' = C.unsafeExpr (Ast.Ast'StructCall (Ast.StructCall "LookupPerson" (Ast.toAst expr'')))

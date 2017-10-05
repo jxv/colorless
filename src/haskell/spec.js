@@ -132,18 +132,24 @@ const wrap = (types) => types.filter(type => type.n && type.w).map(type => ({
 
 const spec = (prefix, version, s) => {
   return ({
-  module: prefix,
-  version: version,
-  error: langType(s.pull.error),
-  meta: langType(s.pull.meta),
-  metaVersion: langTypeVersion(version.major, s.pull.meta),
-  name: s.pull.name,
-  lowercaseName: lowercaseFirstLetter(s.pull.name),
-  hollow: hollow(s.types),
-  struct: struct(s.types),
-  enumeration: enumeration(s.types),
-  wrap: wrap(s.types),
-});
+    module: prefix,
+    version: version,
+    error: langType(s.pull.error),
+    meta: langType(s.pull.meta),
+    metaVersion: langTypeVersion(version.major, s.pull.meta),
+    name: s.pull.name,
+    lowercaseName: lowercaseFirstLetter(s.pull.name),
+    hollow: hollow(s.types),
+    struct: struct(s.types),
+    enumeration: enumeration(s.types),
+    wrap: wrap(s.types),
+    pull: {
+      protocol: s.pull.protocol,
+      address: s.pull.address,
+      port: s.pull.port,
+      path: s.pull.path,
+    },
+  });
 }
 
 module.exports = {

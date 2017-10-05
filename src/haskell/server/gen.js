@@ -10,6 +10,7 @@ var {
   genStruct,
   genEnumeration,
   isFunc,
+  genPull,
 } = require('../common.js');
 
 const genApi = (name, calls) => {
@@ -246,6 +247,7 @@ const genModule = (name, lowercaseName, prefix, version, types) => {
     '-- Module\n',
     'module ', prefix, '.V', version.major, '\n',
     '  ( ', lowercaseName, '\'Version\n',
+    '  , ', lowercaseName, '\'Pull\n',
     '  , ', lowercaseName,'\'Handler\n',
     '  , ', name, '\'Thrower(..)\n',
     '  , ', name, '\'Service(..)\n',
@@ -304,6 +306,7 @@ const gen = (s) => {
   lines.add(genModule(s.name, s.lowercaseName, s.module, s.version, exportTypes));
   lines.add(genImports(s.module, importTypes));
   lines.add(genVersion(s.lowercaseName, s.version.major, s.version.minor));
+  lines.add(genPull(s));
   lines.add(genThrower(s.name, s.lowercaseName, s.error));
   lines.add(genService(s.name, serviceCalls));
   lines.add(genHandleRequest(s.name, s.lowercaseName, s.meta));

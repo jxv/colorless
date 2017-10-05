@@ -16,6 +16,7 @@
 -- Module
 module Colorless.Examples.Phonebook.V0
   ( phonebook'Version
+  , phonebook'Pull
   , phonebook'Handler
   , Phonebook'Thrower(..)
   , Phonebook'Service(..)
@@ -50,6 +51,9 @@ import qualified Colorless.Server as C
 -- Version
 phonebook'Version :: C.Version
 phonebook'Version = C.Version 0 0
+
+phonebook'Pull :: C.Pull
+phonebook'Pull = C.Pull "http" "127.0.0.1" "/" 8000
 
 -- Thrower
 class P.Monad m => Phonebook'Thrower m where

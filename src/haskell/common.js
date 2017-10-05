@@ -300,6 +300,18 @@ const genEnumeration = ({name, label, enumerals}) => {
   return lines;
 };
 
+const genPull = ({lowercaseName, pull}) => {
+  var lines = new Lines();
+
+  lines.add([
+    '\n',
+    lowercaseName, '\'Pull :: C.Pull\n',
+    lowercaseName, '\'Pull = C.Pull "', pull.protocol, '" "', pull.address, '" "', pull.path, '" ', pull.port, '\n',
+  ]);
+
+  return lines;
+};
+
 module.exports = {
   enumeralNameTagMember,
   mkExportTypes,
@@ -310,4 +322,5 @@ module.exports = {
   genEnumeration,
   genVersion,
   isFunc,
+  genPull,
 };

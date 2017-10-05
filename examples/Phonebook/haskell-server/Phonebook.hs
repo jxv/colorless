@@ -7,6 +7,7 @@ module Colorless.Examples.Phonebook
   , Meta'Middlewares(..)
   , V0.Phonebook'Service(..)
   , V0.Phonebook'Thrower(..)
+  , V0.phonebook'Pull
   , V0.PersonId(..)
   , V0.Name(..)
   , V0.Phone(..)
@@ -29,6 +30,7 @@ import qualified Colorless.Examples.Phonebook.V0 as V0
   , Phonebook'Thrower(..)
   , phonebook'Handler
   , phonebook'Version
+  , phonebook'Pull
   , PersonId(..)
   , Name(..)
   , Phone(..)

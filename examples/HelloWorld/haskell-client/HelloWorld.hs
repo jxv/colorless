@@ -16,6 +16,7 @@
 -- Module
 module Colorless.Examples.HelloWorld
   ( helloWorld'Version
+  , helloWorld'Pull
   , Hello(..)
   , Goodbye(..)
   , Color(..)
@@ -55,6 +56,9 @@ import qualified Colorless.Ast as Ast
 -- Version
 helloWorld'Version :: C.Version
 helloWorld'Version = C.Version 2 0
+
+helloWorld'Pull :: C.Pull
+helloWorld'Pull = C.Pull "http" "127.0.0.1" "/" 8080
 
 hello :: C.Expr Hello -> C.Expr T.Text
 hello expr'' = C.unsafeExpr (Ast.Ast'StructCall (Ast.StructCall "Hello" (Ast.toAst expr'')))

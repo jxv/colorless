@@ -4,7 +4,7 @@ var {
   genPragmas,
 } = require('../common.js');
 
-const genModule = (prefix, name, major, exportTypes) => {
+const genModule = (prefix, name, lowercaseName, major, exportTypes) => {
   var lines = new Lines([
     '\n',
     '-- Module\n',
@@ -15,6 +15,7 @@ const genModule = (prefix, name, major, exportTypes) => {
   lines.add([
     '  , V', major, '.', name,'\'Service(..)\n',
     '  , V', major, '.', name,'\'Thrower(..)\n',
+    '  , V', major, '.', lowercaseName,'\'Pull\n',
   ]);
   lines.add(exportTypes.map(type => '  , V' + major  + '.' + type + '(..)\n'))
   lines.add('  ) where\n');
@@ -40,6 +41,7 @@ const genVersionImports = (prefix, name, lowercaseName, major, exportTypes) => {
     '  , ', name,'\'Thrower(..)\n',
     '  , ', lowercaseName, '\'Handler\n',
     '  , ', lowercaseName, '\'Version\n',
+    '  , ', lowercaseName, '\'Pull\n',
   ]);
   lines.add(exportTypes.map(type => '  , ' + type + '(..)\n'));
   lines.add('  )\n');
@@ -110,7 +112,7 @@ const latest = (specs) => {
 
   var lines = new Lines();
   lines.add(genPragmas());
-  lines.add(genModule(spec.module, spec.name, spec.version.major, exportTypes));
+  lines.add(genModule(spec.module, spec.name, spec.lowercaseName, spec.version.major, exportTypes));
   lines.add(genCommonImports());
   specs.forEach(spec =>
     lines.add(genVersionImports(spec.module, spec.name, spec.lowercaseName, spec.version.major, mkExportTypes(spec)))

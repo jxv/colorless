@@ -7,6 +7,7 @@ module Colorless.Examples.HelloWorld
   , Meta'Middlewares(..)
   , V2.HelloWorld'Service(..)
   , V2.HelloWorld'Thrower(..)
+  , V2.helloWorld'Pull
   , V2.Hello(..)
   , V2.Goodbye(..)
   , V2.Color(..)
@@ -22,6 +23,7 @@ import qualified Colorless.Examples.HelloWorld.V0 as V0
   , HelloWorld'Thrower(..)
   , helloWorld'Handler
   , helloWorld'Version
+  , helloWorld'Pull
   , Hello(..)
   )
 
@@ -30,6 +32,7 @@ import qualified Colorless.Examples.HelloWorld.V1 as V1
   , HelloWorld'Thrower(..)
   , helloWorld'Handler
   , helloWorld'Version
+  , helloWorld'Pull
   , Hello(..)
   , Goodbye(..)
   , Color(..)
@@ -41,6 +44,7 @@ import qualified Colorless.Examples.HelloWorld.V2 as V2
   , HelloWorld'Thrower(..)
   , helloWorld'Handler
   , helloWorld'Version
+  , helloWorld'Pull
   , Hello(..)
   , Goodbye(..)
   , Color(..)

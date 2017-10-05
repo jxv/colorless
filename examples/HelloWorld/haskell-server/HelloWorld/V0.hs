@@ -16,6 +16,7 @@
 -- Module
 module Colorless.Examples.HelloWorld.V0
   ( helloWorld'Version
+  , helloWorld'Pull
   , helloWorld'Handler
   , HelloWorld'Thrower(..)
   , HelloWorld'Service(..)
@@ -40,6 +41,9 @@ import qualified Colorless.Server as C
 -- Version
 helloWorld'Version :: C.Version
 helloWorld'Version = C.Version 0 1
+
+helloWorld'Pull :: C.Pull
+helloWorld'Pull = C.Pull "http" "127.0.0.1" "/" 8080
 
 -- Thrower
 class P.Monad m => HelloWorld'Thrower m where
