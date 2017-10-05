@@ -249,6 +249,7 @@ const genModule = (name, lowercaseName, prefix, version, types) => {
     '  ( ', lowercaseName, '\'Version\n',
     '  , ', lowercaseName, '\'Pull\n',
     '  , ', lowercaseName,'\'Handler\n',
+    '  , ', lowercaseName,'\'Spec\n',
     '  , ', name, '\'Thrower(..)\n',
     '  , ', name, '\'Service(..)\n',
   ]);
@@ -293,6 +294,17 @@ const mkApiParserCalls = (s) => {
 
 const currentTypeSource = R.curry((s,ty) => s.typeSource[ty.name] === s.version.major);
 
+const genSpec = ({lowercaseName, original}) => {
+  var lines = new Lines();
+  lines.add([
+    '\n',
+    lowercaseName, '\'Spec :: A.Value\n',
+    lowercaseName, '\'Spec = v\n',
+    '  where P.Just v = A.decode ', JSON.stringify(JSON.stringify(original)), '\n',
+  ]);
+  return lines;
+};
+
 const gen = (s) => {
   const exportTypes = mkExportTypes(s);
   const importTypes = mkImportTypes(s);
@@ -316,6 +328,7 @@ const gen = (s) => {
   s.wrap.filter(currentTypeSource(s)).forEach(ty => lines.add(genWrap(ty)));
   s.struct.filter(currentTypeSource(s)).forEach(ty => lines.add(genStruct(ty)));
   s.enumeration.filter(currentTypeSource(s)).forEach(ty => lines.add(genEnumeration(ty)));
+  lines.add(genSpec(s));
   lines.add('\n');
   return lines.collapse();
 };

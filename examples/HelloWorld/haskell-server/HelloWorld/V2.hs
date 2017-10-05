@@ -18,6 +18,7 @@ module Colorless.Examples.HelloWorld.V2
   ( helloWorld'Version
   , helloWorld'Pull
   , helloWorld'Handler
+  , helloWorld'Spec
   , HelloWorld'Thrower(..)
   , HelloWorld'Service(..)
   , Hello(..)
@@ -128,4 +129,8 @@ instance C.FromVal Hello where
     C.Val'ApiVal (C.ApiVal'Struct (C.Struct m)) -> Hello
       P.<$> C.getMember m "who"
     _ -> P.Nothing
+
+helloWorld'Spec :: A.Value
+helloWorld'Spec = v
+  where P.Just v = A.decode "{\"colorless\":{\"major\":0,\"minor\":0},\"types\":[{\"n\":\"Hello\",\"m\":[{\"who\":\"String\"}],\"o\":\"String\"},{\"n\":\"Goodbye\",\"m\":[{\"target\":\"String\"}],\"o\":\"Unit\"},{\"n\":\"Color\",\"e\":[{\"tag\":\"Red\"},{\"tag\":\"Blue\"},{\"tag\":\"Green\"},{\"tag\":\"Yellow\"},{\"tag\":\"Custom\",\"m\":[{\"r\":\"U8\"},{\"g\":\"U8\"},{\"b\":\"U8\"}]}]}],\"pull\":{\"protocol\":\"http\",\"name\":\"HelloWorld\",\"address\":\"127.0.0.1\",\"meta\":\"Unit\",\"path\":\"/\",\"port\":8080,\"error\":\"Unit\"},\"version\":{\"major\":2,\"minor\":0}}"
 

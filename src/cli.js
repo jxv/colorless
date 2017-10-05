@@ -48,7 +48,8 @@ const supportedSpecs = (prefix, specForLang, diffs, jsonSpecs) => {
   var tyVers = [initTypeVersions(jsonSpecs[0].types.map(ty => ty.n), version)];
 
   for (var i = 0; i < jsonSpecs.length; i++) {
-    specs.push(specForLang(prefix, version, jsonSpecs[i]));
+    const original = R.merge(jsonSpecs[i], {version});
+    specs.push(R.merge(specForLang(prefix, version, jsonSpecs[i]), {original}));
     if (i < diffs.length) {
       const change = typeChanges(diffs[i]);
       version = jsonSpecs[i + 1].version || nextVersion(version, versionChange(change));

@@ -4,6 +4,7 @@
 -- Module
 module Colorless.Examples.HelloWorld
   ( handler'Map
+  , handler'PublicSpec
   , Meta'Middlewares(..)
   , V2.HelloWorld'Service(..)
   , V2.HelloWorld'Thrower(..)
@@ -17,6 +18,7 @@ module Colorless.Examples.HelloWorld
 import qualified Data.Map as Map
 import qualified Colorless.Server as C (RuntimeThrower, Options, Request, Response, Major, Minor)
 import qualified Control.Monad.IO.Class as M (MonadIO)
+import Data.Aeson (toJSON, Value)
 
 import qualified Colorless.Examples.HelloWorld.V0 as V0
   ( HelloWorld'Service(..)
@@ -24,6 +26,7 @@ import qualified Colorless.Examples.HelloWorld.V0 as V0
   , helloWorld'Handler
   , helloWorld'Version
   , helloWorld'Pull
+  , helloWorld'Spec
   , Hello(..)
   )
 
@@ -33,6 +36,7 @@ import qualified Colorless.Examples.HelloWorld.V1 as V1
   , helloWorld'Handler
   , helloWorld'Version
   , helloWorld'Pull
+  , helloWorld'Spec
   , Hello(..)
   , Goodbye(..)
   , Color(..)
@@ -45,6 +49,7 @@ import qualified Colorless.Examples.HelloWorld.V2 as V2
   , helloWorld'Handler
   , helloWorld'Version
   , helloWorld'Pull
+  , helloWorld'Spec
   , Hello(..)
   , Goodbye(..)
   , Color(..)
@@ -74,4 +79,11 @@ handler'Map options metaMiddlewares = Map.fromList
     , (1, (0, V1.helloWorld'Handler options $ meta'Middleware1 metaMiddlewares))
     , (2, (0, V2.helloWorld'Handler options $ meta'Middleware2 metaMiddlewares))
     ]
+
+handler'PublicSpec :: Value
+handler'PublicSpec = toJSON
+  [ V0.helloWorld'Spec
+  , V1.helloWorld'Spec
+  , V2.helloWorld'Spec
+  ]
 

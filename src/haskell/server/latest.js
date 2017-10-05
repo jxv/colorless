@@ -10,6 +10,7 @@ const genModule = (prefix, name, lowercaseName, major, exportTypes) => {
     '-- Module\n',
     'module ', prefix, '\n',
     '  ( handler\'Map\n',
+    '  , handler\'PublicSpec\n',
     '  , Meta\'Middlewares(..)\n',
   ]);
   lines.add([
@@ -28,6 +29,7 @@ const genCommonImports = () => {
     'import qualified Data.Map as Map\n',
     'import qualified Colorless.Server as C (RuntimeThrower, Options, Request, Response, Major, Minor)\n',
     'import qualified Control.Monad.IO.Class as M (MonadIO)\n',
+    'import Data.Aeson (toJSON, Value)\n',
   ]);
 };
 
@@ -42,6 +44,7 @@ const genVersionImports = (prefix, name, lowercaseName, major, exportTypes) => {
     '  , ', lowercaseName, '\'Handler\n',
     '  , ', lowercaseName, '\'Version\n',
     '  , ', lowercaseName, '\'Pull\n',
+    '  , ', lowercaseName, '\'Spec\n',
   ]);
   lines.add(exportTypes.map(type => '  , ' + type + '(..)\n'));
   lines.add('  )\n');
@@ -106,6 +109,20 @@ const genHandlerMap = (specs) => {
   return lines;
 }
 
+const genPublicSpec = (lowercaseName, specs) => {
+  var lines = new Lines([
+    '\n',
+    'handler\'PublicSpec :: Value\n',
+    'handler\'PublicSpec = toJSON\n',
+    '  [ V', specs[0].version.major, '\.', specs[0].lowercaseName, '\'Spec\n',
+  ]);
+  specs.slice(1).forEach(spec =>
+    lines.add(['  , V', spec.version.major,  '\.', specs[0].lowercaseName, '\'Spec\n'])
+  );
+  lines.add('  ]\n');
+  return lines;
+};
+
 const latest = (specs) => {
   const spec = specs[specs.length - 1];
   const exportTypes = mkExportTypes(spec);
@@ -119,6 +136,7 @@ const latest = (specs) => {
   );
   lines.add(genMetaMiddlewares(specs));
   lines.add(genHandlerMap(specs));
+  lines.add(genPublicSpec(spec.lowercaseName, specs))
   lines.add('\n');
   return lines.collapse();
 };

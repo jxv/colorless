@@ -1,11 +1,11 @@
 #! /bin/sh
 
 # HelloWorld
-colorless -l haskell -s HelloWorldDistributed/spec.json -m Colorless.Examples.HelloWorld -n HelloWorld -d ./HelloWorldDistributed/haskell-server -e server
-colorless -l haskell -s HelloWorldDistributed/spec.json -m Colorless.Examples.HelloWorld -n HelloWorld -d ./HelloWorldDistributed/haskell-client -e client
-colorless -l javascript -s HelloWorldDistributed/spec.json -n helloWorld -d ./HelloWorldDistributed/javascript-client -e client
+colorless -l haskell -s HelloWorldPublic/spec.json -m Colorless.Examples.HelloWorld -n HelloWorld -d ./HelloWorldPublic/haskell-server -e server
+colorless -l haskell -s HelloWorldPublic/spec.json -m Colorless.Examples.HelloWorld -n HelloWorld -d ./HelloWorldPublic/haskell-client -e client
+colorless -l javascript -s HelloWorldPublic/spec.json -n helloWorld -d ./HelloWorldPublic/javascript-client -e client
 
-# HelloWorl with Distributed spec
+# HelloWorl with Public spec
 colorless -l haskell -s HelloWorld -m Colorless.Examples.HelloWorld -n HelloWorld -d ./HelloWorld/haskell-server -e server
 colorless -l haskell -s HelloWorld -m Colorless.Examples.HelloWorld -n HelloWorld -d ./HelloWorld/haskell-client -e client
 colorless -l javascript -s HelloWorld -n helloWorld -d ./HelloWorld/javascript-client -e client

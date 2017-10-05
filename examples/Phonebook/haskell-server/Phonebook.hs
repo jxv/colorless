@@ -4,6 +4,7 @@
 -- Module
 module Colorless.Examples.Phonebook
   ( handler'Map
+  , handler'PublicSpec
   , Meta'Middlewares(..)
   , V0.Phonebook'Service(..)
   , V0.Phonebook'Thrower(..)
@@ -24,6 +25,7 @@ module Colorless.Examples.Phonebook
 import qualified Data.Map as Map
 import qualified Colorless.Server as C (RuntimeThrower, Options, Request, Response, Major, Minor)
 import qualified Control.Monad.IO.Class as M (MonadIO)
+import Data.Aeson (toJSON, Value)
 
 import qualified Colorless.Examples.Phonebook.V0 as V0
   ( Phonebook'Service(..)
@@ -31,6 +33,7 @@ import qualified Colorless.Examples.Phonebook.V0 as V0
   , phonebook'Handler
   , phonebook'Version
   , phonebook'Pull
+  , phonebook'Spec
   , PersonId(..)
   , Name(..)
   , Phone(..)
@@ -61,4 +64,9 @@ handler'Map
 handler'Map options metaMiddlewares = Map.fromList
     [ (0, (0, V0.phonebook'Handler options $ meta'Middleware0 metaMiddlewares))
     ]
+
+handler'PublicSpec :: Value
+handler'PublicSpec = toJSON
+  [ V0.phonebook'Spec
+  ]
 
