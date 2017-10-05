@@ -12,7 +12,7 @@ const JavaScript = require('./javascript/index.js');
 
 program
   .version('0.0.0')
-  .option('-s --src [type]', 'Directory of colorless specs')
+  .option('-s --src [type]', 'Directory of specs OR JSON containing array of specs')
   .option('-d --dest [type]', 'Directory to generate code')
   .option('-n --name [type]', 'Name of top level source file and directory')
   .option('-l --lang [type]', 'Language of code')
@@ -168,9 +168,7 @@ const writeCode = (gen, pathBuilder, path, specs) => {
   });
 };
 
-const generateJavascriptClient = (program, items) => {
-  const jsonSpecs = readSpecs(program.src, items);
-
+const generateJavascriptClient = (program, jsonSpecs) => {
   if (!jsonSpecs.length) {
     console.log('No specs');
     return;
@@ -199,9 +197,7 @@ const generateJavascriptClient = (program, items) => {
   });
 };
 
-const generateHaskellClient = (program, items) => {
-  const jsonSpecs = readSpecs(program.src, items);
-
+const generateHaskellClient = (program, jsonSpecs) => {
   if (!jsonSpecs.length) {
     console.log('No specs');
     return;
@@ -230,9 +226,7 @@ const generateHaskellClient = (program, items) => {
   });
 };
 
-const generateHaskellServer = (program, items) => {
-  const jsonSpecs = readSpecs(program.src, items);
-
+const generateHaskellServer = (program, jsonSpecs) => {
   if (!jsonSpecs.length) {
     console.log('No specs');
     return;
@@ -269,47 +263,35 @@ const generateHaskellServer = (program, items) => {
   });
 };
 
+const generate = (program, lang, side, gen) => {
+  if (program.lang === lang && program.side === side &&
+      program.name && program.name.length &&
+      program.dest && program.dest.length &&
+      program.src && program.src.length) {
+    if (hasJsonExtension(program.src)) {
+      var jsonSpecs = JSON.parse(fs.readFileSync(program.src, 'utf8'));
+      if (!Array.isArray(jsonSpecs)) {
+        console.log('JSON source is not an array of specs');
+        return;
+      }
+      gen(program, jsonSpecs);
+    } else {
+      fs.readdir(program.src, function (err, items) {
+        if (err) {
+          console.log(err)
+        } else {
+          gen(program, readSpecs(program.src, items));
+        }
+      });
+    }
+    return true;
+  }
+  return false;
+};
+
 (function() {
-  if (program.lang === 'javascript' && program.side === 'client' &&
-      program.name && program.name.length &&
-      program.dest && program.dest.length &&
-      program.src && program.src.length) {
-    fs.readdir(program.src, function (err, items) {
-      if (err) {
-        console.log(err)
-      } else {
-        generateJavascriptClient(program, items);
-      }
-    });
-    return;
-  }
-
-  if (program.lang === 'haskell' && program.side === 'server' &&
-      program.name && program.name.length &&
-      program.dest && program.dest.length &&
-      program.src && program.src.length) {
-    fs.readdir(program.src, function (err, items) {
-      if (err) {
-        console.log(err)
-      } else {
-        generateHaskellServer(program, items);
-      }
-    });
-    return;
-  }
-
-  if (program.lang === 'haskell' && program.side === 'client' &&
-      program.name && program.name.length &&
-      program.dest && program.dest.length &&
-      program.src && program.src.length) {
-    fs.readdir(program.src, function (err, items) {
-      if (err) {
-        console.log(err)
-      } else {
-        generateHaskellClient(program, items);
-      }
-    });
-    return;
-  }
-  console.log('Bad args');
+  generate(program, 'javascript', 'client', generateJavascriptClient) ||
+  generate(program, 'haskell', 'server', generateHaskellServer) ||
+  generate(program, 'haskell', 'client', generateHaskellClient) ||
+  (() => console.log('Bad args'))();
 })();
