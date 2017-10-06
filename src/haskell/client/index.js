@@ -1,4 +1,5 @@
 var Lines = require('../../lines.js').Lines;
+var httpClient = require('./addon/httpClient.js');
 
 var {
   mkExportTypes,
@@ -60,7 +61,7 @@ const genModule = (name, lowercaseName, prefix, version, types, values) => {
   return lines;
 };
 
-const genImports = () => {
+const genImports = (imports) => {
   var lines = new Lines([
     '\n',
     '-- Imports\n',
@@ -76,6 +77,7 @@ const genImports = () => {
     'import qualified Colorless.Ast as Ast\n',
     'import qualified Colorless.Imports as R\n'
   ]);
+  imports.forEach(x => lines.add(x));
   return lines;
 };
 
@@ -336,19 +338,33 @@ const genEnumeralExpr = ({name, lowercaseName, enumerals}) => {
   return lines;
 };
 
-const gen = (specs) => {
+const gen = (specs, addons) => {
   const spec = specs[specs.length - 1];
   const exportTypes = mkExportTypes(spec);
   const exportValues = mkExportValues(spec);
 
+  var addonOptions = {httpClient};
+  var addonImporting = [];
+  var addonExporting = [];
+  var addonGen = [];
+  addons.forEach(addon => {
+    var option = addonOptions[addon];
+    if (option) {
+      addonImporting.push(option.importing(spec));
+      addonExporting.push(option.exporting(spec));
+      addonGen.push(option.gen(spec));
+    }
+  });
+
   var lines = new Lines();
   lines.add(genPragmas());
-  lines.add(genModule(spec.name, spec.lowercaseName, spec.module, spec.version, exportTypes, exportValues));
-  lines.add(genImports());
+  lines.add(genModule(spec.name, spec.lowercaseName, spec.module, spec.version, exportTypes, exportValues.concat(addonExporting)));
+  lines.add(genImports(addonImporting));
   lines.add(genVersion(spec.lowercaseName, spec.version.major, spec.version.minor));
   lines.add(genPull(spec));
   lines.add(genRequest(spec));
   lines.add(genService(spec));
+  addonGen.forEach(gen => lines.add(gen));
   spec.wrap.forEach(ty => {
     lines.add(genWrap(ty));
     lines.add(genHasType(ty));

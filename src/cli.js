@@ -19,6 +19,7 @@ program
   .option('-m --prefix [type]', 'Prefix or module name')
   .option('-e --side [type]', '\'client\' or \'server\' side code', 'client')
   .option('-v --major [type]', 'Oldest supported major version', '0')
+  .option('-a --addon [type]', 'Add-on code for client-side or server-side. May require additional dependencies.')
   .parse(process.argv);
 
 const hasJsonExtension = (name) => {
@@ -212,7 +213,7 @@ const generateHaskellClient = (program, jsonSpecs) => {
     return;
   }
 
-  const code = Haskell.client.gen(specs);
+  const code = Haskell.client.gen(specs, program.addon ? program.addon.split(',') : []);
 
   mkdirp(program.dest, function (err) {
     if (err) { console.error(err)
