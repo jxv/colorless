@@ -22,10 +22,8 @@ module Colorless.Examples.Phonebook
   , V0.State(..)
   ) where
 
-import qualified Data.Map as Map
 import qualified Colorless.Server as C (RuntimeThrower, Options, Request, Response, Major, Minor)
-import qualified Control.Monad.IO.Class as M (MonadIO)
-import Data.Aeson (toJSON, Value)
+import qualified Colorless.Imports as R
 
 import qualified Colorless.Examples.Phonebook.V0 as V0
   ( Phonebook'Service(..)
@@ -54,19 +52,19 @@ data Meta'Middlewares m meta0
 
 handler'Map
   ::
-    ( M.MonadIO m
+    ( R.MonadIO m
     , C.RuntimeThrower m
     , V0.Phonebook'Service meta0 m
     )
   => C.Options
   -> Meta'Middlewares m meta0
-  -> Map.Map C.Major (C.Minor, C.Request -> m C.Response)
-handler'Map options metaMiddlewares = Map.fromList
+  -> R.Map C.Major (C.Minor, C.Request -> m C.Response)
+handler'Map options metaMiddlewares = R.fromList
     [ (0, (0, V0.phonebook'Handler options $ meta'Middleware0 metaMiddlewares))
     ]
 
-handler'PublicSpec :: Value
-handler'PublicSpec = toJSON
+handler'PublicSpec :: R.Value
+handler'PublicSpec = R.toJSON
   [ V0.phonebook'Spec
   ]
 

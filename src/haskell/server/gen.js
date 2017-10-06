@@ -21,6 +21,45 @@ var {
   genPull,
 } = require('../common.js');
 
+const genPragmas = () => {
+  return new Lines([
+    '-- Pragmas\n',
+    '{-# OPTIONS_GHC -fno-warn-unused-imports #-}\n',
+    '{-# LANGUAGE DuplicateRecordFields #-}\n',
+    '{-# LANGUAGE LambdaCase #-}\n',
+    '{-# LANGUAGE OverloadedStrings #-}\n',
+    '{-# LANGUAGE GeneralizedNewtypeDeriving #-}\n',
+    '{-# LANGUAGE MultiParamTypeClasses #-}\n',
+    '{-# LANGUAGE NamedFieldPuns #-}\n',
+    '{-# LANGUAGE TupleSections #-}\n',
+    '{-# LANGUAGE FlexibleContexts #-}\n',
+    '{-# LANGUAGE FlexibleInstances #-}\n',
+    '{-# LANGUAGE ScopedTypeVariables #-}\n',
+    '{-# LANGUAGE NoImplicitPrelude #-}\n',
+  ]);
+};
+
+const genImports = (prefix, importTypes) => {
+  var lines = new Lines([
+    '\n',
+    '-- Imports\n',
+    'import qualified Prelude as P\n',
+    'import qualified Control.Monad as P\n',
+    'import qualified Data.Word as I\n',
+    'import qualified Data.Int as I\n',
+    'import qualified Data.IORef as IO\n',
+    'import qualified Data.String as P (IsString)\n',
+    '\n',
+    'import qualified Colorless.Imports as R\n',
+    'import qualified Colorless.Server as C\n',
+    '\n',
+  ]);
+  lines.add(importTypes.map(({ name, major }) =>
+    'import ' + prefix + '.V' + major + ' (' + name + '(..))\n'
+  ));
+  return lines;
+};
+
 const genApi = (name, calls) => {
   var lines = new Lines();
   lines.add([
@@ -41,7 +80,6 @@ const genApi = (name, calls) => {
   ]);
   return lines;
 };
-
 
 const genThrower = (name, lowercaseName, error) => {
   return new Lines([
@@ -90,7 +128,7 @@ const genApiParser = (name, lowercaseName, calls) => {
 
   // Hollow
   if (calls.hollow.length) {
-    lines.add('  { hollow = Map.fromList\n');
+    lines.add('  { hollow = R.fromList\n');
     lines.add([
       '     [ ("', calls.hollow[0].label, '", ', name, '\'Api\'', calls.hollow[0].name, ')\n',
     ]);
@@ -101,12 +139,12 @@ const genApiParser = (name, lowercaseName, calls) => {
     );
     lines.add('     ]\n');
   } else {
-    lines.add('  { hollow = Map.empty\n');
+    lines.add('  { hollow = R.empty\n');
   }
 
   // Struct
   if (calls.struct.length) {
-    lines.add('  , struct = Map.fromList\n');
+    lines.add('  , struct = R.fromList\n');
     lines.add([
       '     [ ("', calls.struct[0].label, '", v ', name, '\'Api\'', calls.struct[0].name, ')\n',
     ]);
@@ -117,12 +155,12 @@ const genApiParser = (name, lowercaseName, calls) => {
     );
     lines.add('     ]\n');
   } else {
-    lines.add('  , struct = Map.empty\n');
+    lines.add('  , struct = R.empty\n');
   }
 
   // Enumeration
   if (calls.enumeration.length) {
-    lines.add('  , enumeration = Map.fromList\n');
+    lines.add('  , enumeration = R.fromList\n');
     lines.add([
       '     [ ("', calls.enumeration[0].label, '", v ', name, '\'Api\'', calls.enumeration[0].name, ')\n',
     ]);
@@ -133,12 +171,12 @@ const genApiParser = (name, lowercaseName, calls) => {
     );
     lines.add('     ]\n');
   } else {
-    lines.add('  , enumeration = Map.empty\n');
+    lines.add('  , enumeration = R.empty\n');
   }
 
   // Wrap
   if (calls.wrap.length) {
-    lines.add('  , wrap = Map.fromList\n');
+    lines.add('  , wrap = R.fromList\n');
     lines.add([
       '     [ ("', calls.wrap[0].label, '", v ', name, '\'Api\'', calls.wrap[0].name, ')\n',
     ]);
@@ -149,7 +187,7 @@ const genApiParser = (name, lowercaseName, calls) => {
     );
     lines.add('     ]\n');
   } else {
-    lines.add('  , wrap = Map.empty\n');
+    lines.add('  , wrap = R.empty\n');
   }
 
   lines.add([
@@ -187,12 +225,12 @@ const genHandleRequest = (name, lowercaseName, meta) => {
   return new Lines([
     '\n',
     '-- Handler\n',
-    lowercaseName, '\'Handler :: (', name, '\'Service meta m, C.RuntimeThrower m, IO.MonadIO m) => C.Options -> (', meta, ' -> m meta) -> C.Request -> m C.Response\n',
+    lowercaseName, '\'Handler :: (', name, '\'Service meta m, C.RuntimeThrower m, R.MonadIO m) => C.Options -> (', meta, ' -> m meta) -> C.Request -> m C.Response\n',
     lowercaseName, '\'Handler options metaMiddleware C.Request{meta,query} = do\n',
     '  meta\' <- P.maybe (C.runtimeThrow C.RuntimeError\'UnparsableMeta) P.return (C.fromValFromJson meta)\n',
     '  xformMeta <- metaMiddleware meta\'\n',
-    '  envRef <- IO.liftIO C.emptyEnv\n',
-    '  variableBaseCount <- IO.liftIO (Map.size P.<$> IO.readIORef envRef)\n',
+    '  envRef <- R.liftIO C.emptyEnv\n',
+    '  variableBaseCount <- R.liftIO (R.size P.<$> IO.readIORef envRef)\n',
     '  let options\' = C.Options\n',
     '        { variableLimit = P.fmap (P.+ variableBaseCount) (C.variableLimit options)\n',
     '        }\n',
@@ -202,53 +240,10 @@ const genHandleRequest = (name, lowercaseName, meta) => {
     '        }\n',
     '  query\' <- P.maybe (C.runtimeThrow C.RuntimeError\'UnparsableQuery) P.return (C.jsonToExpr query)\n',
     '  vals <- C.runEval (C.forceVal P.=<< C.eval query\' envRef) evalConfig\n',
-    '  P.return (C.Response\'Success (A.toJSON vals))\n',
+    '  P.return (C.Response\'Success (R.toJSON vals))\n',
   ]);
 };
 
-const genImports = (prefix, importTypes) => {
-  var lines = new Lines([
-    '\n',
-    '-- Imports\n',
-    'import qualified Prelude as P\n',
-    'import qualified Control.Monad as P\n',
-    'import qualified Data.Word as I\n',
-    'import qualified Data.Int as I\n',
-    'import qualified Data.IORef as IO\n',
-    'import qualified Data.String as P (IsString)\n',
-
-    'import qualified Control.Monad.IO.Class as IO\n',
-    'import qualified Data.Aeson as A\n',
-    'import qualified Data.Map as Map\n',
-    'import qualified Data.Text as T\n',
-    'import qualified Data.Text.Conversions as T\n',
-
-    'import qualified Colorless.Server as C\n',
-    '\n',
-  ]);
-  lines.add(importTypes.map(({ name, major }) =>
-    'import ' + prefix + '.V' + major + ' (' + name + '(..))\n'
-  ));
-  return lines;
-};
-
-const genPragmas = () => {
-  return new Lines([
-    '-- Pragmas\n',
-    '{-# OPTIONS_GHC -fno-warn-unused-imports #-}\n',
-    '{-# LANGUAGE DuplicateRecordFields #-}\n',
-    '{-# LANGUAGE LambdaCase #-}\n',
-    '{-# LANGUAGE OverloadedStrings #-}\n',
-    '{-# LANGUAGE GeneralizedNewtypeDeriving #-}\n',
-    '{-# LANGUAGE MultiParamTypeClasses #-}\n',
-    '{-# LANGUAGE NamedFieldPuns #-}\n',
-    '{-# LANGUAGE TupleSections #-}\n',
-    '{-# LANGUAGE FlexibleContexts #-}\n',
-    '{-# LANGUAGE FlexibleInstances #-}\n',
-    '{-# LANGUAGE ScopedTypeVariables #-}\n',
-    '{-# LANGUAGE NoImplicitPrelude #-}\n',
-  ]);
-};
 
 const genModule = (name, lowercaseName, prefix, version, types) => {
   var lines = new Lines([
@@ -307,9 +302,9 @@ const genSpec = ({lowercaseName, original}) => {
   var lines = new Lines();
   lines.add([
     '\n',
-    lowercaseName, '\'Spec :: A.Value\n',
+    lowercaseName, '\'Spec :: R.Value\n',
     lowercaseName, '\'Spec = v\n',
-    '  where P.Just v = A.decode ', JSON.stringify(JSON.stringify(original)), '\n',
+    '  where P.Just v = R.decode ', JSON.stringify(JSON.stringify(original)), '\n',
   ]);
   return lines;
 };

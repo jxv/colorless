@@ -40,11 +40,8 @@ import qualified Data.Word as I
 import qualified Data.Int as I
 import qualified Data.IORef as IO
 import qualified Data.String as P (IsString)
-import qualified Control.Monad.IO.Class as IO
-import qualified Data.Aeson as A
-import qualified Data.Map as Map
-import qualified Data.Text as T
-import qualified Data.Text.Conversions as T
+
+import qualified Colorless.Imports as R
 import qualified Colorless.Server as C
 
 
@@ -65,12 +62,12 @@ class Phonebook'Thrower m => Phonebook'Service meta m where
   lookupPersonByName :: meta -> LookupPersonByName -> m [Person]
 
 -- Handler
-phonebook'Handler :: (Phonebook'Service meta m, C.RuntimeThrower m, IO.MonadIO m) => C.Options -> (() -> m meta) -> C.Request -> m C.Response
+phonebook'Handler :: (Phonebook'Service meta m, C.RuntimeThrower m, R.MonadIO m) => C.Options -> (() -> m meta) -> C.Request -> m C.Response
 phonebook'Handler options metaMiddleware C.Request{meta,query} = do
   meta' <- P.maybe (C.runtimeThrow C.RuntimeError'UnparsableMeta) P.return (C.fromValFromJson meta)
   xformMeta <- metaMiddleware meta'
-  envRef <- IO.liftIO C.emptyEnv
-  variableBaseCount <- IO.liftIO (Map.size P.<$> IO.readIORef envRef)
+  envRef <- R.liftIO C.emptyEnv
+  variableBaseCount <- R.liftIO (R.size P.<$> IO.readIORef envRef)
   let options' = C.Options
         { variableLimit = P.fmap (P.+ variableBaseCount) (C.variableLimit options)
         }
@@ -80,7 +77,7 @@ phonebook'Handler options metaMiddleware C.Request{meta,query} = do
         }
   query' <- P.maybe (C.runtimeThrow C.RuntimeError'UnparsableQuery) P.return (C.jsonToExpr query)
   vals <- C.runEval (C.forceVal P.=<< C.eval query' envRef) evalConfig
-  P.return (C.Response'Success (A.toJSON vals))
+  P.return (C.Response'Success (R.toJSON vals))
 
 -- API
 phonebook'ApiCall :: (Phonebook'Service meta m, C.RuntimeThrower m) => meta -> C.ApiCall -> m C.Val
@@ -93,13 +90,13 @@ phonebook'ApiCall meta' apiCall' = case C.parseApiCall phonebook'ApiParser apiCa
 -- API Parser
 phonebook'ApiParser :: C.ApiParser Phonebook'Api
 phonebook'ApiParser = C.ApiParser
-  { hollow = Map.empty
-  , struct = Map.fromList
+  { hollow = R.empty
+  , struct = R.fromList
      [ ("LookupPerson", v Phonebook'Api'LookupPerson)
      , ("LookupPersonByName", v Phonebook'Api'LookupPersonByName)
      ]
-  , enumeration = Map.empty
-  , wrap = Map.empty
+  , enumeration = R.empty
+  , wrap = R.empty
   }
   where
     v x y = x P.<$> C.fromVal y
@@ -111,8 +108,8 @@ data Phonebook'Api
   deriving (P.Show, P.Eq)
 
 -- Wrap: PersonId
-newtype PersonId = PersonId T.Text
-  deriving (P.Eq, P.Ord, P.IsString, T.ToText,  P.Show)
+newtype PersonId = PersonId R.Text
+  deriving (P.Eq, P.Ord, P.IsString, R.ToText,  P.Show)
 
 instance C.ToVal PersonId where
   toVal (PersonId _w) = C.toVal _w
@@ -120,19 +117,19 @@ instance C.ToVal PersonId where
 instance C.FromVal PersonId where
   fromVal _v = PersonId P.<$> C.fromVal _v
 
-instance A.ToJSON PersonId where
-  toJSON = A.toJSON P.. C.toVal
+instance R.ToJSON PersonId where
+  toJSON = R.toJSON P.. C.toVal
 
-instance A.FromJSON PersonId where
+instance R.FromJSON PersonId where
   parseJSON _v = do
-    _x <- A.parseJSON _v
+    _x <- R.parseJSON _v
     case C.fromVal _x of
       P.Nothing -> P.mzero
       P.Just _y -> P.return _y
 
 -- Wrap: Name
-newtype Name = Name T.Text
-  deriving (P.Eq, P.Ord, P.IsString, T.ToText,  P.Show)
+newtype Name = Name R.Text
+  deriving (P.Eq, P.Ord, P.IsString, R.ToText,  P.Show)
 
 instance C.ToVal Name where
   toVal (Name _w) = C.toVal _w
@@ -140,19 +137,19 @@ instance C.ToVal Name where
 instance C.FromVal Name where
   fromVal _v = Name P.<$> C.fromVal _v
 
-instance A.ToJSON Name where
-  toJSON = A.toJSON P.. C.toVal
+instance R.ToJSON Name where
+  toJSON = R.toJSON P.. C.toVal
 
-instance A.FromJSON Name where
+instance R.FromJSON Name where
   parseJSON _v = do
-    _x <- A.parseJSON _v
+    _x <- R.parseJSON _v
     case C.fromVal _x of
       P.Nothing -> P.mzero
       P.Just _y -> P.return _y
 
 -- Wrap: Phone
-newtype Phone = Phone T.Text
-  deriving (P.Eq, P.Ord, P.IsString, T.ToText,  P.Show)
+newtype Phone = Phone R.Text
+  deriving (P.Eq, P.Ord, P.IsString, R.ToText,  P.Show)
 
 instance C.ToVal Phone where
   toVal (Phone _w) = C.toVal _w
@@ -160,19 +157,19 @@ instance C.ToVal Phone where
 instance C.FromVal Phone where
   fromVal _v = Phone P.<$> C.fromVal _v
 
-instance A.ToJSON Phone where
-  toJSON = A.toJSON P.. C.toVal
+instance R.ToJSON Phone where
+  toJSON = R.toJSON P.. C.toVal
 
-instance A.FromJSON Phone where
+instance R.FromJSON Phone where
   parseJSON _v = do
-    _x <- A.parseJSON _v
+    _x <- R.parseJSON _v
     case C.fromVal _x of
       P.Nothing -> P.mzero
       P.Just _y -> P.return _y
 
 -- Wrap: Street
-newtype Street = Street T.Text
-  deriving (P.Eq, P.Ord, P.IsString, T.ToText,  P.Show)
+newtype Street = Street R.Text
+  deriving (P.Eq, P.Ord, P.IsString, R.ToText,  P.Show)
 
 instance C.ToVal Street where
   toVal (Street _w) = C.toVal _w
@@ -180,19 +177,19 @@ instance C.ToVal Street where
 instance C.FromVal Street where
   fromVal _v = Street P.<$> C.fromVal _v
 
-instance A.ToJSON Street where
-  toJSON = A.toJSON P.. C.toVal
+instance R.ToJSON Street where
+  toJSON = R.toJSON P.. C.toVal
 
-instance A.FromJSON Street where
+instance R.FromJSON Street where
   parseJSON _v = do
-    _x <- A.parseJSON _v
+    _x <- R.parseJSON _v
     case C.fromVal _x of
       P.Nothing -> P.mzero
       P.Just _y -> P.return _y
 
 -- Wrap: City
-newtype City = City T.Text
-  deriving (P.Eq, P.Ord, P.IsString, T.ToText,  P.Show)
+newtype City = City R.Text
+  deriving (P.Eq, P.Ord, P.IsString, R.ToText,  P.Show)
 
 instance C.ToVal City where
   toVal (City _w) = C.toVal _w
@@ -200,19 +197,19 @@ instance C.ToVal City where
 instance C.FromVal City where
   fromVal _v = City P.<$> C.fromVal _v
 
-instance A.ToJSON City where
-  toJSON = A.toJSON P.. C.toVal
+instance R.ToJSON City where
+  toJSON = R.toJSON P.. C.toVal
 
-instance A.FromJSON City where
+instance R.FromJSON City where
   parseJSON _v = do
-    _x <- A.parseJSON _v
+    _x <- R.parseJSON _v
     case C.fromVal _x of
       P.Nothing -> P.mzero
       P.Just _y -> P.return _y
 
 -- Wrap: Zipcode
-newtype Zipcode = Zipcode T.Text
-  deriving (P.Eq, P.Ord, P.IsString, T.ToText,  P.Show)
+newtype Zipcode = Zipcode R.Text
+  deriving (P.Eq, P.Ord, P.IsString, R.ToText,  P.Show)
 
 instance C.ToVal Zipcode where
   toVal (Zipcode _w) = C.toVal _w
@@ -220,12 +217,12 @@ instance C.ToVal Zipcode where
 instance C.FromVal Zipcode where
   fromVal _v = Zipcode P.<$> C.fromVal _v
 
-instance A.ToJSON Zipcode where
-  toJSON = A.toJSON P.. C.toVal
+instance R.ToJSON Zipcode where
+  toJSON = R.toJSON P.. C.toVal
 
-instance A.FromJSON Zipcode where
+instance R.FromJSON Zipcode where
   parseJSON _v = do
-    _x <- A.parseJSON _v
+    _x <- R.parseJSON _v
     case C.fromVal _x of
       P.Nothing -> P.mzero
       P.Just _y -> P.return _y
@@ -244,7 +241,7 @@ instance C.ToVal Address where
     , city
     , zipcode
     , state
-    } = C.Val'ApiVal P.$ C.ApiVal'Struct P.$ C.Struct P.$ Map.fromList
+    } = C.Val'ApiVal P.$ C.ApiVal'Struct P.$ C.Struct P.$ R.fromList
     [ ("street", C.toVal street)
     , ("city", C.toVal city)
     , ("zipcode", C.toVal zipcode)
@@ -260,12 +257,12 @@ instance C.FromVal Address where
       P.<*> C.getMember _m "state"
     _ -> P.Nothing
 
-instance A.ToJSON Address where
-  toJSON = A.toJSON P.. C.toVal
+instance R.ToJSON Address where
+  toJSON = R.toJSON P.. C.toVal
 
-instance A.FromJSON Address where
+instance R.FromJSON Address where
   parseJSON _v = do
-    _x <- A.parseJSON _v
+    _x <- R.parseJSON _v
     case C.fromVal _x of
       P.Nothing -> P.mzero
       P.Just _y -> P.return _y
@@ -284,7 +281,7 @@ instance C.ToVal Person where
     , phone
     , address
     , friends
-    } = C.Val'ApiVal P.$ C.ApiVal'Struct P.$ C.Struct P.$ Map.fromList
+    } = C.Val'ApiVal P.$ C.ApiVal'Struct P.$ C.Struct P.$ R.fromList
     [ ("name", C.toVal name)
     , ("phone", C.toVal phone)
     , ("address", C.toVal address)
@@ -300,12 +297,12 @@ instance C.FromVal Person where
       P.<*> C.getMember _m "friends"
     _ -> P.Nothing
 
-instance A.ToJSON Person where
-  toJSON = A.toJSON P.. C.toVal
+instance R.ToJSON Person where
+  toJSON = R.toJSON P.. C.toVal
 
-instance A.FromJSON Person where
+instance R.FromJSON Person where
   parseJSON _v = do
-    _x <- A.parseJSON _v
+    _x <- R.parseJSON _v
     case C.fromVal _x of
       P.Nothing -> P.mzero
       P.Just _y -> P.return _y
@@ -318,7 +315,7 @@ data LookupPerson = LookupPerson
 instance C.ToVal LookupPerson where
   toVal LookupPerson
     { id
-    } = C.Val'ApiVal P.$ C.ApiVal'Struct P.$ C.Struct P.$ Map.fromList
+    } = C.Val'ApiVal P.$ C.ApiVal'Struct P.$ C.Struct P.$ R.fromList
     [ ("id", C.toVal id)
     ]
 
@@ -328,25 +325,25 @@ instance C.FromVal LookupPerson where
       P.<$> C.getMember _m "id"
     _ -> P.Nothing
 
-instance A.ToJSON LookupPerson where
-  toJSON = A.toJSON P.. C.toVal
+instance R.ToJSON LookupPerson where
+  toJSON = R.toJSON P.. C.toVal
 
-instance A.FromJSON LookupPerson where
+instance R.FromJSON LookupPerson where
   parseJSON _v = do
-    _x <- A.parseJSON _v
+    _x <- R.parseJSON _v
     case C.fromVal _x of
       P.Nothing -> P.mzero
       P.Just _y -> P.return _y
 
 -- Struct: LookupPersonByName
 data LookupPersonByName = LookupPersonByName
-  { name :: T.Text
+  { name :: R.Text
   } deriving (P.Show, P.Eq)
 
 instance C.ToVal LookupPersonByName where
   toVal LookupPersonByName
     { name
-    } = C.Val'ApiVal P.$ C.ApiVal'Struct P.$ C.Struct P.$ Map.fromList
+    } = C.Val'ApiVal P.$ C.ApiVal'Struct P.$ C.Struct P.$ R.fromList
     [ ("name", C.toVal name)
     ]
 
@@ -356,12 +353,12 @@ instance C.FromVal LookupPersonByName where
       P.<$> C.getMember _m "name"
     _ -> P.Nothing
 
-instance A.ToJSON LookupPersonByName where
-  toJSON = A.toJSON P.. C.toVal
+instance R.ToJSON LookupPersonByName where
+  toJSON = R.toJSON P.. C.toVal
 
-instance A.FromJSON LookupPersonByName where
+instance R.FromJSON LookupPersonByName where
   parseJSON _v = do
-    _x <- A.parseJSON _v
+    _x <- R.parseJSON _v
     case C.fromVal _x of
       P.Nothing -> P.mzero
       P.Just _y -> P.return _y
@@ -388,17 +385,17 @@ instance C.FromVal State where
       _ -> P.Nothing
     _ -> P.Nothing
 
-instance A.ToJSON State where
-  toJSON = A.toJSON P.. C.toVal
+instance R.ToJSON State where
+  toJSON = R.toJSON P.. C.toVal
 
-instance A.FromJSON State where
+instance R.FromJSON State where
   parseJSON _v = do
-    _x <- A.parseJSON _v
+    _x <- R.parseJSON _v
     case C.fromVal _x of
       P.Nothing -> P.mzero
       P.Just _y -> P.return _y
 
-phonebook'Spec :: A.Value
+phonebook'Spec :: R.Value
 phonebook'Spec = v
-  where P.Just v = A.decode "{\"colorless\":{\"major\":0,\"minor\":0},\"types\":[{\"n\":\"PersonId\",\"w\":\"String\"},{\"n\":\"Name\",\"w\":\"String\"},{\"n\":\"Phone\",\"w\":\"String\"},{\"n\":\"Street\",\"w\":\"String\"},{\"n\":\"City\",\"w\":\"String\"},{\"n\":\"State\",\"e\":[{\"tag\":\"CA\"},{\"tag\":\"NY\"},{\"tag\":\"TX\"}]},{\"n\":\"Zipcode\",\"w\":\"String\"},{\"n\":\"Address\",\"m\":[{\"street\":\"Street\"},{\"city\":\"City\"},{\"zipcode\":\"Zipcode\"},{\"state\":\"State\"}]},{\"n\":\"Person\",\"m\":[{\"name\":\"Name\"},{\"phone\":\"Phone\"},{\"address\":{\"n\":\"Option\",\"p\":\"Address\"}},{\"friends\":{\"n\":\"List\",\"p\":\"PersonId\"}}]},{\"n\":\"LookupPerson\",\"m\":[{\"id\":\"PersonId\"}],\"o\":{\"n\":\"Option\",\"p\":\"Person\"}},{\"n\":\"LookupPersonByName\",\"m\":[{\"name\":\"String\"}],\"o\":{\"n\":\"List\",\"p\":\"Person\"}}],\"pull\":{\"protocol\":\"http\",\"name\":\"Phonebook\",\"address\":\"127.0.0.1\",\"path\":\"/\",\"port\":8000,\"error\":\"Unit\",\"meta\":\"Unit\"},\"version\":{\"major\":0,\"minor\":0}}"
+  where P.Just v = R.decode "{\"colorless\":{\"major\":0,\"minor\":0},\"types\":[{\"n\":\"PersonId\",\"w\":\"String\"},{\"n\":\"Name\",\"w\":\"String\"},{\"n\":\"Phone\",\"w\":\"String\"},{\"n\":\"Street\",\"w\":\"String\"},{\"n\":\"City\",\"w\":\"String\"},{\"n\":\"State\",\"e\":[{\"tag\":\"CA\"},{\"tag\":\"NY\"},{\"tag\":\"TX\"}]},{\"n\":\"Zipcode\",\"w\":\"String\"},{\"n\":\"Address\",\"m\":[{\"street\":\"Street\"},{\"city\":\"City\"},{\"zipcode\":\"Zipcode\"},{\"state\":\"State\"}]},{\"n\":\"Person\",\"m\":[{\"name\":\"Name\"},{\"phone\":\"Phone\"},{\"address\":{\"n\":\"Option\",\"p\":\"Address\"}},{\"friends\":{\"n\":\"List\",\"p\":\"PersonId\"}}]},{\"n\":\"LookupPerson\",\"m\":[{\"id\":\"PersonId\"}],\"o\":{\"n\":\"Option\",\"p\":\"Person\"}},{\"n\":\"LookupPersonByName\",\"m\":[{\"name\":\"String\"}],\"o\":{\"n\":\"List\",\"p\":\"Person\"}}],\"pull\":{\"protocol\":\"http\",\"name\":\"Phonebook\",\"address\":\"127.0.0.1\",\"path\":\"/\",\"port\":8000,\"error\":\"Unit\",\"meta\":\"Unit\"},\"version\":{\"major\":0,\"minor\":0}}"
 

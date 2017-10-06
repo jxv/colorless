@@ -26,10 +26,8 @@ const genModule = (prefix, name, lowercaseName, major, exportTypes) => {
 const genCommonImports = () => {
   return new Lines([
     '\n',
-    'import qualified Data.Map as Map\n',
     'import qualified Colorless.Server as C (RuntimeThrower, Options, Request, Response, Major, Minor)\n',
-    'import qualified Control.Monad.IO.Class as M (MonadIO)\n',
-    'import Data.Aeson (toJSON, Value)\n',
+    'import qualified Colorless.Imports as R\n'
   ]);
 };
 
@@ -77,7 +75,7 @@ const genHandlerMap = (specs) => {
     '\n',
     'handler\'Map\n',
     '  ::\n',
-    '    ( M.MonadIO m\n',
+    '    ( R.MonadIO m\n',
     '    , C.RuntimeThrower m\n',
   ]);
   lines.add(specs.map(spec =>
@@ -93,8 +91,8 @@ const genHandlerMap = (specs) => {
   ));
   lines.add([
     '\n',
-    '  -> Map.Map C.Major (C.Minor, C.Request -> m C.Response)\n',
-    'handler\'Map options metaMiddlewares = Map.fromList\n',
+    '  -> R.Map C.Major (C.Minor, C.Request -> m C.Response)\n',
+    'handler\'Map options metaMiddlewares = R.fromList\n',
   ]);
 
   lines.add(
@@ -112,8 +110,8 @@ const genHandlerMap = (specs) => {
 const genPublicSpec = (lowercaseName, specs) => {
   var lines = new Lines([
     '\n',
-    'handler\'PublicSpec :: Value\n',
-    'handler\'PublicSpec = toJSON\n',
+    'handler\'PublicSpec :: R.Value\n',
+    'handler\'PublicSpec = R.toJSON\n',
     '  [ V', specs[0].version.major, '\.', specs[0].lowercaseName, '\'Spec\n',
   ]);
   specs.slice(1).forEach(spec =>

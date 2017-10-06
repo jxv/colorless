@@ -14,7 +14,7 @@ const primMap = {
   'F32': 'P.Float',
   'F64': 'P.Float',
   'Char': 'P.Char',
-  'String': 'T.Text',
+  'String': 'R.Text',
 };
 
 const lowercaseFirstLetter = s => s.charAt(0).toLowerCase() + s.slice(1);

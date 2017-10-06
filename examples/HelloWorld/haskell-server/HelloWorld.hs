@@ -15,10 +15,8 @@ module Colorless.Examples.HelloWorld
   , V2.Color'Custom'Members(..)
   ) where
 
-import qualified Data.Map as Map
 import qualified Colorless.Server as C (RuntimeThrower, Options, Request, Response, Major, Minor)
-import qualified Control.Monad.IO.Class as M (MonadIO)
-import Data.Aeson (toJSON, Value)
+import qualified Colorless.Imports as R
 
 import qualified Colorless.Examples.HelloWorld.V0 as V0
   ( HelloWorld'Service(..)
@@ -65,7 +63,7 @@ data Meta'Middlewares m meta0 meta1 meta2
 
 handler'Map
   ::
-    ( M.MonadIO m
+    ( R.MonadIO m
     , C.RuntimeThrower m
     , V0.HelloWorld'Service meta0 m
     , V1.HelloWorld'Service meta1 m
@@ -73,15 +71,15 @@ handler'Map
     )
   => C.Options
   -> Meta'Middlewares m meta0 meta1 meta2
-  -> Map.Map C.Major (C.Minor, C.Request -> m C.Response)
-handler'Map options metaMiddlewares = Map.fromList
+  -> R.Map C.Major (C.Minor, C.Request -> m C.Response)
+handler'Map options metaMiddlewares = R.fromList
     [ (0, (1, V0.helloWorld'Handler options $ meta'Middleware0 metaMiddlewares))
     , (1, (0, V1.helloWorld'Handler options $ meta'Middleware1 metaMiddlewares))
     , (2, (0, V2.helloWorld'Handler options $ meta'Middleware2 metaMiddlewares))
     ]
 
-handler'PublicSpec :: Value
-handler'PublicSpec = toJSON
+handler'PublicSpec :: R.Value
+handler'PublicSpec = R.toJSON
   [ V0.helloWorld'Spec
   , V1.helloWorld'Spec
   , V2.helloWorld'Spec

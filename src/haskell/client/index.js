@@ -65,19 +65,16 @@ const genImports = () => {
     '\n',
     '-- Imports\n',
     'import qualified Prelude as P\n',
-    'import qualified Data.Map as Map\n',
-    'import qualified Control.Monad.IO.Class as IO\n',
     'import qualified Control.Monad as P\n',
-    'import qualified Data.Aeson as A\n',
-    'import qualified Data.Text as T\n',
-    'import qualified Data.Text.Conversions as T\n',
     'import qualified Data.String as P (IsString)\n',
     'import qualified Data.Word as I\n',
     'import qualified Data.Int as I\n',
     'import qualified Data.IORef as IO\n',
+
     'import qualified Colorless.Client as C\n',
     'import qualified Colorless.Client.Expr as C\n',
     'import qualified Colorless.Ast as Ast\n',
+    'import qualified Colorless.Imports as R\n'
   ]);
   return lines;
 };
@@ -85,7 +82,7 @@ const genImports = () => {
 const genRequest = (s) => {
   return new Lines([
     '\n',
-    s.lowercaseName, '\'Request :: (Ast.ToAst a, C.HasType a, A.FromJSON a) => ', s.meta ,' -> C.Expr a -> C.Request ', s.meta,' a\n',
+    s.lowercaseName, '\'Request :: (Ast.ToAst a, C.HasType a, R.FromJSON a) => ', s.meta ,' -> C.Expr a -> C.Request ', s.meta,' a\n',
     s.lowercaseName, '\'Request _meta _query = C.Request (C.Version ', 0,' ', 0, ') ', s.lowercaseName,'\'Version _meta _query\n',
   ]);
 };
@@ -215,7 +212,7 @@ const genStructToAst = ({name, label, members}) => {
   );
   lines.add('    }');
   lines.add([
-    ' = Ast.Ast\'Struct P.. Ast.Struct P.$ Map.fromList\n',
+    ' = Ast.Ast\'Struct P.. Ast.Struct P.$ R.fromList\n',
     '    [ ("', members[0].label, '", Ast.toAst ', members[0].name, ')\n',
   ]);
   members.slice(1).forEach(member =>
@@ -280,7 +277,7 @@ const genEnumerationToAst = ({name, enumerals}) => {
         ])
       );
       lines.add([
-        '      } -> Ast.Ast\'Enumeral P.$ Ast.Enumeral "', enumeral.label, '" P.$ P.Just P.$ Map.fromList\n',
+        '      } -> Ast.Ast\'Enumeral P.$ Ast.Enumeral "', enumeral.label, '" P.$ P.Just P.$ R.fromList\n',
       ]);
       lines.add([
         '      [ ("', enumeral.members[0].label, '", Ast.toAst ', enumeral.members[0].name, ')\n'

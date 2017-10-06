@@ -33,11 +33,8 @@ import qualified Data.Word as I
 import qualified Data.Int as I
 import qualified Data.IORef as IO
 import qualified Data.String as P (IsString)
-import qualified Control.Monad.IO.Class as IO
-import qualified Data.Aeson as A
-import qualified Data.Map as Map
-import qualified Data.Text as T
-import qualified Data.Text.Conversions as T
+
+import qualified Colorless.Imports as R
 import qualified Colorless.Server as C
 
 import Colorless.Examples.HelloWorld.V1 (Goodbye(..))
@@ -57,16 +54,16 @@ class P.Monad m => HelloWorld'Thrower m where
 
 -- Service
 class HelloWorld'Thrower m => HelloWorld'Service meta m where
-  hello :: meta -> Hello -> m T.Text
+  hello :: meta -> Hello -> m R.Text
   goodbye :: meta -> Goodbye -> m ()
 
 -- Handler
-helloWorld'Handler :: (HelloWorld'Service meta m, C.RuntimeThrower m, IO.MonadIO m) => C.Options -> (() -> m meta) -> C.Request -> m C.Response
+helloWorld'Handler :: (HelloWorld'Service meta m, C.RuntimeThrower m, R.MonadIO m) => C.Options -> (() -> m meta) -> C.Request -> m C.Response
 helloWorld'Handler options metaMiddleware C.Request{meta,query} = do
   meta' <- P.maybe (C.runtimeThrow C.RuntimeError'UnparsableMeta) P.return (C.fromValFromJson meta)
   xformMeta <- metaMiddleware meta'
-  envRef <- IO.liftIO C.emptyEnv
-  variableBaseCount <- IO.liftIO (Map.size P.<$> IO.readIORef envRef)
+  envRef <- R.liftIO C.emptyEnv
+  variableBaseCount <- R.liftIO (R.size P.<$> IO.readIORef envRef)
   let options' = C.Options
         { variableLimit = P.fmap (P.+ variableBaseCount) (C.variableLimit options)
         }
@@ -76,7 +73,7 @@ helloWorld'Handler options metaMiddleware C.Request{meta,query} = do
         }
   query' <- P.maybe (C.runtimeThrow C.RuntimeError'UnparsableQuery) P.return (C.jsonToExpr query)
   vals <- C.runEval (C.forceVal P.=<< C.eval query' envRef) evalConfig
-  P.return (C.Response'Success (A.toJSON vals))
+  P.return (C.Response'Success (R.toJSON vals))
 
 -- API
 helloWorld'ApiCall :: (HelloWorld'Service meta m, C.RuntimeThrower m) => meta -> C.ApiCall -> m C.Val
@@ -89,13 +86,13 @@ helloWorld'ApiCall meta' apiCall' = case C.parseApiCall helloWorld'ApiParser api
 -- API Parser
 helloWorld'ApiParser :: C.ApiParser HelloWorld'Api
 helloWorld'ApiParser = C.ApiParser
-  { hollow = Map.empty
-  , struct = Map.fromList
+  { hollow = R.empty
+  , struct = R.fromList
      [ ("Hello", v HelloWorld'Api'Hello)
      , ("Goodbye", v HelloWorld'Api'Goodbye)
      ]
-  , enumeration = Map.empty
-  , wrap = Map.empty
+  , enumeration = R.empty
+  , wrap = R.empty
   }
   where
     v x y = x P.<$> C.fromVal y
@@ -108,13 +105,13 @@ data HelloWorld'Api
 
 -- Struct: Hello
 data Hello = Hello
-  { who :: T.Text
+  { who :: R.Text
   } deriving (P.Show, P.Eq)
 
 instance C.ToVal Hello where
   toVal Hello
     { who
-    } = C.Val'ApiVal P.$ C.ApiVal'Struct P.$ C.Struct P.$ Map.fromList
+    } = C.Val'ApiVal P.$ C.ApiVal'Struct P.$ C.Struct P.$ R.fromList
     [ ("who", C.toVal who)
     ]
 
@@ -124,17 +121,17 @@ instance C.FromVal Hello where
       P.<$> C.getMember _m "who"
     _ -> P.Nothing
 
-instance A.ToJSON Hello where
-  toJSON = A.toJSON P.. C.toVal
+instance R.ToJSON Hello where
+  toJSON = R.toJSON P.. C.toVal
 
-instance A.FromJSON Hello where
+instance R.FromJSON Hello where
   parseJSON _v = do
-    _x <- A.parseJSON _v
+    _x <- R.parseJSON _v
     case C.fromVal _x of
       P.Nothing -> P.mzero
       P.Just _y -> P.return _y
 
-helloWorld'Spec :: A.Value
+helloWorld'Spec :: R.Value
 helloWorld'Spec = v
-  where P.Just v = A.decode "{\"colorless\":{\"major\":0,\"minor\":0},\"version\":{\"major\":2,\"minor\":0},\"types\":[{\"n\":\"Hello\",\"m\":[{\"who\":\"String\"}],\"o\":\"String\"},{\"n\":\"Goodbye\",\"m\":[{\"target\":\"String\"}],\"o\":\"Unit\"},{\"n\":\"Color\",\"e\":[\"Red\",\"Blue\",\"Green\",\"Yellow\",{\"tag\":\"Custom\",\"m\":[{\"r\":\"U8\"},{\"g\":\"U8\"},{\"b\":\"U8\"}]}]}],\"pull\":{\"protocol\":\"http\",\"name\":\"HelloWorld\",\"address\":\"127.0.0.1\",\"meta\":\"Unit\",\"path\":\"/\",\"port\":8080,\"error\":\"Unit\"}}"
+  where P.Just v = R.decode "{\"colorless\":{\"major\":0,\"minor\":0},\"version\":{\"major\":2,\"minor\":0},\"types\":[{\"n\":\"Hello\",\"m\":[{\"who\":\"String\"}],\"o\":\"String\"},{\"n\":\"Goodbye\",\"m\":[{\"target\":\"String\"}],\"o\":\"Unit\"},{\"n\":\"Color\",\"e\":[\"Red\",\"Blue\",\"Green\",\"Yellow\",{\"tag\":\"Custom\",\"m\":[{\"r\":\"U8\"},{\"g\":\"U8\"},{\"b\":\"U8\"}]}]}],\"pull\":{\"protocol\":\"http\",\"name\":\"HelloWorld\",\"address\":\"127.0.0.1\",\"meta\":\"Unit\",\"path\":\"/\",\"port\":8080,\"error\":\"Unit\"}}"
 
