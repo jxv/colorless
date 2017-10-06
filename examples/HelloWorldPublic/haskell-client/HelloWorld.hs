@@ -16,6 +16,7 @@
 module Colorless.Examples.HelloWorld
   ( helloWorld'Version
   , helloWorld'Pull
+  , helloWorld'Request
   , Hello(..)
   , Goodbye(..)
   , Color(..)
@@ -58,6 +59,9 @@ helloWorld'Version = C.Version 2 0
 
 helloWorld'Pull :: C.Pull
 helloWorld'Pull = C.Pull "http" "127.0.0.1" "/" 8080
+
+helloWorld'Request :: (Ast.ToAst a, C.HasType a, A.FromJSON a) => () -> C.Expr a -> C.Request () a
+helloWorld'Request _meta _query = C.Request (C.Version 0 0) helloWorld'Version _meta _query
 
 hello :: C.Expr Hello -> C.Expr T.Text
 hello = C.unsafeExpr P.. Ast.Ast'StructCall P.. Ast.StructCall "Hello" P.. Ast.toAst

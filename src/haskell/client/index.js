@@ -44,6 +44,7 @@ const genModule = (name, lowercaseName, prefix, version, types, values) => {
     'module ', prefix, '\n',
     '  ( ', lowercaseName, '\'Version\n',
     '  , ', lowercaseName, '\'Pull\n',
+    '  , ', lowercaseName, '\'Request\n',
   ]);
   types.forEach(type =>
     lines.add([
@@ -79,6 +80,14 @@ const genImports = () => {
     'import qualified Colorless.Ast as Ast\n',
   ]);
   return lines;
+};
+
+const genRequest = (s) => {
+  return new Lines([
+    '\n',
+    s.lowercaseName, '\'Request :: (Ast.ToAst a, C.HasType a, A.FromJSON a) => ', s.meta ,' -> C.Expr a -> C.Request ', s.meta,' a\n',
+    s.lowercaseName, '\'Request _meta _query = C.Request (C.Version ', 0,' ', 0, ') ', s.lowercaseName,'\'Version _meta _query\n',
+  ]);
 };
 
 const genService = (s) => {
@@ -341,6 +350,7 @@ const gen = (specs) => {
   lines.add(genImports());
   lines.add(genVersion(spec.lowercaseName, spec.version.major, spec.version.minor));
   lines.add(genPull(spec));
+  lines.add(genRequest(spec));
   lines.add(genService(spec));
   spec.wrap.forEach(ty => {
     lines.add(genWrap(ty));

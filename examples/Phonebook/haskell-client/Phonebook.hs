@@ -16,6 +16,7 @@
 module Colorless.Examples.Phonebook
   ( phonebook'Version
   , phonebook'Pull
+  , phonebook'Request
   , PersonId(..)
   , Name(..)
   , Phone(..)
@@ -87,6 +88,9 @@ phonebook'Version = C.Version 0 0
 
 phonebook'Pull :: C.Pull
 phonebook'Pull = C.Pull "http" "127.0.0.1" "/" 8000
+
+phonebook'Request :: (Ast.ToAst a, C.HasType a, A.FromJSON a) => () -> C.Expr a -> C.Request () a
+phonebook'Request _meta _query = C.Request (C.Version 0 0) phonebook'Version _meta _query
 
 lookupPerson :: C.Expr LookupPerson -> C.Expr (P.Maybe Person)
 lookupPerson = C.unsafeExpr P.. Ast.Ast'StructCall P.. Ast.StructCall "LookupPerson" P.. Ast.toAst
