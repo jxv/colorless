@@ -16,7 +16,7 @@
     "pull": {
       "protocol": "http",
       "name": "Phonebook",
-      "address": "127.0.0.1",
+      "host": "127.0.0.1",
       "path": "/",
       "port": 8000,
       "error": "Unit",

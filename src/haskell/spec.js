@@ -145,7 +145,7 @@ const spec = (prefix, version, s) => {
     wrap: wrap(s.types),
     pull: {
       protocol: s.pull.protocol,
-      address: s.pull.address,
+      host: s.pull.host,
       port: s.pull.port,
       path: s.pull.path,
     },

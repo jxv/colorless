@@ -309,7 +309,7 @@ const genPull = ({lowercaseName, pull}) => {
   lines.add([
     '\n',
     lowercaseName, '\'Pull :: C.Pull\n',
-    lowercaseName, '\'Pull = C.Pull "', pull.protocol, '" "', pull.address, '" "', pull.path, '" ', pull.port, '\n',
+    lowercaseName, '\'Pull = C.Pull "', pull.protocol, '" "', pull.host, '" "', pull.path, '" ', pull.port, '\n',
   ]);
   return lines;
 };

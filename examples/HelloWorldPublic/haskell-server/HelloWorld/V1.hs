@@ -187,5 +187,5 @@ instance R.FromJSON Color where
 
 helloWorld'Spec :: R.Value
 helloWorld'Spec = v
-  where P.Just v = R.decode "{\"colorless\":{\"major\":0,\"minor\":0},\"version\":{\"major\":1,\"minor\":0},\"types\":[{\"n\":\"Hello\",\"m\":[{\"target\":\"String\"}],\"o\":\"String\"},{\"n\":\"Goodbye\",\"m\":[{\"target\":\"String\"}],\"o\":\"Unit\"},{\"n\":\"Color\",\"e\":[\"Red\",\"Green\",\"Blue\",{\"tag\":\"Custom\",\"m\":[{\"r\":\"U8\"},{\"g\":\"U8\"},{\"b\":\"U8\"}]},\"Yellow\"]}],\"pull\":{\"protocol\":\"http\",\"name\":\"HelloWorld\",\"address\":\"127.0.0.1\",\"meta\":\"Unit\",\"path\":\"/\",\"port\":8080,\"error\":\"Unit\"}}"
+  where P.Just v = R.decode "{\"colorless\":{\"major\":0,\"minor\":0},\"version\":{\"major\":1,\"minor\":0},\"types\":[{\"n\":\"Hello\",\"m\":[{\"target\":\"String\"}],\"o\":\"String\"},{\"n\":\"Goodbye\",\"m\":[{\"target\":\"String\"}],\"o\":\"Unit\"},{\"n\":\"Color\",\"e\":[\"Red\",\"Green\",\"Blue\",{\"tag\":\"Custom\",\"m\":[{\"r\":\"U8\"},{\"g\":\"U8\"},{\"b\":\"U8\"}]},\"Yellow\"]}],\"pull\":{\"protocol\":\"http\",\"name\":\"HelloWorld\",\"host\":\"127.0.0.1\",\"meta\":\"Unit\",\"path\":\"/\",\"port\":8080,\"error\":\"Unit\"}}"
 
