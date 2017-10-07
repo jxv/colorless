@@ -243,9 +243,9 @@ const generateHaskellServer = (program, jsonSpecs) => {
     return;
   }
 
-  const latest = Haskell.server.latest(specs);
-
   const addons = program.addon ? program.addon.split(',') : [];
+  const latest = Haskell.server.latest(specs, addons);
+
   const haskellPathBuilder = (path, major) => path + '/V' + major + '.hs';
 
   mkdirp(program.dest, function (err) {

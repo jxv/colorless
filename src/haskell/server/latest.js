@@ -1,10 +1,12 @@
 var Lines = require('../../lines.js').Lines;
+var scotty = require('./addon/scotty-latest.js');
+
 var {
   mkExportTypes,
   genPragmas,
 } = require('../common.js');
 
-const genModule = (prefix, name, lowercaseName, major, exportTypes) => {
+const genModule = (prefix, name, lowercaseName, major, exportTypes, values) => {
   var lines = new Lines([
     '\n',
     '-- Module\n',
@@ -13,6 +15,7 @@ const genModule = (prefix, name, lowercaseName, major, exportTypes) => {
     '  , handler\'PublicSpec\n',
     '  , Meta\'Middlewares(..)\n',
   ]);
+  values.forEach(value => lines.add('  , ' + value + '\n'));
   lines.add([
     '  , V', major, '.', name,'\'Service(..)\n',
     '  , V', major, '.', name,'\'Thrower(..)\n',
@@ -23,12 +26,14 @@ const genModule = (prefix, name, lowercaseName, major, exportTypes) => {
   return lines;
 };
 
-const genCommonImports = () => {
-  return new Lines([
+const genImports = (importing) => {
+  var lines = new Lines([
     '\n',
     'import qualified Colorless.Server as C (RuntimeThrower, Options, Request, Response, Major, Minor)\n',
     'import qualified Colorless.Imports as R\n'
   ]);
+  importing.forEach(imp => lines.add(imp + '\n'));
+  return lines;
 };
 
 const genVersionImports = (prefix, name, lowercaseName, major, exportTypes) => {
@@ -121,20 +126,34 @@ const genPublicSpec = (lowercaseName, specs) => {
   return lines;
 };
 
-const latest = (specs) => {
+const latest = (specs, addons) => {
   const spec = specs[specs.length - 1];
   const exportTypes = mkExportTypes(spec);
 
+  const addonOptions = { 'scotty': scotty };
+  var addonImporting = [];
+  var addonExporting = [];
+  var addonGen = [];
+  addons.forEach(addon => {
+    var option = addonOptions[addon];
+    if (option) {
+      addonImporting = addonImporting.concat(option.importing(spec));
+      addonExporting = addonExporting.concat(option.exporting(spec));
+      addonGen.push(option.gen(specs));
+    }
+  });
+
   var lines = new Lines();
   lines.add(genPragmas());
-  lines.add(genModule(spec.module, spec.name, spec.lowercaseName, spec.version.major, exportTypes));
-  lines.add(genCommonImports());
+  lines.add(genModule(spec.module, spec.name, spec.lowercaseName, spec.version.major, exportTypes, addonExporting));
+  lines.add(genImports(addonImporting));
   specs.forEach(spec =>
     lines.add(genVersionImports(spec.module, spec.name, spec.lowercaseName, spec.version.major, mkExportTypes(spec)))
   );
   lines.add(genMetaMiddlewares(specs));
   lines.add(genHandlerMap(specs));
   lines.add(genPublicSpec(spec.lowercaseName, specs))
+  addonGen.forEach(gen => lines.add(gen));
   lines.add('\n');
   return lines.collapse();
 };

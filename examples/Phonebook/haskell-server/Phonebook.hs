@@ -6,6 +6,8 @@ module Phonebook
   ( handler'Map
   , handler'PublicSpec
   , Meta'Middlewares(..)
+  , phonebook'Scotty'SendResponse
+  , phonebook'Scotty'GetSpec
   , V0.Phonebook'Service(..)
   , V0.Phonebook'Thrower(..)
   , V0.phonebook'Pull
@@ -24,6 +26,7 @@ module Phonebook
 
 import qualified Colorless.Server as C (RuntimeThrower, Options, Request, Response, Major, Minor)
 import qualified Colorless.Imports as R
+import qualified Colorless.Server.Scotty as Scotty
 
 import qualified Phonebook.V0 as V0
   ( Phonebook'Service(..)
@@ -67,4 +70,15 @@ handler'PublicSpec :: R.Value
 handler'PublicSpec = R.toJSON
   [ V0.phonebook'Spec
   ]
+
+phonebook'Scotty'SendResponse
+  :: (Scotty.ScottyError e, R.MonadIO m, C.RuntimeThrower m, Phonebook'Service meta m)
+  -> C.Options
+  -> Meta'Middlewares m meta0
+  -> C.Pull
+  -> Scotty.ScottyT e m ()
+phonebook'Scotty'SendResponse options metaMiddlewares pull = ScottyT.sendResponse pull phonebook'Version (handler'Map options metaMiddlewares)
+
+phonebook'Scotty'GetSpec :: (Scotty.ScottyError e, R.MonadIO m) => C.Pull -> Scotty.ScottyT e m ()
+phonebook'Scotty'GetSpec = ScottyT.getSpec phonebook'PublicSpec
 

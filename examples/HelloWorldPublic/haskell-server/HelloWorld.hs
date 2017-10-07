@@ -6,6 +6,8 @@ module HelloWorld
   ( handler'Map
   , handler'PublicSpec
   , Meta'Middlewares(..)
+  , helloWorld'Scotty'SendResponse
+  , helloWorld'Scotty'GetSpec
   , V2.HelloWorld'Service(..)
   , V2.HelloWorld'Thrower(..)
   , V2.helloWorld'Pull
@@ -17,6 +19,7 @@ module HelloWorld
 
 import qualified Colorless.Server as C (RuntimeThrower, Options, Request, Response, Major, Minor)
 import qualified Colorless.Imports as R
+import qualified Colorless.Server.Scotty as Scotty
 
 import qualified HelloWorld.V0 as V0
   ( HelloWorld'Service(..)
@@ -84,4 +87,15 @@ handler'PublicSpec = R.toJSON
   , V1.helloWorld'Spec
   , V2.helloWorld'Spec
   ]
+
+helloWorld'Scotty'SendResponse
+  :: (Scotty.ScottyError e, R.MonadIO m, C.RuntimeThrower m, HelloWorld'Service meta m)
+  -> C.Options
+  -> Meta'Middlewares m meta0 meta1 meta2
+  -> C.Pull
+  -> Scotty.ScottyT e m ()
+helloWorld'Scotty'SendResponse options metaMiddlewares pull = ScottyT.sendResponse pull helloWorld'Version (handler'Map options metaMiddlewares)
+
+helloWorld'Scotty'GetSpec :: (Scotty.ScottyError e, R.MonadIO m) => C.Pull -> Scotty.ScottyT e m ()
+helloWorld'Scotty'GetSpec = ScottyT.getSpec helloWorld'PublicSpec
 
