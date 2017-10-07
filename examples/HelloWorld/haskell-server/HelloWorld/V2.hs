@@ -42,6 +42,7 @@ import qualified Colorless.Server as C
 import HelloWorld.V1 (Goodbye(..))
 import HelloWorld.V1 (Color(..))
 import HelloWorld.V1 (Color'Custom'Members(..))
+
 import qualified Colorless.Server.Scotty as Scotty
 
 -- Version
@@ -60,8 +61,13 @@ class HelloWorld'Thrower m => HelloWorld'Service meta m where
   hello :: meta -> Hello -> m R.Text
   goodbye :: meta -> Goodbye -> m ()
 
-helloWorld'Scotty'SendResponse :: (Scotty.ScottyError e, R.MonadIO m, C.RuntimeThrower m, HelloWorld'Service meta m) => C.Pull -> Scotty.ScottyT e m ()
-helloWorld'Scotty'SendResponse _pull = ScottyT.sendResponseSingleton _pull helloWorld'Version helloWorld'Handler
+helloWorld'Scotty'SendResponse
+  :: (Scotty.ScottyError e, R.MonadIO m, C.RuntimeThrower m, HelloWorld'Service meta m)
+  => C.Options
+  -> (() -> m meta)
+  -> C.Pull
+  -> Scotty.ScottyT e m ()
+helloWorld'Scotty'SendResponse _options _metaMiddleware _pull = ScottyT.sendResponseSingleton _pull helloWorld'Version (helloWorld'Handler _options _metaMiddleware)
 
 helloWorld'Scotty'GetSpec :: (Scotty.ScottyError e, R.MonadIO m) => C.Pull -> Scotty.ScottyT e m ()
 helloWorld'Scotty'GetSpec = ScottyT.getSpec P.$ R.toJSON [helloWorld'Spec]

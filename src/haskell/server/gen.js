@@ -58,8 +58,8 @@ const genImports = (prefix, importTypes, importing) => {
   lines.add(importTypes.map(({ name, major }) =>
     'import ' + prefix + '.V' + major + ' (' + name + '(..))\n'
   ));
-  importing.forEach(x => lines.add(x));
   lines.add('\n');
+  importing.forEach(x => lines.add(x + '\n'));
   return lines;
 };
 
