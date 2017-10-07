@@ -2,7 +2,7 @@
 {-# OPTIONS_GHC -fno-warn-unused-imports #-}
 
 -- Module
-module Colorless.Examples.Phonebook
+module Phonebook
   ( handler'Map
   , handler'PublicSpec
   , Meta'Middlewares(..)
@@ -25,7 +25,7 @@ module Colorless.Examples.Phonebook
 import qualified Colorless.Server as C (RuntimeThrower, Options, Request, Response, Major, Minor)
 import qualified Colorless.Imports as R
 
-import qualified Colorless.Examples.Phonebook.V0 as V0
+import qualified Phonebook.V0 as V0
   ( Phonebook'Service(..)
   , Phonebook'Thrower(..)
   , phonebook'Handler

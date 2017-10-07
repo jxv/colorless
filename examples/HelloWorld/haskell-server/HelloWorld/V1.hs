@@ -13,7 +13,7 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 
 -- Module
-module Colorless.Examples.HelloWorld.V1
+module HelloWorld.V1
   ( helloWorld'Version
   , helloWorld'Pull
   , helloWorld'Handler
@@ -37,7 +37,7 @@ import qualified Data.String as P (IsString)
 import qualified Colorless.Imports as R
 import qualified Colorless.Server as C
 
-import Colorless.Examples.HelloWorld.V0 (Hello(..))
+import HelloWorld.V0 (Hello(..))
 
 -- Version
 helloWorld'Version :: C.Version

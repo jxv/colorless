@@ -13,7 +13,7 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 
 -- Module
-module Colorless.Examples.Phonebook.V0
+module Phonebook.V0
   ( phonebook'Version
   , phonebook'Pull
   , phonebook'Handler

@@ -2,7 +2,7 @@
 {-# OPTIONS_GHC -fno-warn-unused-imports #-}
 
 -- Module
-module Colorless.Examples.HelloWorld
+module HelloWorld
   ( handler'Map
   , handler'PublicSpec
   , Meta'Middlewares(..)
@@ -18,7 +18,7 @@ module Colorless.Examples.HelloWorld
 import qualified Colorless.Server as C (RuntimeThrower, Options, Request, Response, Major, Minor)
 import qualified Colorless.Imports as R
 
-import qualified Colorless.Examples.HelloWorld.V0 as V0
+import qualified HelloWorld.V0 as V0
   ( HelloWorld'Service(..)
   , HelloWorld'Thrower(..)
   , helloWorld'Handler
@@ -28,7 +28,7 @@ import qualified Colorless.Examples.HelloWorld.V0 as V0
   , Hello(..)
   )
 
-import qualified Colorless.Examples.HelloWorld.V1 as V1
+import qualified HelloWorld.V1 as V1
   ( HelloWorld'Service(..)
   , HelloWorld'Thrower(..)
   , helloWorld'Handler
@@ -41,7 +41,7 @@ import qualified Colorless.Examples.HelloWorld.V1 as V1
   , Color'Custom'Members(..)
   )
 
-import qualified Colorless.Examples.HelloWorld.V2 as V2
+import qualified HelloWorld.V2 as V2
   ( HelloWorld'Service(..)
   , HelloWorld'Thrower(..)
   , helloWorld'Handler

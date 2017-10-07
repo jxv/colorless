@@ -13,7 +13,7 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 
 -- Module
-module Colorless.Examples.Phonebook
+module Phonebook
   ( phonebook'Version
   , phonebook'Pull
   , phonebook'Request
@@ -64,6 +64,7 @@ module Colorless.Examples.Phonebook
   , person'friends
   , lookupPerson'id
   , lookupPersonByName'name
+  , phonebook'HttpClient'SendRequest
   ) where
 
 -- Imports
@@ -77,7 +78,7 @@ import qualified Colorless.Client as C
 import qualified Colorless.Client.Expr as C
 import qualified Colorless.Ast as Ast
 import qualified Colorless.Imports as R
-
+import qualified Colorless.Client.HttpClient as HttpClient
 -- Version
 phonebook'Version :: C.Version
 phonebook'Version = C.Version 0 0
@@ -93,6 +94,15 @@ lookupPerson = C.unsafeExpr P.. Ast.Ast'StructCall P.. Ast.StructCall "LookupPer
 
 lookupPersonByName :: C.Expr LookupPersonByName -> C.Expr [Person]
 lookupPersonByName = C.unsafeExpr P.. Ast.Ast'StructCall P.. Ast.StructCall "LookupPersonByName" P.. Ast.toAst
+
+phonebook'HttpClient'SendRequest
+  :: (C.HasType a, Ast.ToAst a, R.FromJSON a)
+  => HttpClient.Manager
+  -> C.Pull
+  -> HttpClient.RequestHeaders
+  -> C.Request () a
+  -> P.IO (HttpClient.HttpClientResponse R.ByteString, P.Maybe (C.Response () a))
+phonebook'HttpClient'SendRequest = HttpClient.sendRequest
 
 -- Wrap: PersonId
 newtype PersonId = PersonId R.Text

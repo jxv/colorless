@@ -13,7 +13,7 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 
 -- Module
-module Colorless.Examples.HelloWorld.V0
+module HelloWorld.V0
   ( helloWorld'Version
   , helloWorld'Pull
   , helloWorld'Handler
