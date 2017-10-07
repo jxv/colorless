@@ -1,5 +1,6 @@
 const R = require('ramda');
 var Lines = require('../../lines.js').Lines;
+var scotty = require('./addon/scotty-gen.js');
 
 var {
   enumeralNameTagMember,
@@ -39,7 +40,7 @@ const genPragmas = () => {
   ]);
 };
 
-const genImports = (prefix, importTypes) => {
+const genImports = (prefix, importTypes, importing) => {
   var lines = new Lines([
     '\n',
     '-- Imports\n',
@@ -57,6 +58,8 @@ const genImports = (prefix, importTypes) => {
   lines.add(importTypes.map(({ name, major }) =>
     'import ' + prefix + '.V' + major + ' (' + name + '(..))\n'
   ));
+  importing.forEach(x => lines.add(x));
+  lines.add('\n');
   return lines;
 };
 
@@ -245,7 +248,7 @@ const genHandleRequest = (name, lowercaseName, meta) => {
 };
 
 
-const genModule = (name, lowercaseName, prefix, version, types) => {
+const genModule = (name, lowercaseName, prefix, version, types, values) => {
   var lines = new Lines([
     '\n',
     '-- Module\n',
@@ -260,6 +263,11 @@ const genModule = (name, lowercaseName, prefix, version, types) => {
   types.forEach(type =>
     lines.add([
       '  , ', type, '(..)\n',
+    ])
+  );
+  values.forEach(value =>
+    lines.add([
+      '  , ', value,'\n',
     ])
   );
   lines.add('  ) where\n');
@@ -309,7 +317,7 @@ const genSpec = ({lowercaseName, original}) => {
   return lines;
 };
 
-const gen = (s) => {
+const gen = (s, addons) => {
   const exportTypes = mkExportTypes(s);
   const importTypes = mkImportTypes(s);
   const serviceCalls = mkServiceCalls(s);
@@ -317,14 +325,28 @@ const gen = (s) => {
   const apiCalls = mkApiCalls(s);
   const apiParserCalls = mkApiParserCalls(s);
 
+  const addonOptions = { 'scotty': scotty };
+  var addonImporting = [];
+  var addonExporting = [];
+  var addonGen = [];
+  addons.forEach(addon => {
+    var option = addonOptions[addon];
+    if (option) {
+      addonImporting = addonImporting.concat(option.importing(s));
+      addonExporting = addonExporting.concat(option.exporting(s));
+      addonGen.push(option.gen(s));
+    }
+  });
+
   var lines = new Lines();
   lines.add(genPragmas());
-  lines.add(genModule(s.name, s.lowercaseName, s.module, s.version, exportTypes));
-  lines.add(genImports(s.module, importTypes));
+  lines.add(genModule(s.name, s.lowercaseName, s.module, s.version, exportTypes, addonExporting));
+  lines.add(genImports(s.module, importTypes, addonImporting));
   lines.add(genVersion(s.lowercaseName, s.version.major, s.version.minor));
   lines.add(genPull(s));
   lines.add(genThrower(s.name, s.lowercaseName, s.error));
   lines.add(genService(s.name, serviceCalls));
+  addonGen.forEach(gen => lines.add(gen));
   lines.add(genHandleRequest(s.name, s.lowercaseName, s.meta));
   lines.add(genApiLookup(s.name, s.lowercaseName, apiLookupPairs));
   lines.add(genApiParser(s.name, s.lowercaseName, apiParserCalls));

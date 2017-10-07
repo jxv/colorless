@@ -79,6 +79,7 @@ import qualified Colorless.Client.Expr as C
 import qualified Colorless.Ast as Ast
 import qualified Colorless.Imports as R
 import qualified Colorless.Client.HttpClient as HttpClient
+
 -- Version
 phonebook'Version :: C.Version
 phonebook'Version = C.Version 0 0

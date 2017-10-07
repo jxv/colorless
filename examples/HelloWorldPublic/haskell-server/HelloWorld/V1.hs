@@ -24,6 +24,8 @@ module HelloWorld.V1
   , Goodbye(..)
   , Color(..)
   , Color'Custom'Members(..)
+  , helloWorld'Scotty'SendResponse
+  , helloWorld'Scotty'GetSpec
   ) where
 
 -- Imports
@@ -38,6 +40,7 @@ import qualified Colorless.Imports as R
 import qualified Colorless.Server as C
 
 import HelloWorld.V0 (Hello(..))
+import qualified Colorless.Server.Scotty as Scotty
 
 -- Version
 helloWorld'Version :: C.Version
@@ -54,6 +57,12 @@ class P.Monad m => HelloWorld'Thrower m where
 class HelloWorld'Thrower m => HelloWorld'Service meta m where
   hello :: meta -> Hello -> m R.Text
   goodbye :: meta -> Goodbye -> m ()
+
+helloWorld'Scotty'SendResponse :: (Scotty.ScottyError e, R.MonadIO m, C.RuntimeThrower m, HelloWorld'Service meta m) => C.Pull -> Scotty.ScottyT e m ()
+helloWorld'Scotty'SendResponse _pull = ScottyT.sendResponseSingleton _pull helloWorld'Version helloWorld'Handler
+
+helloWorld'Scotty'GetSpec :: (Scotty.ScottyError e, R.MonadIO m) => C.Pull -> Scotty.ScottyT e m ()
+helloWorld'Scotty'GetSpec = ScottyT.getSpec P.$ R.toJSON [helloWorld'Spec]
 
 -- Handler
 helloWorld'Handler :: (HelloWorld'Service meta m, C.RuntimeThrower m, R.MonadIO m) => C.Options -> (() -> m meta) -> C.Request -> m C.Response

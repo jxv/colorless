@@ -213,7 +213,8 @@ const generateHaskellClient = (program, jsonSpecs) => {
     return;
   }
 
-  const code = Haskell.client.gen(specs, program.addon ? program.addon.split(',') : []);
+  const addons = program.addon ? program.addon.split(',') : [];
+  const code = Haskell.client.gen(specs, addons);
 
   mkdirp(program.dest, function (err) {
     if (err) { console.error(err)
@@ -244,6 +245,7 @@ const generateHaskellServer = (program, jsonSpecs) => {
 
   const latest = Haskell.server.latest(specs);
 
+  const addons = program.addon ? program.addon.split(',') : [];
   const haskellPathBuilder = (path, major) => path + '/V' + major + '.hs';
 
   mkdirp(program.dest, function (err) {
@@ -256,7 +258,7 @@ const generateHaskellServer = (program, jsonSpecs) => {
           fs.writeFile(path + '.hs', latest, function (err) {
             if (err) { console.error(err)
             } else {
-              writeCode(Haskell.server.gen, haskellPathBuilder, path, specs);
+              writeCode(spec => Haskell.server.gen(spec, addons), haskellPathBuilder, path, specs);
             }
           });
         }

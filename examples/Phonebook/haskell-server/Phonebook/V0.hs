@@ -31,6 +31,8 @@ module Phonebook.V0
   , LookupPerson(..)
   , LookupPersonByName(..)
   , State(..)
+  , phonebook'Scotty'SendResponse
+  , phonebook'Scotty'GetSpec
   ) where
 
 -- Imports
@@ -44,6 +46,7 @@ import qualified Data.String as P (IsString)
 import qualified Colorless.Imports as R
 import qualified Colorless.Server as C
 
+import qualified Colorless.Server.Scotty as Scotty
 
 -- Version
 phonebook'Version :: C.Version
@@ -60,6 +63,12 @@ class P.Monad m => Phonebook'Thrower m where
 class Phonebook'Thrower m => Phonebook'Service meta m where
   lookupPerson :: meta -> LookupPerson -> m (P.Maybe Person)
   lookupPersonByName :: meta -> LookupPersonByName -> m [Person]
+
+phonebook'Scotty'SendResponse :: (Scotty.ScottyError e, R.MonadIO m, C.RuntimeThrower m, Phonebook'Service meta m) => C.Pull -> Scotty.ScottyT e m ()
+phonebook'Scotty'SendResponse _pull = ScottyT.sendResponseSingleton _pull phonebook'Version phonebook'Handler
+
+phonebook'Scotty'GetSpec :: (Scotty.ScottyError e, R.MonadIO m) => C.Pull -> Scotty.ScottyT e m ()
+phonebook'Scotty'GetSpec = ScottyT.getSpec P.$ R.toJSON [phonebook'Spec]
 
 -- Handler
 phonebook'Handler :: (Phonebook'Service meta m, C.RuntimeThrower m, R.MonadIO m) => C.Options -> (() -> m meta) -> C.Request -> m C.Response

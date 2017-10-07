@@ -78,6 +78,7 @@ const genImports = (imports) => {
     'import qualified Colorless.Imports as R\n'
   ]);
   imports.forEach(x => lines.add(x));
+  lines.add('\n');
   return lines;
 };
 
@@ -350,8 +351,8 @@ const gen = (specs, addons) => {
   addons.forEach(addon => {
     var option = addonOptions[addon];
     if (option) {
-      addonImporting.push(option.importing(spec));
-      addonExporting.push(option.exporting(spec));
+      addonImporting = addonImporting.concat(option.importing(spec));
+      addonExporting = addonExporting.concat(option.exporting(spec));
       addonGen.push(option.gen(spec));
     }
   });
