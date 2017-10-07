@@ -6,9 +6,13 @@
 
 
 <p align="center">
-  The Programmatic IDL
+  <b>The Programmatic IDL</b>
 </p>
 
+<hr />
 
 <p align="center">
+<a href="https://join.slack.com/t/colorless-idl/shared_invite/enQtMjQ5NTIzMjQyNzQwLWQ1YmU4YzE3MTEwMDBjMDg5NTU2NzJhNDFkZjIzOGEzMzNhMTAwYjE0MDUyNGE0MzU0N2NkZDg5ZDA1NTY0MmM">
+    <img alt="Slack" src="https://raw.githubusercontent.com/jxv/colorless-data/master/slack-512.png" width="128" height="128"><br/>Join the Slack!
+</a>
 </p>
