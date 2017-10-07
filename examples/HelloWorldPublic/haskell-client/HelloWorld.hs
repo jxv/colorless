@@ -67,13 +67,13 @@ goodbye :: C.Expr Goodbye -> C.Expr ()
 goodbye = C.unsafeExpr P.. Ast.Ast'StructCall P.. Ast.StructCall "Goodbye" P.. Ast.toAst
 
 helloWorld'HttpClient'SendRequest
-  :: (c.HasType a, C.ToAst a, R.FromJSON a)
+  :: (C.HasType a, Ast.ToAst a, R.FromJSON a)
   => HttpClient.Manager
   -> C.Pull
   -> HttpClient.RequestHeaders
   -> C.Request () a
-  -> P.IO (HttpClient.HttpClientResponse C.ByteString, P.Maybe (C.Response () a))
-helloWorld'HttpClient'SendRequest = C.sendRequest
+  -> P.IO (HttpClient.HttpClientResponse R.ByteString, P.Maybe (C.Response () a))
+helloWorld'HttpClient'SendRequest = HttpClient.sendRequest
 
 -- Struct: Hello
 data Hello = Hello

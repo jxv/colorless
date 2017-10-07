@@ -12,13 +12,13 @@ const gen = (s) => {
   return new Lines([
     '\n',
     s.lowercaseName, '\'HttpClient\'SendRequest\n',
-    '  :: (c.HasType a, C.ToAst a, R.FromJSON a)\n',
+    '  :: (C.HasType a, Ast.ToAst a, R.FromJSON a)\n',
     '  => HttpClient.Manager\n',
     '  -> C.Pull\n',
     '  -> HttpClient.RequestHeaders\n',
     '  -> C.Request ', s.meta,' a\n',
-    '  -> P.IO (HttpClient.HttpClientResponse C.ByteString, P.Maybe (C.Response ', s.error,' a))\n',
-    s.lowercaseName, '\'HttpClient\'SendRequest = C.sendRequest\n',
+    '  -> P.IO (HttpClient.HttpClientResponse R.ByteString, P.Maybe (C.Response ', s.error,' a))\n',
+    s.lowercaseName, '\'HttpClient\'SendRequest = HttpClient.sendRequest\n',
   ]);
 };
 
