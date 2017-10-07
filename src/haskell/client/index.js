@@ -343,7 +343,7 @@ const gen = (specs, addons) => {
   const exportTypes = mkExportTypes(spec);
   const exportValues = mkExportValues(spec);
 
-  var addonOptions = {httpClient};
+  var addonOptions = {'http-client': httpClient};
   var addonImporting = [];
   var addonExporting = [];
   var addonGen = [];

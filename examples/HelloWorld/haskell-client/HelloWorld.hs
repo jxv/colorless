@@ -35,7 +35,7 @@ module Colorless.Examples.HelloWorld
   , color'
   , hello'who
   , goodbye'target
-  , helloWorld'SendRequest
+  , helloWorld'HttpClient'SendRequest
   ) where
 
 -- Imports
@@ -66,14 +66,14 @@ hello = C.unsafeExpr P.. Ast.Ast'StructCall P.. Ast.StructCall "Hello" P.. Ast.t
 goodbye :: C.Expr Goodbye -> C.Expr ()
 goodbye = C.unsafeExpr P.. Ast.Ast'StructCall P.. Ast.StructCall "Goodbye" P.. Ast.toAst
 
-helloWorld'SendRequest
+helloWorld'HttpClient'SendRequest
   :: (c.HasType a, C.ToAst a, R.FromJSON a)
   => HttpClient.Manager
   -> C.Pull
   -> HttpClient.RequestHeaders
   -> C.Request () a
   -> P.IO (HttpClient.HttpClientResponse C.ByteString, P.Maybe (C.Response () a))
-helloWorld'SendRequest = C.sendRequest
+helloWorld'HttpClient'SendRequest = C.sendRequest
 
 -- Struct: Hello
 data Hello = Hello
