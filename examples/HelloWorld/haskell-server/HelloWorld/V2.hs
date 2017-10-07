@@ -73,7 +73,12 @@ helloWorld'Scotty'GetSpec :: (Scotty.ScottyError e, R.MonadIO m) => C.Pull -> Sc
 helloWorld'Scotty'GetSpec = ScottyT.getSpec P.$ R.toJSON [helloWorld'Spec]
 
 -- Handler
-helloWorld'Handler :: (HelloWorld'Service meta m, C.RuntimeThrower m, R.MonadIO m) => C.Options -> (() -> m meta) -> C.Request -> m C.Response
+helloWorld'Handler
+  :: (HelloWorld'Service meta m, C.RuntimeThrower m, R.MonadIO m)
+  => C.Options
+  -> (() -> m meta)
+  -> C.Request
+  -> m C.Response
 helloWorld'Handler options metaMiddleware C.Request{meta,query} = do
   meta' <- P.maybe (C.runtimeThrow C.RuntimeError'UnparsableMeta) P.return (C.fromValFromJson meta)
   xformMeta <- metaMiddleware meta'

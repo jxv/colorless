@@ -228,7 +228,12 @@ const genHandleRequest = (name, lowercaseName, meta) => {
   return new Lines([
     '\n',
     '-- Handler\n',
-    lowercaseName, '\'Handler :: (', name, '\'Service meta m, C.RuntimeThrower m, R.MonadIO m) => C.Options -> (', meta, ' -> m meta) -> C.Request -> m C.Response\n',
+    lowercaseName, '\'Handler\n',
+    '  :: (', name, '\'Service meta m, C.RuntimeThrower m, R.MonadIO m)\n',
+    '  => C.Options\n',
+    '  -> (', meta, ' -> m meta)\n',
+    '  -> C.Request\n',
+    '  -> m C.Response\n',
     lowercaseName, '\'Handler options metaMiddleware C.Request{meta,query} = do\n',
     '  meta\' <- P.maybe (C.runtimeThrow C.RuntimeError\'UnparsableMeta) P.return (C.fromValFromJson meta)\n',
     '  xformMeta <- metaMiddleware meta\'\n',

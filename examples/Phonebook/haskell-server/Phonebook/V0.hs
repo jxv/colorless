@@ -77,7 +77,12 @@ phonebook'Scotty'GetSpec :: (Scotty.ScottyError e, R.MonadIO m) => C.Pull -> Sco
 phonebook'Scotty'GetSpec = ScottyT.getSpec P.$ R.toJSON [phonebook'Spec]
 
 -- Handler
-phonebook'Handler :: (Phonebook'Service meta m, C.RuntimeThrower m, R.MonadIO m) => C.Options -> (() -> m meta) -> C.Request -> m C.Response
+phonebook'Handler
+  :: (Phonebook'Service meta m, C.RuntimeThrower m, R.MonadIO m)
+  => C.Options
+  -> (() -> m meta)
+  -> C.Request
+  -> m C.Response
 phonebook'Handler options metaMiddleware C.Request{meta,query} = do
   meta' <- P.maybe (C.runtimeThrow C.RuntimeError'UnparsableMeta) P.return (C.fromValFromJson meta)
   xformMeta <- metaMiddleware meta'
