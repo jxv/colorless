@@ -361,41 +361,82 @@ const gen = (specs, addons) => {
   lines.add(genPragmas());
   lines.add(genModule(spec.name, spec.lowercaseName, spec.module, spec.version, exportTypes, exportValues.concat(addonExporting)));
   lines.add(genImports(addonImporting));
+
+  lines.add('\n');
+  lines.add('--------------------------------------------------------\n');
+  lines.add('-- Configs\n');
+  lines.add('--------------------------------------------------------\n');
+
   lines.add(genVersion(spec.lowercaseName, spec.version.major, spec.version.minor));
   lines.add(genPull(spec));
-  lines.add(genRequest(spec));
-  lines.add(genService(spec));
-  addonGen.forEach(gen => lines.add(gen));
+
+  lines.add('\n');
+  lines.add('--------------------------------------------------------\n');
+  lines.add('-- Types\n');
+  lines.add('--------------------------------------------------------\n');
   spec.wrap.forEach(ty => {
     lines.add(genWrap(ty));
+  });
+  spec.struct.forEach(ty => {
+    lines.add(genStruct(ty));
+  });
+  spec.enumeration.forEach(ty => {
+    lines.add(genEnumeration(ty));
+  });
+
+  lines.add('\n');
+  lines.add('--------------------------------------------------------\n');
+  lines.add('-- API\n');
+  lines.add('--------------------------------------------------------\n');
+
+  lines.add(genRequest(spec));
+  lines.add(genService(spec));
+
+  spec.wrap.forEach(ty => {
+    lines.add(genWrapExpr(ty));
+  });
+  spec.struct.forEach(ty => {
+    lines.add(genStructExpr(ty));
+    lines.add(genStructPath(ty));
+  });
+  spec.enumeration.forEach(ty => {
+    lines.add(genEnumeralExpr(ty));
+  });
+
+  lines.add('\n');
+  lines.add('--------------------------------------------------------\n');
+  lines.add('-- Add-ons\n');
+  lines.add('--------------------------------------------------------\n');
+  addonGen.forEach(gen => lines.add(gen));
+
+  lines.add('\n');
+  lines.add('--------------------------------------------------------\n');
+  lines.add('-- Type Instances\n');
+  lines.add('--------------------------------------------------------\n');
+
+  spec.wrap.forEach(ty => {
     lines.add(genHasType(ty));
     lines.add(genWrapToVal(ty));
     lines.add(genWrapFromVal(ty));
     lines.add(genToJson(ty));
     lines.add(genFromJson(ty));
     lines.add(genWrapToAst(ty));
-    lines.add(genWrapExpr(ty));
   });
   spec.struct.forEach(ty => {
-    lines.add(genStruct(ty));
     lines.add(genHasType(ty));
     lines.add(genStructToVal(ty));
     lines.add(genStructFromVal(ty));
     lines.add(genToJson(ty));
     lines.add(genFromJson(ty));
-    lines.add(genStructPath(ty));
     lines.add(genStructToAst(ty));
-    lines.add(genStructExpr(ty));
   });
   spec.enumeration.forEach(ty => {
-    lines.add(genEnumeration(ty));
     lines.add(genHasType(ty));
     lines.add(genEnumerationToVal(ty));
     lines.add(genEnumerationFromVal(ty));
     lines.add(genToJson(ty));
     lines.add(genFromJson(ty));
     lines.add(genEnumerationToAst(ty));
-    lines.add(genEnumeralExpr(ty));
   });
   lines.add('\n');
   return lines.collapse();
