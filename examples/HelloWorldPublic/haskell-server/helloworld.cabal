@@ -14,7 +14,7 @@ cabal-version:  >= 1.10
 
 executable helloworld
   main-is: Main.hs
-  default-extensions: GeneralizedNewtypeDeriving NamedFieldPuns
+  default-extensions: GeneralizedNewtypeDeriving NamedFieldPuns OverloadedStrings FlexibleInstances MultiParamTypeClasses
   ghc-options: -Wall
   build-depends:
       base >= 4.9 && < 5

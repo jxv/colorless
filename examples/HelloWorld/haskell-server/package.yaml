@@ -16,6 +16,9 @@ dependencies:
 default-extensions:
   - GeneralizedNewtypeDeriving
   - NamedFieldPuns
+  - OverloadedStrings
+  - FlexibleInstances
+  - MultiParamTypeClasses
 
 executables:
   helloworld:
