@@ -40,12 +40,20 @@ import qualified Colorless.Server as C
 
 import qualified Colorless.Server.Scotty as Scotty
 
+--------------------------------------------------------
+-- Configs
+--------------------------------------------------------
+
 -- Version
 helloWorld'Version :: C.Version
 helloWorld'Version = C.Version 0 0
 
 helloWorld'Pull :: C.Pull
 helloWorld'Pull = C.Pull "http" "127.0.0.1" "/" 8080
+
+--------------------------------------------------------
+-- Interfaces
+--------------------------------------------------------
 
 -- Thrower
 class C.ServiceThrower m => HelloWorld'Thrower m where
@@ -59,6 +67,19 @@ class P.Monad m => HelloWorld'Service meta m where
 instance HelloWorld'Service meta m => HelloWorld'Service meta (M.ExceptT C.Response m) where
   hello _meta = M.lift  P.. hello _meta
 
+--------------------------------------------------------
+-- Types
+--------------------------------------------------------
+
+-- Struct: Hello
+data Hello = Hello
+  { target :: R.Text
+  } deriving (P.Show, P.Eq)
+
+--------------------------------------------------------
+-- Add-ons
+--------------------------------------------------------
+
 helloWorld'Scotty'SendResponse
   :: (Scotty.ScottyError e, R.MonadIO m, HelloWorld'Service meta m)
   => C.Options
@@ -69,6 +90,10 @@ helloWorld'Scotty'SendResponse _options _metaMiddleware _pull = Scotty.sendRespo
 
 helloWorld'Scotty'GetSpec :: (Scotty.ScottyError e, R.MonadIO m) => C.Pull -> Scotty.ScottyT e m ()
 helloWorld'Scotty'GetSpec = Scotty.getSpec P.$ R.toJSON [helloWorld'Spec]
+
+--------------------------------------------------------
+-- Request handling
+--------------------------------------------------------
 
 -- Handler
 helloWorld'Handler
@@ -118,10 +143,9 @@ data HelloWorld'Api
   = HelloWorld'Api'Hello Hello
   deriving (P.Show, P.Eq)
 
--- Struct: Hello
-data Hello = Hello
-  { target :: R.Text
-  } deriving (P.Show, P.Eq)
+--------------------------------------------------------
+-- Type Instances
+--------------------------------------------------------
 
 instance C.ToVal Hello where
   toVal Hello

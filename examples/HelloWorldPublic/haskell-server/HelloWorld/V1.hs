@@ -44,12 +44,20 @@ import HelloWorld.V0 (Hello(..))
 
 import qualified Colorless.Server.Scotty as Scotty
 
+--------------------------------------------------------
+-- Configs
+--------------------------------------------------------
+
 -- Version
 helloWorld'Version :: C.Version
 helloWorld'Version = C.Version 1 0
 
 helloWorld'Pull :: C.Pull
 helloWorld'Pull = C.Pull "http" "127.0.0.1" "/" 8080
+
+--------------------------------------------------------
+-- Interfaces
+--------------------------------------------------------
 
 -- Thrower
 class C.ServiceThrower m => HelloWorld'Thrower m where
@@ -65,6 +73,34 @@ instance HelloWorld'Service meta m => HelloWorld'Service meta (M.ExceptT C.Respo
   hello _meta = M.lift  P.. hello _meta
   goodbye _meta = M.lift  P.. goodbye _meta
 
+--------------------------------------------------------
+-- Types
+--------------------------------------------------------
+
+-- Struct: Goodbye
+data Goodbye = Goodbye
+  { target :: R.Text
+  } deriving (P.Show, P.Eq)
+
+-- Enumeration: Color
+data Color
+  = Color'Red 
+  | Color'Green
+  | Color'Blue
+  | Color'Custom Color'Custom'Members
+  | Color'Yellow
+  deriving (P.Show, P.Eq)
+
+data Color'Custom'Members = Color'Custom'Members
+  { r :: I.Word8
+  , g :: I.Word8
+  , b :: I.Word8
+  } deriving (P.Show, P.Eq)
+
+--------------------------------------------------------
+-- Add-ons
+--------------------------------------------------------
+
 helloWorld'Scotty'SendResponse
   :: (Scotty.ScottyError e, R.MonadIO m, HelloWorld'Service meta m)
   => C.Options
@@ -75,6 +111,10 @@ helloWorld'Scotty'SendResponse _options _metaMiddleware _pull = Scotty.sendRespo
 
 helloWorld'Scotty'GetSpec :: (Scotty.ScottyError e, R.MonadIO m) => C.Pull -> Scotty.ScottyT e m ()
 helloWorld'Scotty'GetSpec = Scotty.getSpec P.$ R.toJSON [helloWorld'Spec]
+
+--------------------------------------------------------
+-- Request handling
+--------------------------------------------------------
 
 -- Handler
 helloWorld'Handler
@@ -127,10 +167,9 @@ data HelloWorld'Api
   | HelloWorld'Api'Goodbye Goodbye
   deriving (P.Show, P.Eq)
 
--- Struct: Goodbye
-data Goodbye = Goodbye
-  { target :: R.Text
-  } deriving (P.Show, P.Eq)
+--------------------------------------------------------
+-- Type Instances
+--------------------------------------------------------
 
 instance C.ToVal Goodbye where
   toVal Goodbye
@@ -154,21 +193,6 @@ instance R.FromJSON Goodbye where
     case C.fromVal _x of
       P.Nothing -> P.mzero
       P.Just _y -> P.return _y
-
--- Enumeration: Color
-data Color
-  = Color'Red 
-  | Color'Green
-  | Color'Blue
-  | Color'Custom Color'Custom'Members
-  | Color'Yellow
-  deriving (P.Show, P.Eq)
-
-data Color'Custom'Members = Color'Custom'Members
-  { r :: I.Word8
-  , g :: I.Word8
-  , b :: I.Word8
-  } deriving (P.Show, P.Eq)
 
 instance C.ToVal Color where
   toVal = \case

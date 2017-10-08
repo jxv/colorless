@@ -50,12 +50,20 @@ import qualified Colorless.Server as C
 
 import qualified Colorless.Server.Scotty as Scotty
 
+--------------------------------------------------------
+-- Configs
+--------------------------------------------------------
+
 -- Version
 phonebook'Version :: C.Version
 phonebook'Version = C.Version 0 0
 
 phonebook'Pull :: C.Pull
 phonebook'Pull = C.Pull "http" "127.0.0.1" "/" 8000
+
+--------------------------------------------------------
+-- Interfaces
+--------------------------------------------------------
 
 -- Thrower
 class C.ServiceThrower m => Phonebook'Thrower m where
@@ -71,6 +79,71 @@ instance Phonebook'Service meta m => Phonebook'Service meta (M.ExceptT C.Respons
   lookupPerson _meta = M.lift  P.. lookupPerson _meta
   lookupPersonByName _meta = M.lift  P.. lookupPersonByName _meta
 
+--------------------------------------------------------
+-- Types
+--------------------------------------------------------
+
+-- Wrap: PersonId
+newtype PersonId = PersonId R.Text
+  deriving (P.Eq, P.Ord, P.IsString, R.ToText,  P.Show)
+
+-- Wrap: Name
+newtype Name = Name R.Text
+  deriving (P.Eq, P.Ord, P.IsString, R.ToText,  P.Show)
+
+-- Wrap: Phone
+newtype Phone = Phone R.Text
+  deriving (P.Eq, P.Ord, P.IsString, R.ToText,  P.Show)
+
+-- Wrap: Street
+newtype Street = Street R.Text
+  deriving (P.Eq, P.Ord, P.IsString, R.ToText,  P.Show)
+
+-- Wrap: City
+newtype City = City R.Text
+  deriving (P.Eq, P.Ord, P.IsString, R.ToText,  P.Show)
+
+-- Wrap: Zipcode
+newtype Zipcode = Zipcode R.Text
+  deriving (P.Eq, P.Ord, P.IsString, R.ToText,  P.Show)
+
+-- Struct: Address
+data Address = Address
+  { street :: Street
+  , city :: City
+  , zipcode :: Zipcode
+  , state :: State
+  } deriving (P.Show, P.Eq)
+
+-- Struct: Person
+data Person = Person
+  { name :: Name
+  , phone :: Phone
+  , address :: (P.Maybe Address)
+  , friends :: [PersonId]
+  } deriving (P.Show, P.Eq)
+
+-- Struct: LookupPerson
+data LookupPerson = LookupPerson
+  { id :: PersonId
+  } deriving (P.Show, P.Eq)
+
+-- Struct: LookupPersonByName
+data LookupPersonByName = LookupPersonByName
+  { name :: R.Text
+  } deriving (P.Show, P.Eq)
+
+-- Enumeration: State
+data State
+  = State'CA 
+  | State'NY
+  | State'TX
+  deriving (P.Show, P.Eq)
+
+--------------------------------------------------------
+-- Add-ons
+--------------------------------------------------------
+
 phonebook'Scotty'SendResponse
   :: (Scotty.ScottyError e, R.MonadIO m, Phonebook'Service meta m)
   => C.Options
@@ -81,6 +154,10 @@ phonebook'Scotty'SendResponse _options _metaMiddleware _pull = Scotty.sendRespon
 
 phonebook'Scotty'GetSpec :: (Scotty.ScottyError e, R.MonadIO m) => C.Pull -> Scotty.ScottyT e m ()
 phonebook'Scotty'GetSpec = Scotty.getSpec P.$ R.toJSON [phonebook'Spec]
+
+--------------------------------------------------------
+-- Request handling
+--------------------------------------------------------
 
 -- Handler
 phonebook'Handler
@@ -133,9 +210,9 @@ data Phonebook'Api
   | Phonebook'Api'LookupPersonByName LookupPersonByName
   deriving (P.Show, P.Eq)
 
--- Wrap: PersonId
-newtype PersonId = PersonId R.Text
-  deriving (P.Eq, P.Ord, P.IsString, R.ToText,  P.Show)
+--------------------------------------------------------
+-- Type Instances
+--------------------------------------------------------
 
 instance C.ToVal PersonId where
   toVal (PersonId _w) = C.toVal _w
@@ -153,10 +230,6 @@ instance R.FromJSON PersonId where
       P.Nothing -> P.mzero
       P.Just _y -> P.return _y
 
--- Wrap: Name
-newtype Name = Name R.Text
-  deriving (P.Eq, P.Ord, P.IsString, R.ToText,  P.Show)
-
 instance C.ToVal Name where
   toVal (Name _w) = C.toVal _w
 
@@ -172,10 +245,6 @@ instance R.FromJSON Name where
     case C.fromVal _x of
       P.Nothing -> P.mzero
       P.Just _y -> P.return _y
-
--- Wrap: Phone
-newtype Phone = Phone R.Text
-  deriving (P.Eq, P.Ord, P.IsString, R.ToText,  P.Show)
 
 instance C.ToVal Phone where
   toVal (Phone _w) = C.toVal _w
@@ -193,10 +262,6 @@ instance R.FromJSON Phone where
       P.Nothing -> P.mzero
       P.Just _y -> P.return _y
 
--- Wrap: Street
-newtype Street = Street R.Text
-  deriving (P.Eq, P.Ord, P.IsString, R.ToText,  P.Show)
-
 instance C.ToVal Street where
   toVal (Street _w) = C.toVal _w
 
@@ -212,10 +277,6 @@ instance R.FromJSON Street where
     case C.fromVal _x of
       P.Nothing -> P.mzero
       P.Just _y -> P.return _y
-
--- Wrap: City
-newtype City = City R.Text
-  deriving (P.Eq, P.Ord, P.IsString, R.ToText,  P.Show)
 
 instance C.ToVal City where
   toVal (City _w) = C.toVal _w
@@ -233,10 +294,6 @@ instance R.FromJSON City where
       P.Nothing -> P.mzero
       P.Just _y -> P.return _y
 
--- Wrap: Zipcode
-newtype Zipcode = Zipcode R.Text
-  deriving (P.Eq, P.Ord, P.IsString, R.ToText,  P.Show)
-
 instance C.ToVal Zipcode where
   toVal (Zipcode _w) = C.toVal _w
 
@@ -252,14 +309,6 @@ instance R.FromJSON Zipcode where
     case C.fromVal _x of
       P.Nothing -> P.mzero
       P.Just _y -> P.return _y
-
--- Struct: Address
-data Address = Address
-  { street :: Street
-  , city :: City
-  , zipcode :: Zipcode
-  , state :: State
-  } deriving (P.Show, P.Eq)
 
 instance C.ToVal Address where
   toVal Address
@@ -293,14 +342,6 @@ instance R.FromJSON Address where
       P.Nothing -> P.mzero
       P.Just _y -> P.return _y
 
--- Struct: Person
-data Person = Person
-  { name :: Name
-  , phone :: Phone
-  , address :: (P.Maybe Address)
-  , friends :: [PersonId]
-  } deriving (P.Show, P.Eq)
-
 instance C.ToVal Person where
   toVal Person
     { name
@@ -333,11 +374,6 @@ instance R.FromJSON Person where
       P.Nothing -> P.mzero
       P.Just _y -> P.return _y
 
--- Struct: LookupPerson
-data LookupPerson = LookupPerson
-  { id :: PersonId
-  } deriving (P.Show, P.Eq)
-
 instance C.ToVal LookupPerson where
   toVal LookupPerson
     { id
@@ -361,11 +397,6 @@ instance R.FromJSON LookupPerson where
       P.Nothing -> P.mzero
       P.Just _y -> P.return _y
 
--- Struct: LookupPersonByName
-data LookupPersonByName = LookupPersonByName
-  { name :: R.Text
-  } deriving (P.Show, P.Eq)
-
 instance C.ToVal LookupPersonByName where
   toVal LookupPersonByName
     { name
@@ -388,13 +419,6 @@ instance R.FromJSON LookupPersonByName where
     case C.fromVal _x of
       P.Nothing -> P.mzero
       P.Just _y -> P.return _y
-
--- Enumeration: State
-data State
-  = State'CA 
-  | State'NY
-  | State'TX
-  deriving (P.Show, P.Eq)
 
 instance C.ToVal State where
   toVal = \case

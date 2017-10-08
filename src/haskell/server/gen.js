@@ -361,18 +361,58 @@ const gen = (s, addons) => {
   lines.add(genPragmas());
   lines.add(genModule(s.name, s.lowercaseName, s.module, s.version, exportTypes, addonExporting));
   lines.add(genImports(s.module, importTypes, addonImporting));
+
+  lines.add('\n');
+  lines.add('--------------------------------------------------------\n');
+  lines.add('-- Configs\n');
+  lines.add('--------------------------------------------------------\n');
+
   lines.add(genVersion(s.lowercaseName, s.version.major, s.version.minor));
   lines.add(genPull(s));
+
+  lines.add('\n');
+  lines.add('--------------------------------------------------------\n');
+  lines.add('-- Interfaces\n');
+  lines.add('--------------------------------------------------------\n');
+
   lines.add(genThrower(s.name, s.lowercaseName, s.error));
   lines.add(genService(s.name, serviceCalls));
+
+  lines.add('\n');
+  lines.add('--------------------------------------------------------\n');
+  lines.add('-- Types\n');
+  lines.add('--------------------------------------------------------\n');
+  s.wrap.filter(currentTypeSource(s)).forEach(ty => {
+    lines.add(genWrap(ty));
+  });
+  s.struct.filter(currentTypeSource(s)).forEach(ty => {
+    lines.add(genStruct(ty));
+  });
+  s.enumeration.filter(currentTypeSource(s)).forEach(ty => {
+    lines.add(genEnumeration(ty));
+  });
+
+  lines.add('\n');
+  lines.add('--------------------------------------------------------\n');
+  lines.add('-- Add-ons\n');
+  lines.add('--------------------------------------------------------\n');
   addonGen.forEach(gen => lines.add(gen));
+
+  lines.add('\n');
+  lines.add('--------------------------------------------------------\n');
+  lines.add('-- Request handling\n');
+  lines.add('--------------------------------------------------------\n');
   lines.add(genHandleRequest(s.name, s.lowercaseName, s.meta));
   lines.add(genApiLookup(s.name, s.lowercaseName, apiLookupPairs));
   lines.add(genApiParser(s.name, s.lowercaseName, apiParserCalls));
   lines.add(genApi(s.name, apiCalls));
 
+  lines.add('\n');
+  lines.add('--------------------------------------------------------\n');
+  lines.add('-- Type Instances\n');
+  lines.add('--------------------------------------------------------\n');
+
   s.wrap.filter(currentTypeSource(s)).forEach(ty => {
-    lines.add(genWrap(ty));
     lines.add(genWrapToVal(ty));
     lines.add(genWrapFromVal(ty));
     lines.add(genToJson(ty));
@@ -380,14 +420,12 @@ const gen = (s, addons) => {
   });
 
   s.struct.filter(currentTypeSource(s)).forEach(ty => {
-    lines.add(genStruct(ty));
     lines.add(genStructToVal(ty));
     lines.add(genStructFromVal(ty));
     lines.add(genToJson(ty));
     lines.add(genFromJson(ty));
   });
   s.enumeration.filter(currentTypeSource(s)).forEach(ty => {
-    lines.add(genEnumeration(ty));
     lines.add(genEnumerationToVal(ty));
     lines.add(genEnumerationFromVal(ty));
     lines.add(genToJson(ty));
