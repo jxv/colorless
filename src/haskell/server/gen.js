@@ -46,6 +46,7 @@ const genImports = (prefix, importTypes, importing) => {
     '-- Imports\n',
     'import qualified Prelude as P\n',
     'import qualified Control.Monad as P\n',
+    'import qualified Control.Monad.Except as M\n',
     'import qualified Data.Word as I\n',
     'import qualified Data.Int as I\n',
     'import qualified Data.IORef as IO\n',
@@ -85,12 +86,14 @@ const genApi = (name, calls) => {
 };
 
 const genThrower = (name, lowercaseName, error) => {
-  return new Lines([
+  var lines = new Lines([
     '\n',
     '-- Thrower\n',
-    'class P.Monad m => ', name ,'\'Thrower m where\n',
+    'class C.ServiceThrower m => ', name ,'\'Thrower m where\n',
     '  ', lowercaseName,'\'Throw :: ', error, ' -> m a\n',
+    '  ', lowercaseName,'\'Throw = C.serviceThrow P.. R.toJSON\n',
   ]);
+  return lines;
 };
 
 const mkServiceCalls = (s) => {
@@ -111,13 +114,24 @@ const genService = (name, calls) => {
   var lines = new Lines([
     '\n',
     '-- Service\n',
-    'class ', name,'\'Thrower m => ', name ,'\'Service meta m where\n'
+    'class P.Monad m => ', name ,'\'Service meta m where\n'
   ]);
   calls.forEach(call =>
     lines.add([
       '  ', call.func, ' :: meta ->', call.name ? (' ' + call.name + ' ->') : '', ' m ', call.output, '\n',
     ])
   );
+
+  lines.add([
+    '\n',
+    'instance ', name,'\'Service meta m => ', name ,'\'Service meta (M.ExceptT C.Response m) where\n'
+  ]);
+  calls.forEach(call =>
+    lines.add([
+      '  ', call.func, ' _meta = M.lift ', call.name ? ' P.. ' : ' P.$ ', call.func, ' _meta\n',
+    ])
+  );
+
   return lines;
 };
 
@@ -206,7 +220,7 @@ const genApiLookup = (name, lowercaseName, calls) => {
   var lines = new Lines([
     '\n',
     '-- API\n',
-    lowercaseName, '\'ApiCall :: (', name, '\'Service meta m, C.RuntimeThrower m) => meta -> C.ApiCall -> m C.Val\n',
+    lowercaseName, '\'ApiCall :: (', name, '\'Service meta m, C.ServiceThrower m, C.RuntimeThrower m) => meta -> C.ApiCall -> m C.Val\n',
     lowercaseName, '\'ApiCall meta\' apiCall\' = case C.parseApiCall ', lowercaseName,'\'ApiParser apiCall\' of\n',
     '  P.Nothing -> C.runtimeThrow C.RuntimeError\'UnrecognizedCall\n',
     '  P.Just x\' -> case x\' of\n',
@@ -229,14 +243,14 @@ const genHandleRequest = (name, lowercaseName, meta) => {
     '\n',
     '-- Handler\n',
     lowercaseName, '\'Handler\n',
-    '  :: (', name, '\'Service meta m, C.RuntimeThrower m, R.MonadIO m)\n',
+    '  :: (', name, '\'Service meta m, R.MonadIO m)\n',
     '  => C.Options\n',
     '  -> (', meta, ' -> m meta)\n',
     '  -> C.Request\n',
-    '  -> m C.Response\n',
-    lowercaseName, '\'Handler options metaMiddleware C.Request{meta,query} = do\n',
+    '  -> m (P.Either C.Response C.Response)\n',
+    lowercaseName, '\'Handler options metaMiddleware C.Request{meta,query} = M.runExceptT P.$ do\n',
     '  meta\' <- P.maybe (C.runtimeThrow C.RuntimeError\'UnparsableMeta) P.return (C.fromValFromJson meta)\n',
-    '  xformMeta <- metaMiddleware meta\'\n',
+    '  xformMeta <- M.lift P.$ metaMiddleware meta\'\n',
     '  envRef <- R.liftIO C.emptyEnv\n',
     '  variableBaseCount <- R.liftIO (R.size P.<$> IO.readIORef envRef)\n',
     '  let options\' = C.Options\n',

@@ -14,8 +14,16 @@ const gen = (specs) => {
   var lines = new Lines([
     '\n',
     s.lowercaseName, '\'Scotty\'SendResponse\n',
-    '  :: (Scotty.ScottyError e, R.MonadIO m, C.RuntimeThrower m, ', s.name,'\'Service meta m)\n',
-    '  -> C.Options\n',
+    '  ::\n',
+    '    ( Scotty.ScottyError e\n',
+    '    , R.MonadIO m\n',
+  ]);
+  lines.add(specs.map(({version}) =>
+    '    , V' + version.major + '.' + s.name + '\'Service meta' + version.major + ' m\n'
+  ));
+  lines.add([
+    '    )\n',
+    '  => C.Options\n',
     '  -> Meta\'Middlewares m',
   ]);
   lines.add(specs.map(({version}) =>
@@ -25,10 +33,10 @@ const gen = (specs) => {
     '\n',
     '  -> C.Pull\n',
     '  -> Scotty.ScottyT e m ()\n',
-    s.lowercaseName, '\'Scotty\'SendResponse options metaMiddlewares pull = ScottyT.sendResponse pull ', s.lowercaseName,'\'Version (handler\'Map options metaMiddlewares)\n',
+    s.lowercaseName, '\'Scotty\'SendResponse options metaMiddlewares pull = Scotty.sendResponse pull (handler\'Map options metaMiddlewares)\n',
     '\n',
     s.lowercaseName, '\'Scotty\'GetSpec :: (Scotty.ScottyError e, R.MonadIO m) => C.Pull -> Scotty.ScottyT e m ()\n',
-    s.lowercaseName, '\'Scotty\'GetSpec = ScottyT.getSpec ', s.lowercaseName,'\'PublicSpec\n',
+    s.lowercaseName, '\'Scotty\'GetSpec = Scotty.getSpec handler\'PublicSpec\n',
   ]);
   return lines;
 };

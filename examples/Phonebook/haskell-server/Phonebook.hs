@@ -24,7 +24,8 @@ module Phonebook
   , V0.State(..)
   ) where
 
-import qualified Colorless.Server as C (RuntimeThrower, Options, Request, Response, Major, Minor)
+import qualified Prelude as P
+import qualified Colorless.Server as C (RuntimeThrower, Options, Request, Response, Major, Minor, Pull)
 import qualified Colorless.Imports as R
 import qualified Colorless.Server.Scotty as Scotty
 
@@ -56,14 +57,13 @@ data Meta'Middlewares m meta0
 handler'Map
   ::
     ( R.MonadIO m
-    , C.RuntimeThrower m
     , V0.Phonebook'Service meta0 m
     )
   => C.Options
   -> Meta'Middlewares m meta0
-  -> R.Map C.Major (C.Minor, C.Request -> m C.Response)
+  -> R.Map C.Major (C.Minor, C.Request -> m (P.Either C.Response C.Response))
 handler'Map options metaMiddlewares = R.fromList
-    [ (0, (0, V0.phonebook'Handler options $ meta'Middleware0 metaMiddlewares))
+    [ (0, (0, V0.phonebook'Handler options P.$ meta'Middleware0 metaMiddlewares))
     ]
 
 handler'PublicSpec :: R.Value
@@ -72,13 +72,17 @@ handler'PublicSpec = R.toJSON
   ]
 
 phonebook'Scotty'SendResponse
-  :: (Scotty.ScottyError e, R.MonadIO m, C.RuntimeThrower m, Phonebook'Service meta m)
-  -> C.Options
+  ::
+    ( Scotty.ScottyError e
+    , R.MonadIO m
+    , V0.Phonebook'Service meta0 m
+    )
+  => C.Options
   -> Meta'Middlewares m meta0
   -> C.Pull
   -> Scotty.ScottyT e m ()
-phonebook'Scotty'SendResponse options metaMiddlewares pull = ScottyT.sendResponse pull phonebook'Version (handler'Map options metaMiddlewares)
+phonebook'Scotty'SendResponse options metaMiddlewares pull = Scotty.sendResponse pull (handler'Map options metaMiddlewares)
 
 phonebook'Scotty'GetSpec :: (Scotty.ScottyError e, R.MonadIO m) => C.Pull -> Scotty.ScottyT e m ()
-phonebook'Scotty'GetSpec = ScottyT.getSpec phonebook'PublicSpec
+phonebook'Scotty'GetSpec = Scotty.getSpec handler'PublicSpec
 

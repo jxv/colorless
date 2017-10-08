@@ -38,6 +38,7 @@ module Phonebook.V0
 -- Imports
 import qualified Prelude as P
 import qualified Control.Monad as P
+import qualified Control.Monad.Except as M
 import qualified Data.Word as I
 import qualified Data.Int as I
 import qualified Data.IORef as IO
@@ -57,35 +58,40 @@ phonebook'Pull :: C.Pull
 phonebook'Pull = C.Pull "http" "127.0.0.1" "/" 8000
 
 -- Thrower
-class P.Monad m => Phonebook'Thrower m where
+class C.ServiceThrower m => Phonebook'Thrower m where
   phonebook'Throw :: () -> m a
+  phonebook'Throw = C.serviceThrow P.. R.toJSON
 
 -- Service
-class Phonebook'Thrower m => Phonebook'Service meta m where
+class P.Monad m => Phonebook'Service meta m where
   lookupPerson :: meta -> LookupPerson -> m (P.Maybe Person)
   lookupPersonByName :: meta -> LookupPersonByName -> m [Person]
 
+instance Phonebook'Service meta m => Phonebook'Service meta (M.ExceptT C.Response m) where
+  lookupPerson _meta = M.lift  P.. lookupPerson _meta
+  lookupPersonByName _meta = M.lift  P.. lookupPersonByName _meta
+
 phonebook'Scotty'SendResponse
-  :: (Scotty.ScottyError e, R.MonadIO m, C.RuntimeThrower m, Phonebook'Service meta m)
+  :: (Scotty.ScottyError e, R.MonadIO m, Phonebook'Service meta m)
   => C.Options
   -> (() -> m meta)
   -> C.Pull
   -> Scotty.ScottyT e m ()
-phonebook'Scotty'SendResponse _options _metaMiddleware _pull = ScottyT.sendResponseSingleton _pull phonebook'Version (phonebook'Handler _options _metaMiddleware)
+phonebook'Scotty'SendResponse _options _metaMiddleware _pull = Scotty.sendResponseSingleton _pull phonebook'Version (phonebook'Handler _options _metaMiddleware)
 
 phonebook'Scotty'GetSpec :: (Scotty.ScottyError e, R.MonadIO m) => C.Pull -> Scotty.ScottyT e m ()
-phonebook'Scotty'GetSpec = ScottyT.getSpec P.$ R.toJSON [phonebook'Spec]
+phonebook'Scotty'GetSpec = Scotty.getSpec P.$ R.toJSON [phonebook'Spec]
 
 -- Handler
 phonebook'Handler
-  :: (Phonebook'Service meta m, C.RuntimeThrower m, R.MonadIO m)
+  :: (Phonebook'Service meta m, R.MonadIO m)
   => C.Options
   -> (() -> m meta)
   -> C.Request
-  -> m C.Response
-phonebook'Handler options metaMiddleware C.Request{meta,query} = do
+  -> m (P.Either C.Response C.Response)
+phonebook'Handler options metaMiddleware C.Request{meta,query} = M.runExceptT P.$ do
   meta' <- P.maybe (C.runtimeThrow C.RuntimeError'UnparsableMeta) P.return (C.fromValFromJson meta)
-  xformMeta <- metaMiddleware meta'
+  xformMeta <- M.lift P.$ metaMiddleware meta'
   envRef <- R.liftIO C.emptyEnv
   variableBaseCount <- R.liftIO (R.size P.<$> IO.readIORef envRef)
   let options' = C.Options
@@ -100,7 +106,7 @@ phonebook'Handler options metaMiddleware C.Request{meta,query} = do
   P.return (C.Response'Success (R.toJSON vals))
 
 -- API
-phonebook'ApiCall :: (Phonebook'Service meta m, C.RuntimeThrower m) => meta -> C.ApiCall -> m C.Val
+phonebook'ApiCall :: (Phonebook'Service meta m, C.ServiceThrower m, C.RuntimeThrower m) => meta -> C.ApiCall -> m C.Val
 phonebook'ApiCall meta' apiCall' = case C.parseApiCall phonebook'ApiParser apiCall' of
   P.Nothing -> C.runtimeThrow C.RuntimeError'UnrecognizedCall
   P.Just x' -> case x' of

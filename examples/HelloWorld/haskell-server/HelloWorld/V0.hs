@@ -28,6 +28,7 @@ module HelloWorld.V0
 -- Imports
 import qualified Prelude as P
 import qualified Control.Monad as P
+import qualified Control.Monad.Except as M
 import qualified Data.Word as I
 import qualified Data.Int as I
 import qualified Data.IORef as IO
@@ -41,41 +42,44 @@ import qualified Colorless.Server.Scotty as Scotty
 
 -- Version
 helloWorld'Version :: C.Version
-helloWorld'Version = C.Version 0 1
+helloWorld'Version = C.Version 0 0
 
 helloWorld'Pull :: C.Pull
 helloWorld'Pull = C.Pull "http" "127.0.0.1" "/" 8080
 
 -- Thrower
-class P.Monad m => HelloWorld'Thrower m where
+class C.ServiceThrower m => HelloWorld'Thrower m where
   helloWorld'Throw :: () -> m a
+  helloWorld'Throw = C.serviceThrow P.. R.toJSON
 
 -- Service
-class HelloWorld'Thrower m => HelloWorld'Service meta m where
-  goodbye :: meta -> m ()
+class P.Monad m => HelloWorld'Service meta m where
   hello :: meta -> Hello -> m R.Text
 
+instance HelloWorld'Service meta m => HelloWorld'Service meta (M.ExceptT C.Response m) where
+  hello _meta = M.lift  P.. hello _meta
+
 helloWorld'Scotty'SendResponse
-  :: (Scotty.ScottyError e, R.MonadIO m, C.RuntimeThrower m, HelloWorld'Service meta m)
+  :: (Scotty.ScottyError e, R.MonadIO m, HelloWorld'Service meta m)
   => C.Options
   -> (() -> m meta)
   -> C.Pull
   -> Scotty.ScottyT e m ()
-helloWorld'Scotty'SendResponse _options _metaMiddleware _pull = ScottyT.sendResponseSingleton _pull helloWorld'Version (helloWorld'Handler _options _metaMiddleware)
+helloWorld'Scotty'SendResponse _options _metaMiddleware _pull = Scotty.sendResponseSingleton _pull helloWorld'Version (helloWorld'Handler _options _metaMiddleware)
 
 helloWorld'Scotty'GetSpec :: (Scotty.ScottyError e, R.MonadIO m) => C.Pull -> Scotty.ScottyT e m ()
-helloWorld'Scotty'GetSpec = ScottyT.getSpec P.$ R.toJSON [helloWorld'Spec]
+helloWorld'Scotty'GetSpec = Scotty.getSpec P.$ R.toJSON [helloWorld'Spec]
 
 -- Handler
 helloWorld'Handler
-  :: (HelloWorld'Service meta m, C.RuntimeThrower m, R.MonadIO m)
+  :: (HelloWorld'Service meta m, R.MonadIO m)
   => C.Options
   -> (() -> m meta)
   -> C.Request
-  -> m C.Response
-helloWorld'Handler options metaMiddleware C.Request{meta,query} = do
+  -> m (P.Either C.Response C.Response)
+helloWorld'Handler options metaMiddleware C.Request{meta,query} = M.runExceptT P.$ do
   meta' <- P.maybe (C.runtimeThrow C.RuntimeError'UnparsableMeta) P.return (C.fromValFromJson meta)
-  xformMeta <- metaMiddleware meta'
+  xformMeta <- M.lift P.$ metaMiddleware meta'
   envRef <- R.liftIO C.emptyEnv
   variableBaseCount <- R.liftIO (R.size P.<$> IO.readIORef envRef)
   let options' = C.Options
@@ -90,19 +94,16 @@ helloWorld'Handler options metaMiddleware C.Request{meta,query} = do
   P.return (C.Response'Success (R.toJSON vals))
 
 -- API
-helloWorld'ApiCall :: (HelloWorld'Service meta m, C.RuntimeThrower m) => meta -> C.ApiCall -> m C.Val
+helloWorld'ApiCall :: (HelloWorld'Service meta m, C.ServiceThrower m, C.RuntimeThrower m) => meta -> C.ApiCall -> m C.Val
 helloWorld'ApiCall meta' apiCall' = case C.parseApiCall helloWorld'ApiParser apiCall' of
   P.Nothing -> C.runtimeThrow C.RuntimeError'UnrecognizedCall
   P.Just x' -> case x' of
-    HelloWorld'Api'Goodbye -> C.toVal P.<$> goodbye meta'
     HelloWorld'Api'Hello a' -> C.toVal P.<$> hello meta' a'
 
 -- API Parser
 helloWorld'ApiParser :: C.ApiParser HelloWorld'Api
 helloWorld'ApiParser = C.ApiParser
-  { hollow = R.fromList
-     [ ("Goodbye", HelloWorld'Api'Goodbye)
-     ]
+  { hollow = R.empty
   , struct = R.fromList
      [ ("Hello", v HelloWorld'Api'Hello)
      ]
@@ -114,8 +115,7 @@ helloWorld'ApiParser = C.ApiParser
 
 -- Api
 data HelloWorld'Api
-  = HelloWorld'Api'Goodbye
-  | HelloWorld'Api'Hello Hello
+  = HelloWorld'Api'Hello Hello
   deriving (P.Show, P.Eq)
 
 -- Struct: Hello
@@ -148,5 +148,5 @@ instance R.FromJSON Hello where
 
 helloWorld'Spec :: R.Value
 helloWorld'Spec = v
-  where P.Just v = R.decode "{\"colorless\":{\"major\":0,\"minor\":0},\"types\":[{\"n\":\"Hello\",\"m\":[{\"target\":\"String\"}],\"o\":\"String\"},{\"n\":\"Goodbye\",\"o\":\"Unit\"}],\"pull\":{\"protocol\":\"http\",\"name\":\"HelloWorld\",\"host\":\"127.0.0.1\",\"meta\":\"Unit\",\"path\":\"/\",\"port\":8080,\"error\":\"Unit\"},\"version\":{\"major\":0,\"minor\":1}}"
+  where P.Just v = R.decode "{\"colorless\":{\"major\":0,\"minor\":0},\"types\":[{\"n\":\"Hello\",\"m\":[{\"target\":\"String\"}],\"o\":\"String\"}],\"pull\":{\"protocol\":\"http\",\"name\":\"HelloWorld\",\"host\":\"127.0.0.1\",\"meta\":\"Unit\",\"path\":\"/\",\"port\":8080,\"error\":\"Unit\"},\"version\":{\"major\":0,\"minor\":0}}"
 

@@ -29,7 +29,8 @@ const genModule = (prefix, name, lowercaseName, major, exportTypes, values) => {
 const genImports = (importing) => {
   var lines = new Lines([
     '\n',
-    'import qualified Colorless.Server as C (RuntimeThrower, Options, Request, Response, Major, Minor)\n',
+    'import qualified Prelude as P\n',
+    'import qualified Colorless.Server as C (RuntimeThrower, Options, Request, Response, Major, Minor, Pull)\n',
     'import qualified Colorless.Imports as R\n'
   ]);
   importing.forEach(imp => lines.add(imp + '\n'));
@@ -81,7 +82,6 @@ const genHandlerMap = (specs) => {
     'handler\'Map\n',
     '  ::\n',
     '    ( R.MonadIO m\n',
-    '    , C.RuntimeThrower m\n',
   ]);
   lines.add(specs.map(spec =>
     '    , V' + spec.version.major + '.' +  spec.name + '\'Service meta' + spec.version.major + ' m\n',
@@ -96,15 +96,15 @@ const genHandlerMap = (specs) => {
   ));
   lines.add([
     '\n',
-    '  -> R.Map C.Major (C.Minor, C.Request -> m C.Response)\n',
+    '  -> R.Map C.Major (C.Minor, C.Request -> m (P.Either C.Response C.Response))\n',
     'handler\'Map options metaMiddlewares = R.fromList\n',
   ]);
 
   lines.add(
-    '    [ (' + specs[0].version.major + ', (' + specs[0].version.minor + ', V' + specs[0].version.major + '.' + specs[0].lowercaseName + '\'Handler options $ meta\'Middleware' + specs[0].version.major + ' metaMiddlewares))\n'
+    '    [ (' + specs[0].version.major + ', (' + specs[0].version.minor + ', V' + specs[0].version.major + '.' + specs[0].lowercaseName + '\'Handler options P.$ meta\'Middleware' + specs[0].version.major + ' metaMiddlewares))\n'
   );
   lines.add(specs.slice(1).map(spec =>
-    '    , (' + spec.version.major + ', (' + spec.version.minor + ', V' + spec.version.major + '.' + spec.lowercaseName + '\'Handler options $ meta\'Middleware' + spec.version.major + ' metaMiddlewares))\n'
+    '    , (' + spec.version.major + ', (' + spec.version.minor + ', V' + spec.version.major + '.' + spec.lowercaseName + '\'Handler options P.$ meta\'Middleware' + spec.version.major + ' metaMiddlewares))\n'
   ));
   lines.add(
     '    ]\n'

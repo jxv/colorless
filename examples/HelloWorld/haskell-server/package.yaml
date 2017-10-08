@@ -1,0 +1,22 @@
+name: helloworld
+version: "0.0.0"
+maintainer: Joe Vargas
+synopsis: Hello World Example
+description: Hello World Example
+stability: experimental
+license: MIT
+
+dependencies:
+  - base >= 4.9 && < 5
+  - colorless
+  - colorless-scotty
+  - mtl
+  - text
+
+default-extensions:
+  - GeneralizedNewtypeDeriving
+
+executables:
+  helloworld:
+    main: Main.hs
+    ghc-options: -Wall

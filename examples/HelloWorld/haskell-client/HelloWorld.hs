@@ -18,23 +18,10 @@ module HelloWorld
   , helloWorld'Pull
   , helloWorld'Request
   , Hello(..)
-  , Goodbye(..)
-  , Color(..)
-  , Color'Custom'Members(..)
   , hello
-  , goodbye
   , hello'Mk
-  , goodbye'Mk
-  , color'Red'Mk
-  , color'Blue'Mk
-  , color'Green'Mk
-  , color'Yellow'Mk
-  , color'Custom'Mk
   , hello'
-  , goodbye'
-  , color'
-  , hello'who
-  , goodbye'target
+  , hello'target
   , helloWorld'HttpClient'SendRequest
   ) where
 
@@ -53,7 +40,7 @@ import qualified Colorless.Client.HttpClient as HttpClient
 
 -- Version
 helloWorld'Version :: C.Version
-helloWorld'Version = C.Version 2 0
+helloWorld'Version = C.Version 0 0
 
 helloWorld'Pull :: C.Pull
 helloWorld'Pull = C.Pull "http" "127.0.0.1" "/" 8080
@@ -63,9 +50,6 @@ helloWorld'Request _meta _query = C.Request (C.Version 0 0) helloWorld'Version _
 
 hello :: C.Expr Hello -> C.Expr R.Text
 hello = C.unsafeExpr P.. Ast.Ast'StructCall P.. Ast.StructCall "Hello" P.. Ast.toAst
-
-goodbye :: C.Expr Goodbye -> C.Expr ()
-goodbye = C.unsafeExpr P.. Ast.Ast'StructCall P.. Ast.StructCall "Goodbye" P.. Ast.toAst
 
 helloWorld'HttpClient'SendRequest
   :: (C.HasType a, Ast.ToAst a, R.FromJSON a)
@@ -78,7 +62,7 @@ helloWorld'HttpClient'SendRequest = HttpClient.sendRequest
 
 -- Struct: Hello
 data Hello = Hello
-  { who :: R.Text
+  { target :: R.Text
   } deriving (P.Show, P.Eq)
 
 instance C.HasType Hello where
@@ -86,15 +70,15 @@ instance C.HasType Hello where
 
 instance C.ToVal Hello where
   toVal Hello
-    { who
+    { target
     } = C.Val'ApiVal P.$ C.ApiVal'Struct P.$ C.Struct P.$ R.fromList
-    [ ("who", C.toVal who)
+    [ ("target", C.toVal target)
     ]
 
 instance C.FromVal Hello where
   fromVal = \case
     C.Val'ApiVal (C.ApiVal'Struct (C.Struct _m)) -> Hello
-      P.<$> C.getMember _m "who"
+      P.<$> C.getMember _m "target"
     _ -> P.Nothing
 
 instance R.ToJSON Hello where
@@ -107,159 +91,19 @@ instance R.FromJSON Hello where
       P.Nothing -> P.mzero
       P.Just _y -> P.return _y
 
-hello'who :: C.Path (Hello -> R.Text)
-hello'who = C.unsafePath ["who"]
+hello'target :: C.Path (Hello -> R.Text)
+hello'target = C.unsafePath ["target"]
 
 instance Ast.ToAst Hello where
   toAst Hello
-    { who
-    } = Ast.Ast'Struct P.. Ast.Struct P.$ R.fromList
-    [ ("who", Ast.toAst who)
-    ]
-
-hello'Mk :: C.Expr (R.Text -> Hello)
-hello'Mk = C.unsafeStructExpr ["who"]
-
-hello' :: Hello -> C.Expr Hello
-hello' = C.unsafeExpr P.. Ast.toAst
-
--- Struct: Goodbye
-data Goodbye = Goodbye
-  { target :: R.Text
-  } deriving (P.Show, P.Eq)
-
-instance C.HasType Goodbye where
-  getType _ = "Goodbye"
-
-instance C.ToVal Goodbye where
-  toVal Goodbye
-    { target
-    } = C.Val'ApiVal P.$ C.ApiVal'Struct P.$ C.Struct P.$ R.fromList
-    [ ("target", C.toVal target)
-    ]
-
-instance C.FromVal Goodbye where
-  fromVal = \case
-    C.Val'ApiVal (C.ApiVal'Struct (C.Struct _m)) -> Goodbye
-      P.<$> C.getMember _m "target"
-    _ -> P.Nothing
-
-instance R.ToJSON Goodbye where
-  toJSON = R.toJSON P.. C.toVal
-
-instance R.FromJSON Goodbye where
-  parseJSON _v = do
-    _x <- R.parseJSON _v
-    case C.fromVal _x of
-      P.Nothing -> P.mzero
-      P.Just _y -> P.return _y
-
-goodbye'target :: C.Path (Goodbye -> R.Text)
-goodbye'target = C.unsafePath ["target"]
-
-instance Ast.ToAst Goodbye where
-  toAst Goodbye
     { target
     } = Ast.Ast'Struct P.. Ast.Struct P.$ R.fromList
     [ ("target", Ast.toAst target)
     ]
 
-goodbye'Mk :: C.Expr (R.Text -> Goodbye)
-goodbye'Mk = C.unsafeStructExpr ["target"]
+hello'Mk :: C.Expr (R.Text -> Hello)
+hello'Mk = C.unsafeStructExpr ["target"]
 
-goodbye' :: Goodbye -> C.Expr Goodbye
-goodbye' = C.unsafeExpr P.. Ast.toAst
-
--- Enumeration: Color
-data Color
-  = Color'Red 
-  | Color'Blue
-  | Color'Green
-  | Color'Yellow
-  | Color'Custom Color'Custom'Members
-  deriving (P.Show, P.Eq)
-
-data Color'Custom'Members = Color'Custom'Members
-  { r :: I.Word8
-  , g :: I.Word8
-  , b :: I.Word8
-  } deriving (P.Show, P.Eq)
-
-instance C.HasType Color where
-  getType _ = "Color"
-
-instance C.ToVal Color where
-  toVal = \case
-    Color'Red -> C.Val'ApiVal P.$ C.ApiVal'Enumeral P.$ C.Enumeral "Red" P.Nothing
-    Color'Blue -> C.Val'ApiVal P.$ C.ApiVal'Enumeral P.$ C.Enumeral "Blue" P.Nothing
-    Color'Green -> C.Val'ApiVal P.$ C.ApiVal'Enumeral P.$ C.Enumeral "Green" P.Nothing
-    Color'Yellow -> C.Val'ApiVal P.$ C.ApiVal'Enumeral P.$ C.Enumeral "Yellow" P.Nothing
-    Color'Custom Color'Custom'Members
-      { r
-      , g
-      , b
-      } -> C.Val'ApiVal P.$ C.ApiVal'Enumeral P.$ C.Enumeral "Custom" P.$ P.Just P.$ R.fromList
-      [ ("r", C.toVal r)
-      , ("g", C.toVal g)
-      , ("b", C.toVal b)
-      ]
-
-instance C.FromVal Color where
-  fromVal = \case
-    C.Val'ApiVal (C.ApiVal'Enumeral (C.Enumeral _tag _m)) -> case (_tag,_m) of
-      ("Red", P.Nothing) -> P.Just Color'Red
-      ("Blue", P.Nothing) -> P.Just Color'Blue
-      ("Green", P.Nothing) -> P.Just Color'Green
-      ("Yellow", P.Nothing) -> P.Just Color'Yellow
-      ("Custom", P.Just _m') -> Color'Custom P.<$> (Color'Custom'Members
-          P.<$> C.getMember _m' "r"
-          P.<*> C.getMember _m' "g"
-          P.<*> C.getMember _m' "b"
-        )
-      _ -> P.Nothing
-    _ -> P.Nothing
-
-instance R.ToJSON Color where
-  toJSON = R.toJSON P.. C.toVal
-
-instance R.FromJSON Color where
-  parseJSON _v = do
-    _x <- R.parseJSON _v
-    case C.fromVal _x of
-      P.Nothing -> P.mzero
-      P.Just _y -> P.return _y
-
-instance Ast.ToAst Color where
-  toAst = \case
-    Color'Red -> Ast.Ast'Enumeral P.$ Ast.Enumeral "Red" P.Nothing
-    Color'Blue -> Ast.Ast'Enumeral P.$ Ast.Enumeral "Blue" P.Nothing
-    Color'Green -> Ast.Ast'Enumeral P.$ Ast.Enumeral "Green" P.Nothing
-    Color'Yellow -> Ast.Ast'Enumeral P.$ Ast.Enumeral "Yellow" P.Nothing
-    Color'Custom Color'Custom'Members
-      { r
-      , g
-      , b
-      } -> Ast.Ast'Enumeral P.$ Ast.Enumeral "Custom" P.$ P.Just P.$ R.fromList
-      [ ("r", Ast.toAst r)
-      , ("g", Ast.toAst g)
-      , ("b", Ast.toAst b)
-      ]
-
-color'Red'Mk :: C.Expr Color
-color'Red'Mk = C.unsafeExpr P.. Ast.toAst P.$ Color'Red
-
-color'Blue'Mk :: C.Expr Color
-color'Blue'Mk = C.unsafeExpr P.. Ast.toAst P.$ Color'Blue
-
-color'Green'Mk :: C.Expr Color
-color'Green'Mk = C.unsafeExpr P.. Ast.toAst P.$ Color'Green
-
-color'Yellow'Mk :: C.Expr Color
-color'Yellow'Mk = C.unsafeExpr P.. Ast.toAst P.$ Color'Yellow
-
-color'Custom'Mk :: C.Expr (I.Word8 -> I.Word8 -> I.Word8 -> Color)
-color'Custom'Mk = C.unsafeEnumeralExpr "Custom" ["r", "g", "b"]
-
-color' :: Color -> C.Expr Color
-color' = C.unsafeExpr P.. Ast.toAst
+hello' :: Hello -> C.Expr Hello
+hello' = C.unsafeExpr P.. Ast.toAst
 
