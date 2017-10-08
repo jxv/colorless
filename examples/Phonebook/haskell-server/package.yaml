@@ -1,8 +1,8 @@
-name: helloworld
+name: phonebook
 version: "0.0.0"
 maintainer: Joe Vargas
-synopsis: Hello World Example
-description: Hello World Example
+synopsis: Phonebook Example
+description: Phonebook Example
 stability: experimental
 license: MIT
 
@@ -18,6 +18,6 @@ default-extensions:
   - NamedFieldPuns
 
 executables:
-  helloworld:
+  phonebook:
     main: Main.hs
     ghc-options: -Wall

@@ -8,18 +8,19 @@ import Colorless.Types
 import Colorless.Server.Scotty
 import Data.Text.Lazy
 
-import HelloWorld.V0
+import Phonebook.V0
 
 newtype App a = App { unApp :: IO a }
   deriving (Functor, Applicative, Monad, MonadIO)
 
-instance HelloWorld'Service () App where
-  hello () Hello{target} = return $ "Hello, " `mappend` target
+instance Phonebook'Service () App where
+  lookupPerson () LookupPerson{} = return Nothing
+  lookupPersonByName () LookupPersonByName{} = return []
 
 main :: IO ()
-main = runServer helloWorld'Pull unApp routes
+main = runServer phonebook'Pull unApp routes
 
 routes :: ScottyT Text App ()
 routes = do
-  helloWorld'Scotty'SendResponse defOptions return helloWorld'Pull
-  helloWorld'Scotty'GetSpec helloWorld'Pull
+  phonebook'Scotty'SendResponse defOptions return phonebook'Pull
+  phonebook'Scotty'GetSpec phonebook'Pull

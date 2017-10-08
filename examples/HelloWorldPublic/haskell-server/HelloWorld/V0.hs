@@ -46,7 +46,7 @@ import qualified Colorless.Server.Scotty as Scotty
 
 -- Version
 helloWorld'Version :: C.Version
-helloWorld'Version = C.Version 0 1
+helloWorld'Version = C.Version 0 0
 
 helloWorld'Pull :: C.Pull
 helloWorld'Pull = C.Pull "http" "127.0.0.1" "/" 8080
@@ -62,11 +62,9 @@ class C.ServiceThrower m => HelloWorld'Thrower m where
 
 -- Service
 class P.Monad m => HelloWorld'Service meta m where
-  goodbye :: meta -> m ()
   hello :: meta -> Hello -> m R.Text
 
 instance HelloWorld'Service meta m => HelloWorld'Service meta (M.ExceptT C.Response m) where
-  goodbye _meta = M.lift  P.$ goodbye _meta
   hello _meta = M.lift  P.. hello _meta
 
 --------------------------------------------------------
@@ -125,15 +123,12 @@ helloWorld'ApiCall :: (HelloWorld'Service meta m, C.ServiceThrower m, C.RuntimeT
 helloWorld'ApiCall meta' apiCall' = case C.parseApiCall helloWorld'ApiParser apiCall' of
   P.Nothing -> C.runtimeThrow C.RuntimeError'UnrecognizedCall
   P.Just x' -> case x' of
-    HelloWorld'Api'Goodbye -> C.toVal P.<$> goodbye meta'
     HelloWorld'Api'Hello a' -> C.toVal P.<$> hello meta' a'
 
 -- API Parser
 helloWorld'ApiParser :: C.ApiParser HelloWorld'Api
 helloWorld'ApiParser = C.ApiParser
-  { hollow = R.fromList
-     [ ("Goodbye", HelloWorld'Api'Goodbye)
-     ]
+  { hollow = R.empty
   , struct = R.fromList
      [ ("Hello", v HelloWorld'Api'Hello)
      ]
@@ -145,8 +140,7 @@ helloWorld'ApiParser = C.ApiParser
 
 -- Api
 data HelloWorld'Api
-  = HelloWorld'Api'Goodbye
-  | HelloWorld'Api'Hello Hello
+  = HelloWorld'Api'Hello Hello
   deriving (P.Show, P.Eq)
 
 --------------------------------------------------------
@@ -178,5 +172,5 @@ instance R.FromJSON Hello where
 
 helloWorld'Spec :: R.Value
 helloWorld'Spec = v
-  where P.Just v = R.decode "{\"colorless\":{\"major\":0,\"minor\":0},\"version\":{\"major\":0,\"minor\":1},\"types\":[{\"n\":\"Hello\",\"m\":[{\"target\":\"String\"}],\"o\":\"String\"},{\"n\":\"Goodbye\",\"o\":\"Unit\"}],\"pull\":{\"protocol\":\"http\",\"name\":\"HelloWorld\",\"host\":\"127.0.0.1\",\"meta\":\"Unit\",\"path\":\"/\",\"port\":8080,\"error\":\"Unit\"}}"
+  where P.Just v = R.decode "{\"colorless\":{\"major\":0,\"minor\":0},\"version\":{\"major\":0,\"minor\":0},\"types\":[{\"n\":\"Hello\",\"m\":[{\"target\":\"String\"}],\"o\":\"String\"}],\"pull\":{\"protocol\":\"http\",\"name\":\"HelloWorld\",\"host\":\"127.0.0.1\",\"meta\":\"Unit\",\"path\":\"/\",\"port\":8080,\"error\":\"Unit\"}}"
 

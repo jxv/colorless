@@ -14,58 +14,5 @@
       "port": 8080,
       "error": "Unit"
     }
-  },
-  {
-    "colorless": { "major": 0, "minor": 0 },
-    "version": { "major": 0, "minor": 1 },
-    "types": [
-      { "n": "Hello", "m": [ {"target":"String"} ], "o": "String" },
-      { "n": "Goodbye", "o": "Unit" }
-    ],
-    "pull": {
-      "protocol": "http",
-      "name": "HelloWorld",
-      "host": "127.0.0.1",
-      "meta": "Unit",
-      "path": "/",
-      "port": 8080,
-      "error": "Unit"
-    }
-  },
-  {
-    "colorless": { "major": 0, "minor": 0 },
-    "version": { "major": 1, "minor": 0 },
-    "types": [
-      { "n": "Hello", "m": [ {"target":"String"} ], "o": "String" },
-      { "n": "Goodbye", "m": [ {"target":"String"} ], "o": "Unit" },
-      { "n": "Color", "e": [ "Red", "Green", "Blue", { "tag": "Custom", "m": [{"r":"U8"}, {"g":"U8"}, {"b":"U8"}] }, "Yellow" ] }
-    ],
-    "pull": {
-      "protocol": "http",
-      "name": "HelloWorld",
-      "host": "127.0.0.1",
-      "meta": "Unit",
-      "path": "/",
-      "port": 8080,
-      "error": "Unit"
-    }
-  },
-  {
-    "colorless": { "major": 0, "minor": 0 },
-    "version": { "major": 2, "minor": 0 },
-    "types": [
-      { "n": "Hello", "m": [ {"who":"String"} ], "o": "String" },
-      { "n": "Goodbye", "m": [ {"target":"String"} ], "o": "Unit" },
-      { "n": "Color", "e": [ "Red", "Blue", "Green", "Yellow", { "tag": "Custom", "m": [{"r":"U8"},{"g":"U8"},{"b":"U8"}]} ] }
-    ],
-    "pull": {
-      "protocol": "http",
-      "name": "HelloWorld",
-      "host": "127.0.0.1",
-      "meta": "Unit",
-      "path": "/",
-      "port": 8080,
-      "error": "Unit"
-    }
   }
 ]
