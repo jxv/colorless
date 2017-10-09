@@ -22,7 +22,7 @@ module HelloWorld
   , hello'Mk
   , hello'
   , hello'target
-  , helloWorld'HttpClient'SendRequest
+  , helloWorld'HttpClient'Post
   ) where
 
 -- Imports
@@ -81,14 +81,14 @@ hello'target = C.unsafePath ["target"]
 -- Add-ons
 --------------------------------------------------------
 
-helloWorld'HttpClient'SendRequest
+helloWorld'HttpClient'Post
   :: (C.HasType a, Ast.ToAst a, R.FromJSON a)
   => HttpClient.Manager
   -> C.Pull
   -> HttpClient.RequestHeaders
   -> C.Request () a
   -> P.IO (HttpClient.HttpClientResponse R.ByteString, P.Maybe (C.Response () a))
-helloWorld'HttpClient'SendRequest = HttpClient.sendRequest
+helloWorld'HttpClient'Post = HttpClient.sendRequest
 
 --------------------------------------------------------
 -- Type Instances

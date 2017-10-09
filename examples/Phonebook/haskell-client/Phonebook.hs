@@ -69,7 +69,7 @@ module Phonebook
   , lookupPerson'id
   , lookupPersonByName'name
   , insertPerson'person
-  , phonebook'HttpClient'SendRequest
+  , phonebook'HttpClient'Post
   ) where
 
 -- Imports
@@ -293,14 +293,14 @@ state' = C.unsafeExpr P.. Ast.toAst
 -- Add-ons
 --------------------------------------------------------
 
-phonebook'HttpClient'SendRequest
+phonebook'HttpClient'Post
   :: (C.HasType a, Ast.ToAst a, R.FromJSON a)
   => HttpClient.Manager
   -> C.Pull
   -> HttpClient.RequestHeaders
   -> C.Request () a
   -> P.IO (HttpClient.HttpClientResponse R.ByteString, P.Maybe (C.Response () a))
-phonebook'HttpClient'SendRequest = HttpClient.sendRequest
+phonebook'HttpClient'Post = HttpClient.sendRequest
 
 --------------------------------------------------------
 -- Type Instances

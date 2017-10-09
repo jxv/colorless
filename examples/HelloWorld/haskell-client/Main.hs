@@ -18,7 +18,7 @@ main = do
   putStrLn "\n\"Request\""
   printJSON req
 
-  resp <- helloWorld'HttpClient'SendRequest manager helloWorld'pull [] req
+  resp <- helloWorld'HttpClient'Post manager helloWorld'pull [] req
 
   putStrLn "\n\"Response\""
   printJSON $ snd resp

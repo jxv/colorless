@@ -23,7 +23,7 @@ main = do
   putStrLn "\n\"Request\""
   printJSON req
 
-  resp <- phonebook'HttpClient'SendRequest manager phonebook'pull [] req
+  resp <- phonebook'HttpClient'Post manager phonebook'pull [] req
 
   putStrLn "\n\"Response\""
   printJSON $ snd resp
