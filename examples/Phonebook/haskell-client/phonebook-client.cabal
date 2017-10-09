@@ -2,9 +2,9 @@
 --
 -- see: https://github.com/sol/hpack
 
-name:           phonebook-server
+name:           phonebook-client
 version:        0.0.0
-synopsis:       Phonebook Example
+synopsis:       PHonebook Example
 description:    Phonebook Example
 stability:      experimental
 maintainer:     Joe Vargas
@@ -12,16 +12,17 @@ license:        MIT
 build-type:     Simple
 cabal-version:  >= 1.10
 
-executable phonebook-server
+executable phonebook-client
   main-is: Main.hs
   default-extensions: GeneralizedNewtypeDeriving NamedFieldPuns OverloadedStrings FlexibleInstances MultiParamTypeClasses
   ghc-options: -Wall
   build-depends:
-      base >= 4.9 && < 5
-    , containers
+      aeson
+    , base >= 4.9 && < 5
+    , bytestring
     , colorless
-    , colorless-scotty
-    , random
+    , colorless-http-client
     , mtl
     , text
+    , http-client-tls
   default-language: Haskell2010

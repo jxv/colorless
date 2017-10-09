@@ -2,7 +2,7 @@ resolver: lts-9.6
 packages:
 - '.'
 extra-deps:
-- 'colorless-2.2.10'
+- 'colorless-2.2.11'
 - 'colorless-http-client-0.0.3'
 flags: {}
 extra-package-dbs: []

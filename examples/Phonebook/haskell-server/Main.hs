@@ -1,13 +1,16 @@
 module Main where
 
 import qualified Data.Map as Map
+import qualified Data.Text as T
 import qualified Data.Text.Lazy as TL
+import Control.Monad
 import Control.Monad.IO.Class
 import Control.Monad.Reader
 import Control.Concurrent.MVar
 import Colorless.Types
 import Colorless.Server.Scotty
 import Data.Map (Map)
+import System.Random
 
 import Phonebook.V0
 
@@ -19,7 +22,20 @@ newtype App a = App { unApp :: ReaderT (MVar DB) IO a }
 getDB :: App DB
 getDB = ask >>= liftIO . readMVar
 
+modifyDB :: (DB -> DB) -> App ()
+modifyDB f = do
+  mdb <- ask
+  db <- liftIO $ takeMVar mdb
+  liftIO $ putMVar mdb (f db)
+
+genId :: IO T.Text
+genId = T.pack <$> liftM (take 10 . randomRs ('a','z')) newStdGen
+
 instance Phonebook'Service () App where
+  phonebook'InsertPerson () InsertPerson{insertPersonPerson = person} = do
+    personId <- liftIO $ PersonId <$> genId
+    modifyDB $ Map.insert personId person
+    return personId
   phonebook'LookupPerson () LookupPerson{lookupPersonId = id'} = do
     db <- getDB
     return $ Map.lookup id' db

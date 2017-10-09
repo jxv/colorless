@@ -21,6 +21,7 @@ module Phonebook
   , V0.Person(..)
   , V0.LookupPerson(..)
   , V0.LookupPersonByName(..)
+  , V0.InsertPerson(..)
   , V0.State(..)
   ) where
 
@@ -46,6 +47,7 @@ import qualified Phonebook.V0 as V0
   , Person(..)
   , LookupPerson(..)
   , LookupPersonByName(..)
+  , InsertPerson(..)
   , State(..)
   )
 

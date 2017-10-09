@@ -30,6 +30,7 @@ module Phonebook.V0
   , Person(..)
   , LookupPerson(..)
   , LookupPersonByName(..)
+  , InsertPerson(..)
   , State(..)
   , phonebook'Scotty'Post
   , phonebook'Scotty'Get
@@ -74,10 +75,12 @@ class C.ServiceThrower m => Phonebook'Thrower m where
 class P.Monad m => Phonebook'Service meta m where
   phonebook'LookupPerson :: meta -> LookupPerson -> m (P.Maybe Person)
   phonebook'LookupPersonByName :: meta -> LookupPersonByName -> m [Person]
+  phonebook'InsertPerson :: meta -> InsertPerson -> m PersonId
 
 instance Phonebook'Service meta m => Phonebook'Service meta (M.ExceptT C.Response m) where
   phonebook'LookupPerson _meta = M.lift  P.. phonebook'LookupPerson _meta
   phonebook'LookupPersonByName _meta = M.lift  P.. phonebook'LookupPersonByName _meta
+  phonebook'InsertPerson _meta = M.lift  P.. phonebook'InsertPerson _meta
 
 --------------------------------------------------------
 -- Types
@@ -131,6 +134,11 @@ data LookupPerson = LookupPerson
 -- Struct: LookupPersonByName
 data LookupPersonByName = LookupPersonByName
   { lookupPersonByNameName :: Name
+  } deriving (P.Show, P.Eq)
+
+-- Struct: InsertPerson
+data InsertPerson = InsertPerson
+  { insertPersonPerson :: Person
   } deriving (P.Show, P.Eq)
 
 -- Enumeration: State
@@ -189,6 +197,7 @@ phonebook'ApiCall meta' apiCall' = case C.parseApiCall phonebook'ApiParser apiCa
   P.Just x' -> case x' of
     Phonebook'Api'LookupPerson a' -> C.toVal P.<$> phonebook'LookupPerson meta' a'
     Phonebook'Api'LookupPersonByName a' -> C.toVal P.<$> phonebook'LookupPersonByName meta' a'
+    Phonebook'Api'InsertPerson a' -> C.toVal P.<$> phonebook'InsertPerson meta' a'
 
 -- API Parser
 phonebook'ApiParser :: C.ApiParser Phonebook'Api
@@ -197,6 +206,7 @@ phonebook'ApiParser = C.ApiParser
   , struct = R.fromList
      [ ("LookupPerson", v Phonebook'Api'LookupPerson)
      , ("LookupPersonByName", v Phonebook'Api'LookupPersonByName)
+     , ("InsertPerson", v Phonebook'Api'InsertPerson)
      ]
   , enumeration = R.empty
   , wrap = R.empty
@@ -208,6 +218,7 @@ phonebook'ApiParser = C.ApiParser
 data Phonebook'Api
   = Phonebook'Api'LookupPerson LookupPerson
   | Phonebook'Api'LookupPersonByName LookupPersonByName
+  | Phonebook'Api'InsertPerson InsertPerson
   deriving (P.Show, P.Eq)
 
 --------------------------------------------------------
@@ -420,6 +431,29 @@ instance R.FromJSON LookupPersonByName where
       P.Nothing -> P.mzero
       P.Just _y -> P.return _y
 
+instance C.ToVal InsertPerson where
+  toVal InsertPerson
+    { insertPersonPerson
+    } = C.Val'ApiVal P.$ C.ApiVal'Struct P.$ C.Struct P.$ R.fromList
+    [ ("person", C.toVal insertPersonPerson)
+    ]
+
+instance C.FromVal InsertPerson where
+  fromVal = \case
+    C.Val'ApiVal (C.ApiVal'Struct (C.Struct _m)) -> InsertPerson
+      P.<$> C.getMember _m "person"
+    _ -> P.Nothing
+
+instance R.ToJSON InsertPerson where
+  toJSON = R.toJSON P.. C.toVal
+
+instance R.FromJSON InsertPerson where
+  parseJSON _v = do
+    _x <- R.parseJSON _v
+    case C.fromVal _x of
+      P.Nothing -> P.mzero
+      P.Just _y -> P.return _y
+
 instance C.ToVal State where
   toVal = \case
     State'CA -> C.Val'ApiVal P.$ C.ApiVal'Enumeral P.$ C.Enumeral "CA" P.Nothing
@@ -447,5 +481,5 @@ instance R.FromJSON State where
 
 phonebook'spec :: R.Value
 phonebook'spec = v
-  where P.Just v = R.decode "{\"colorless\":{\"major\":0,\"minor\":0},\"types\":[{\"n\":\"PersonId\",\"w\":\"String\"},{\"n\":\"Name\",\"w\":\"String\"},{\"n\":\"Phone\",\"w\":\"String\"},{\"n\":\"Street\",\"w\":\"String\"},{\"n\":\"City\",\"w\":\"String\"},{\"n\":\"State\",\"e\":[{\"tag\":\"CA\"},{\"tag\":\"NY\"},{\"tag\":\"TX\"}]},{\"n\":\"Zipcode\",\"w\":\"String\"},{\"n\":\"Address\",\"m\":[{\"street\":\"Street\"},{\"city\":\"City\"},{\"zipcode\":\"Zipcode\"},{\"state\":\"State\"}]},{\"n\":\"Person\",\"m\":[{\"name\":\"Name\"},{\"phone\":\"Phone\"},{\"address\":{\"n\":\"Option\",\"p\":\"Address\"}},{\"friends\":{\"n\":\"List\",\"p\":\"PersonId\"}}]},{\"n\":\"LookupPerson\",\"m\":[{\"id\":\"PersonId\"}],\"o\":{\"n\":\"Option\",\"p\":\"Person\"}},{\"n\":\"LookupPersonByName\",\"m\":[{\"name\":\"Name\"}],\"o\":{\"n\":\"List\",\"p\":\"Person\"}}],\"pull\":{\"protocol\":\"http\",\"name\":\"Phonebook\",\"host\":\"127.0.0.1\",\"path\":\"/\",\"port\":8000,\"error\":\"Unit\",\"meta\":\"Unit\"},\"version\":{\"major\":0,\"minor\":0}}"
+  where P.Just v = R.decode "{\"colorless\":{\"major\":0,\"minor\":0},\"types\":[{\"n\":\"PersonId\",\"w\":\"String\"},{\"n\":\"Name\",\"w\":\"String\"},{\"n\":\"Phone\",\"w\":\"String\"},{\"n\":\"Street\",\"w\":\"String\"},{\"n\":\"City\",\"w\":\"String\"},{\"n\":\"State\",\"e\":[{\"tag\":\"CA\"},{\"tag\":\"NY\"},{\"tag\":\"TX\"}]},{\"n\":\"Zipcode\",\"w\":\"String\"},{\"n\":\"Address\",\"m\":[{\"street\":\"Street\"},{\"city\":\"City\"},{\"zipcode\":\"Zipcode\"},{\"state\":\"State\"}]},{\"n\":\"Person\",\"m\":[{\"name\":\"Name\"},{\"phone\":\"Phone\"},{\"address\":{\"n\":\"Option\",\"p\":\"Address\"}},{\"friends\":{\"n\":\"List\",\"p\":\"PersonId\"}}]},{\"n\":\"LookupPerson\",\"m\":[{\"id\":\"PersonId\"}],\"o\":{\"n\":\"Option\",\"p\":\"Person\"}},{\"n\":\"LookupPersonByName\",\"m\":[{\"name\":\"Name\"}],\"o\":{\"n\":\"List\",\"p\":\"Person\"}},{\"n\":\"InsertPerson\",\"m\":[{\"person\":\"Person\"}],\"o\":\"PersonId\"}],\"pull\":{\"protocol\":\"http\",\"name\":\"Phonebook\",\"host\":\"127.0.0.1\",\"path\":\"/\",\"port\":8000,\"error\":\"Unit\",\"meta\":\"Unit\"},\"version\":{\"major\":0,\"minor\":0}}"
 

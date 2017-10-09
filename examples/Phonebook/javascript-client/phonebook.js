@@ -26,3 +26,14 @@ export const LookupPersonByName = (m) => {
     },
   };
 };
+
+export const InsertPerson = (m) => {
+  assert(m !== undefined, "`InsertPerson` missing members");
+  assert(m.person !== undefined, "`InsertPerson` missing member `person`");
+  return {
+    n: 'InsertPerson',
+    m: {
+      'person': m.person,
+    },
+  };
+};

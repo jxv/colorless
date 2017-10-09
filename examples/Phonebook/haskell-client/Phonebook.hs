@@ -27,13 +27,16 @@ module Phonebook
   , Person(..)
   , LookupPerson(..)
   , LookupPersonByName(..)
+  , InsertPerson(..)
   , State(..)
   , phonebook'LookupPerson
   , phonebook'LookupPersonByName
+  , phonebook'InsertPerson
   , address'Mk
   , person'Mk
   , lookupPerson'Mk
   , lookupPersonByName'Mk
+  , insertPerson'Mk
   , personId'Mk
   , name'Mk
   , phone'Mk
@@ -47,6 +50,7 @@ module Phonebook
   , person'
   , lookupPerson'
   , lookupPersonByName'
+  , insertPerson'
   , personId'
   , name'
   , phone'
@@ -64,6 +68,7 @@ module Phonebook
   , person'friends
   , lookupPerson'id
   , lookupPersonByName'name
+  , insertPerson'person
   , phonebook'HttpClient'SendRequest
   ) where
 
@@ -145,6 +150,11 @@ data LookupPersonByName = LookupPersonByName
   { lookupPersonByNameName :: Name
   } deriving (P.Show, P.Eq)
 
+-- Struct: InsertPerson
+data InsertPerson = InsertPerson
+  { insertPersonPerson :: Person
+  } deriving (P.Show, P.Eq)
+
 -- Enumeration: State
 data State
   = State'CA 
@@ -164,6 +174,9 @@ phonebook'LookupPerson = C.unsafeExpr P.. Ast.Ast'StructCall P.. Ast.StructCall 
 
 phonebook'LookupPersonByName :: C.Expr LookupPersonByName -> C.Expr [Person]
 phonebook'LookupPersonByName = C.unsafeExpr P.. Ast.Ast'StructCall P.. Ast.StructCall "LookupPersonByName" P.. Ast.toAst
+
+phonebook'InsertPerson :: C.Expr InsertPerson -> C.Expr PersonId
+phonebook'InsertPerson = C.unsafeExpr P.. Ast.Ast'StructCall P.. Ast.StructCall "InsertPerson" P.. Ast.toAst
 
 personId'Mk :: C.Expr (R.Text -> PersonId)
 personId'Mk = C.unsafeWrapExpr
@@ -254,6 +267,15 @@ lookupPersonByName' = C.unsafeExpr P.. Ast.toAst
 
 lookupPersonByName'name :: C.Path (LookupPersonByName -> Name)
 lookupPersonByName'name = C.unsafePath ["name"]
+
+insertPerson'Mk :: C.Expr (Person -> InsertPerson)
+insertPerson'Mk = C.unsafeStructExpr ["person"]
+
+insertPerson' :: InsertPerson -> C.Expr InsertPerson
+insertPerson' = C.unsafeExpr P.. Ast.toAst
+
+insertPerson'person :: C.Path (InsertPerson -> Person)
+insertPerson'person = C.unsafePath ["person"]
 
 state'CA'Mk :: C.Expr State
 state'CA'Mk = C.unsafeExpr P.. Ast.toAst P.$ State'CA
@@ -576,6 +598,39 @@ instance Ast.ToAst LookupPersonByName where
     { lookupPersonByNameName
     } = Ast.Ast'Struct P.. Ast.Struct P.$ R.fromList
     [ ("name", Ast.toAst lookupPersonByNameName)
+    ]
+
+instance C.HasType InsertPerson where
+  getType _ = "InsertPerson"
+
+instance C.ToVal InsertPerson where
+  toVal InsertPerson
+    { insertPersonPerson
+    } = C.Val'ApiVal P.$ C.ApiVal'Struct P.$ C.Struct P.$ R.fromList
+    [ ("person", C.toVal insertPersonPerson)
+    ]
+
+instance C.FromVal InsertPerson where
+  fromVal = \case
+    C.Val'ApiVal (C.ApiVal'Struct (C.Struct _m)) -> InsertPerson
+      P.<$> C.getMember _m "person"
+    _ -> P.Nothing
+
+instance R.ToJSON InsertPerson where
+  toJSON = R.toJSON P.. C.toVal
+
+instance R.FromJSON InsertPerson where
+  parseJSON _v = do
+    _x <- R.parseJSON _v
+    case C.fromVal _x of
+      P.Nothing -> P.mzero
+      P.Just _y -> P.return _y
+
+instance Ast.ToAst InsertPerson where
+  toAst InsertPerson
+    { insertPersonPerson
+    } = Ast.Ast'Struct P.. Ast.Struct P.$ R.fromList
+    [ ("person", Ast.toAst insertPersonPerson)
     ]
 
 instance C.HasType State where

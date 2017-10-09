@@ -11,7 +11,8 @@
       { "n": "Address", "m": [ {"street":"Street"}, {"city":"City"}, {"zipcode":"Zipcode"}, {"state":"State"} ] },
       { "n": "Person", "m": [ {"name": "Name"}, {"phone": "Phone"}, {"address":{"n":"Option","p":"Address"}}, {"friends": {"n":"List", "p": "PersonId"}} ] },
       { "n": "LookupPerson", "m": [{"id": "PersonId"}], "o": {"n":"Option","p":"Person"} },
-      { "n": "LookupPersonByName", "m": [{"name": "Name"}], "o": {"n":"List","p":"Person"} }
+      { "n": "LookupPersonByName", "m": [{"name": "Name"}], "o": {"n":"List","p":"Person"} },
+      { "n": "InsertPerson", "m": [{"person":"Person"}], "o": "PersonId" }
     ],
     "pull": {
       "protocol": "http",
