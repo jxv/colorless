@@ -72,12 +72,12 @@ class C.ServiceThrower m => Phonebook'Thrower m where
 
 -- Service
 class P.Monad m => Phonebook'Service meta m where
-  lookupPerson :: meta -> LookupPerson -> m (P.Maybe Person)
-  lookupPersonByName :: meta -> LookupPersonByName -> m [Person]
+  phonebook'lookupPerson :: meta -> LookupPerson -> m (P.Maybe Person)
+  phonebook'lookupPersonByName :: meta -> LookupPersonByName -> m [Person]
 
 instance Phonebook'Service meta m => Phonebook'Service meta (M.ExceptT C.Response m) where
-  lookupPerson _meta = M.lift  P.. lookupPerson _meta
-  lookupPersonByName _meta = M.lift  P.. lookupPersonByName _meta
+  phonebook'lookupPerson _meta = M.lift  P.. phonebook'lookupPerson _meta
+  phonebook'lookupPersonByName _meta = M.lift  P.. phonebook'lookupPersonByName _meta
 
 --------------------------------------------------------
 -- Types
@@ -109,28 +109,28 @@ newtype Zipcode = Zipcode R.Text
 
 -- Struct: Address
 data Address = Address
-  { street :: Street
-  , city :: City
-  , zipcode :: Zipcode
-  , state :: State
+  { addressStreet :: Street
+  , addressCity :: City
+  , addressZipcode :: Zipcode
+  , addressState :: State
   } deriving (P.Show, P.Eq)
 
 -- Struct: Person
 data Person = Person
-  { name :: Name
-  , phone :: Phone
-  , address :: (P.Maybe Address)
-  , friends :: [PersonId]
+  { personName :: Name
+  , personPhone :: Phone
+  , personAddress :: (P.Maybe Address)
+  , personFriends :: [PersonId]
   } deriving (P.Show, P.Eq)
 
 -- Struct: LookupPerson
 data LookupPerson = LookupPerson
-  { id :: PersonId
+  { lookupPersonId :: PersonId
   } deriving (P.Show, P.Eq)
 
 -- Struct: LookupPersonByName
 data LookupPersonByName = LookupPersonByName
-  { name :: R.Text
+  { lookupPersonByNameName :: Name
   } deriving (P.Show, P.Eq)
 
 -- Enumeration: State
@@ -187,8 +187,8 @@ phonebook'ApiCall :: (Phonebook'Service meta m, C.ServiceThrower m, C.RuntimeThr
 phonebook'ApiCall meta' apiCall' = case C.parseApiCall phonebook'ApiParser apiCall' of
   P.Nothing -> C.runtimeThrow C.RuntimeError'UnrecognizedCall
   P.Just x' -> case x' of
-    Phonebook'Api'LookupPerson a' -> C.toVal P.<$> lookupPerson meta' a'
-    Phonebook'Api'LookupPersonByName a' -> C.toVal P.<$> lookupPersonByName meta' a'
+    Phonebook'Api'LookupPerson a' -> C.toVal P.<$> phonebook'lookupPerson meta' a'
+    Phonebook'Api'LookupPersonByName a' -> C.toVal P.<$> phonebook'lookupPersonByName meta' a'
 
 -- API Parser
 phonebook'ApiParser :: C.ApiParser Phonebook'Api
@@ -312,15 +312,15 @@ instance R.FromJSON Zipcode where
 
 instance C.ToVal Address where
   toVal Address
-    { street
-    , city
-    , zipcode
-    , state
+    { addressStreet
+    , addressCity
+    , addressZipcode
+    , addressState
     } = C.Val'ApiVal P.$ C.ApiVal'Struct P.$ C.Struct P.$ R.fromList
-    [ ("street", C.toVal street)
-    , ("city", C.toVal city)
-    , ("zipcode", C.toVal zipcode)
-    , ("state", C.toVal state)
+    [ ("street", C.toVal addressStreet)
+    , ("city", C.toVal addressCity)
+    , ("zipcode", C.toVal addressZipcode)
+    , ("state", C.toVal addressState)
     ]
 
 instance C.FromVal Address where
@@ -344,15 +344,15 @@ instance R.FromJSON Address where
 
 instance C.ToVal Person where
   toVal Person
-    { name
-    , phone
-    , address
-    , friends
+    { personName
+    , personPhone
+    , personAddress
+    , personFriends
     } = C.Val'ApiVal P.$ C.ApiVal'Struct P.$ C.Struct P.$ R.fromList
-    [ ("name", C.toVal name)
-    , ("phone", C.toVal phone)
-    , ("address", C.toVal address)
-    , ("friends", C.toVal friends)
+    [ ("name", C.toVal personName)
+    , ("phone", C.toVal personPhone)
+    , ("address", C.toVal personAddress)
+    , ("friends", C.toVal personFriends)
     ]
 
 instance C.FromVal Person where
@@ -376,9 +376,9 @@ instance R.FromJSON Person where
 
 instance C.ToVal LookupPerson where
   toVal LookupPerson
-    { id
+    { lookupPersonId
     } = C.Val'ApiVal P.$ C.ApiVal'Struct P.$ C.Struct P.$ R.fromList
-    [ ("id", C.toVal id)
+    [ ("id", C.toVal lookupPersonId)
     ]
 
 instance C.FromVal LookupPerson where
@@ -399,9 +399,9 @@ instance R.FromJSON LookupPerson where
 
 instance C.ToVal LookupPersonByName where
   toVal LookupPersonByName
-    { name
+    { lookupPersonByNameName
     } = C.Val'ApiVal P.$ C.ApiVal'Struct P.$ C.Struct P.$ R.fromList
-    [ ("name", C.toVal name)
+    [ ("name", C.toVal lookupPersonByNameName)
     ]
 
 instance C.FromVal LookupPersonByName where
@@ -447,5 +447,5 @@ instance R.FromJSON State where
 
 phonebook'Spec :: R.Value
 phonebook'Spec = v
-  where P.Just v = R.decode "{\"colorless\":{\"major\":0,\"minor\":0},\"types\":[{\"n\":\"PersonId\",\"w\":\"String\"},{\"n\":\"Name\",\"w\":\"String\"},{\"n\":\"Phone\",\"w\":\"String\"},{\"n\":\"Street\",\"w\":\"String\"},{\"n\":\"City\",\"w\":\"String\"},{\"n\":\"State\",\"e\":[{\"tag\":\"CA\"},{\"tag\":\"NY\"},{\"tag\":\"TX\"}]},{\"n\":\"Zipcode\",\"w\":\"String\"},{\"n\":\"Address\",\"m\":[{\"street\":\"Street\"},{\"city\":\"City\"},{\"zipcode\":\"Zipcode\"},{\"state\":\"State\"}]},{\"n\":\"Person\",\"m\":[{\"name\":\"Name\"},{\"phone\":\"Phone\"},{\"address\":{\"n\":\"Option\",\"p\":\"Address\"}},{\"friends\":{\"n\":\"List\",\"p\":\"PersonId\"}}]},{\"n\":\"LookupPerson\",\"m\":[{\"id\":\"PersonId\"}],\"o\":{\"n\":\"Option\",\"p\":\"Person\"}},{\"n\":\"LookupPersonByName\",\"m\":[{\"name\":\"String\"}],\"o\":{\"n\":\"List\",\"p\":\"Person\"}}],\"pull\":{\"protocol\":\"http\",\"name\":\"Phonebook\",\"host\":\"127.0.0.1\",\"path\":\"/\",\"port\":8000,\"error\":\"Unit\",\"meta\":\"Unit\"},\"version\":{\"major\":0,\"minor\":0}}"
+  where P.Just v = R.decode "{\"colorless\":{\"major\":0,\"minor\":0},\"types\":[{\"n\":\"PersonId\",\"w\":\"String\"},{\"n\":\"Name\",\"w\":\"String\"},{\"n\":\"Phone\",\"w\":\"String\"},{\"n\":\"Street\",\"w\":\"String\"},{\"n\":\"City\",\"w\":\"String\"},{\"n\":\"State\",\"e\":[{\"tag\":\"CA\"},{\"tag\":\"NY\"},{\"tag\":\"TX\"}]},{\"n\":\"Zipcode\",\"w\":\"String\"},{\"n\":\"Address\",\"m\":[{\"street\":\"Street\"},{\"city\":\"City\"},{\"zipcode\":\"Zipcode\"},{\"state\":\"State\"}]},{\"n\":\"Person\",\"m\":[{\"name\":\"Name\"},{\"phone\":\"Phone\"},{\"address\":{\"n\":\"Option\",\"p\":\"Address\"}},{\"friends\":{\"n\":\"List\",\"p\":\"PersonId\"}}]},{\"n\":\"LookupPerson\",\"m\":[{\"id\":\"PersonId\"}],\"o\":{\"n\":\"Option\",\"p\":\"Person\"}},{\"n\":\"LookupPersonByName\",\"m\":[{\"name\":\"Name\"}],\"o\":{\"n\":\"List\",\"p\":\"Person\"}}],\"pull\":{\"protocol\":\"http\",\"name\":\"Phonebook\",\"host\":\"127.0.0.1\",\"path\":\"/\",\"port\":8000,\"error\":\"Unit\",\"meta\":\"Unit\"},\"version\":{\"major\":0,\"minor\":0}}"
 

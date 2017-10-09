@@ -28,8 +28,8 @@ module Phonebook
   , LookupPerson(..)
   , LookupPersonByName(..)
   , State(..)
-  , lookupPerson
-  , lookupPersonByName
+  , phonebook'lookupPerson
+  , phonebook'lookupPersonByName
   , address'Mk
   , person'Mk
   , lookupPerson'Mk
@@ -121,28 +121,28 @@ newtype Zipcode = Zipcode R.Text
 
 -- Struct: Address
 data Address = Address
-  { street :: Street
-  , city :: City
-  , zipcode :: Zipcode
-  , state :: State
+  { addressStreet :: Street
+  , addressCity :: City
+  , addressZipcode :: Zipcode
+  , addressState :: State
   } deriving (P.Show, P.Eq)
 
 -- Struct: Person
 data Person = Person
-  { name :: Name
-  , phone :: Phone
-  , address :: (P.Maybe Address)
-  , friends :: [PersonId]
+  { personName :: Name
+  , personPhone :: Phone
+  , personAddress :: (P.Maybe Address)
+  , personFriends :: [PersonId]
   } deriving (P.Show, P.Eq)
 
 -- Struct: LookupPerson
 data LookupPerson = LookupPerson
-  { id :: PersonId
+  { lookupPersonId :: PersonId
   } deriving (P.Show, P.Eq)
 
 -- Struct: LookupPersonByName
 data LookupPersonByName = LookupPersonByName
-  { name :: R.Text
+  { lookupPersonByNameName :: Name
   } deriving (P.Show, P.Eq)
 
 -- Enumeration: State
@@ -159,11 +159,11 @@ data State
 phonebook'Request :: (Ast.ToAst a, C.HasType a, R.FromJSON a) => () -> C.Expr a -> C.Request () a
 phonebook'Request _meta _query = C.Request (C.Version 0 0) phonebook'Version _meta _query
 
-lookupPerson :: C.Expr LookupPerson -> C.Expr (P.Maybe Person)
-lookupPerson = C.unsafeExpr P.. Ast.Ast'StructCall P.. Ast.StructCall "LookupPerson" P.. Ast.toAst
+phonebook'lookupPerson :: C.Expr LookupPerson -> C.Expr (P.Maybe Person)
+phonebook'lookupPerson = C.unsafeExpr P.. Ast.Ast'StructCall P.. Ast.StructCall "LookupPerson" P.. Ast.toAst
 
-lookupPersonByName :: C.Expr LookupPersonByName -> C.Expr [Person]
-lookupPersonByName = C.unsafeExpr P.. Ast.Ast'StructCall P.. Ast.StructCall "LookupPersonByName" P.. Ast.toAst
+phonebook'lookupPersonByName :: C.Expr LookupPersonByName -> C.Expr [Person]
+phonebook'lookupPersonByName = C.unsafeExpr P.. Ast.Ast'StructCall P.. Ast.StructCall "LookupPersonByName" P.. Ast.toAst
 
 personId'Mk :: C.Expr (R.Text -> PersonId)
 personId'Mk = C.unsafeWrapExpr
@@ -246,13 +246,13 @@ lookupPerson' = C.unsafeExpr P.. Ast.toAst
 lookupPerson'id :: C.Path (LookupPerson -> PersonId)
 lookupPerson'id = C.unsafePath ["id"]
 
-lookupPersonByName'Mk :: C.Expr (R.Text -> LookupPersonByName)
+lookupPersonByName'Mk :: C.Expr (Name -> LookupPersonByName)
 lookupPersonByName'Mk = C.unsafeStructExpr ["name"]
 
 lookupPersonByName' :: LookupPersonByName -> C.Expr LookupPersonByName
 lookupPersonByName' = C.unsafeExpr P.. Ast.toAst
 
-lookupPersonByName'name :: C.Path (LookupPersonByName -> R.Text)
+lookupPersonByName'name :: C.Path (LookupPersonByName -> Name)
 lookupPersonByName'name = C.unsafePath ["name"]
 
 state'CA'Mk :: C.Expr State
@@ -304,7 +304,7 @@ instance R.FromJSON PersonId where
       P.Just _y -> P.return _y
 
 instance Ast.ToAst PersonId where
-  toAst (PersonId w) = Ast.toAst w
+  toAst (PersonId _w) = Ast.toAst _w
 
 instance C.HasType Name where
   getType _ = "Name"
@@ -326,7 +326,7 @@ instance R.FromJSON Name where
       P.Just _y -> P.return _y
 
 instance Ast.ToAst Name where
-  toAst (Name w) = Ast.toAst w
+  toAst (Name _w) = Ast.toAst _w
 
 instance C.HasType Phone where
   getType _ = "Phone"
@@ -348,7 +348,7 @@ instance R.FromJSON Phone where
       P.Just _y -> P.return _y
 
 instance Ast.ToAst Phone where
-  toAst (Phone w) = Ast.toAst w
+  toAst (Phone _w) = Ast.toAst _w
 
 instance C.HasType Street where
   getType _ = "Street"
@@ -370,7 +370,7 @@ instance R.FromJSON Street where
       P.Just _y -> P.return _y
 
 instance Ast.ToAst Street where
-  toAst (Street w) = Ast.toAst w
+  toAst (Street _w) = Ast.toAst _w
 
 instance C.HasType City where
   getType _ = "City"
@@ -392,7 +392,7 @@ instance R.FromJSON City where
       P.Just _y -> P.return _y
 
 instance Ast.ToAst City where
-  toAst (City w) = Ast.toAst w
+  toAst (City _w) = Ast.toAst _w
 
 instance C.HasType Zipcode where
   getType _ = "Zipcode"
@@ -414,22 +414,22 @@ instance R.FromJSON Zipcode where
       P.Just _y -> P.return _y
 
 instance Ast.ToAst Zipcode where
-  toAst (Zipcode w) = Ast.toAst w
+  toAst (Zipcode _w) = Ast.toAst _w
 
 instance C.HasType Address where
   getType _ = "Address"
 
 instance C.ToVal Address where
   toVal Address
-    { street
-    , city
-    , zipcode
-    , state
+    { addressStreet
+    , addressCity
+    , addressZipcode
+    , addressState
     } = C.Val'ApiVal P.$ C.ApiVal'Struct P.$ C.Struct P.$ R.fromList
-    [ ("street", C.toVal street)
-    , ("city", C.toVal city)
-    , ("zipcode", C.toVal zipcode)
-    , ("state", C.toVal state)
+    [ ("street", C.toVal addressStreet)
+    , ("city", C.toVal addressCity)
+    , ("zipcode", C.toVal addressZipcode)
+    , ("state", C.toVal addressState)
     ]
 
 instance C.FromVal Address where
@@ -453,15 +453,15 @@ instance R.FromJSON Address where
 
 instance Ast.ToAst Address where
   toAst Address
-    { street
-    , city
-    , zipcode
-    , state
+    { addressStreet
+    , addressCity
+    , addressZipcode
+    , addressState
     } = Ast.Ast'Struct P.. Ast.Struct P.$ R.fromList
-    [ ("street", Ast.toAst street)
-    , ("city", Ast.toAst city)
-    , ("zipcode", Ast.toAst zipcode)
-    , ("state", Ast.toAst state)
+    [ ("street", Ast.toAst addressStreet)
+    , ("city", Ast.toAst addressCity)
+    , ("zipcode", Ast.toAst addressZipcode)
+    , ("state", Ast.toAst addressState)
     ]
 
 instance C.HasType Person where
@@ -469,15 +469,15 @@ instance C.HasType Person where
 
 instance C.ToVal Person where
   toVal Person
-    { name
-    , phone
-    , address
-    , friends
+    { personName
+    , personPhone
+    , personAddress
+    , personFriends
     } = C.Val'ApiVal P.$ C.ApiVal'Struct P.$ C.Struct P.$ R.fromList
-    [ ("name", C.toVal name)
-    , ("phone", C.toVal phone)
-    , ("address", C.toVal address)
-    , ("friends", C.toVal friends)
+    [ ("name", C.toVal personName)
+    , ("phone", C.toVal personPhone)
+    , ("address", C.toVal personAddress)
+    , ("friends", C.toVal personFriends)
     ]
 
 instance C.FromVal Person where
@@ -501,15 +501,15 @@ instance R.FromJSON Person where
 
 instance Ast.ToAst Person where
   toAst Person
-    { name
-    , phone
-    , address
-    , friends
+    { personName
+    , personPhone
+    , personAddress
+    , personFriends
     } = Ast.Ast'Struct P.. Ast.Struct P.$ R.fromList
-    [ ("name", Ast.toAst name)
-    , ("phone", Ast.toAst phone)
-    , ("address", Ast.toAst address)
-    , ("friends", Ast.toAst friends)
+    [ ("name", Ast.toAst personName)
+    , ("phone", Ast.toAst personPhone)
+    , ("address", Ast.toAst personAddress)
+    , ("friends", Ast.toAst personFriends)
     ]
 
 instance C.HasType LookupPerson where
@@ -517,9 +517,9 @@ instance C.HasType LookupPerson where
 
 instance C.ToVal LookupPerson where
   toVal LookupPerson
-    { id
+    { lookupPersonId
     } = C.Val'ApiVal P.$ C.ApiVal'Struct P.$ C.Struct P.$ R.fromList
-    [ ("id", C.toVal id)
+    [ ("id", C.toVal lookupPersonId)
     ]
 
 instance C.FromVal LookupPerson where
@@ -540,9 +540,9 @@ instance R.FromJSON LookupPerson where
 
 instance Ast.ToAst LookupPerson where
   toAst LookupPerson
-    { id
+    { lookupPersonId
     } = Ast.Ast'Struct P.. Ast.Struct P.$ R.fromList
-    [ ("id", Ast.toAst id)
+    [ ("id", Ast.toAst lookupPersonId)
     ]
 
 instance C.HasType LookupPersonByName where
@@ -550,9 +550,9 @@ instance C.HasType LookupPersonByName where
 
 instance C.ToVal LookupPersonByName where
   toVal LookupPersonByName
-    { name
+    { lookupPersonByNameName
     } = C.Val'ApiVal P.$ C.ApiVal'Struct P.$ C.Struct P.$ R.fromList
-    [ ("name", C.toVal name)
+    [ ("name", C.toVal lookupPersonByNameName)
     ]
 
 instance C.FromVal LookupPersonByName where
@@ -573,9 +573,9 @@ instance R.FromJSON LookupPersonByName where
 
 instance Ast.ToAst LookupPersonByName where
   toAst LookupPersonByName
-    { name
+    { lookupPersonByNameName
     } = Ast.Ast'Struct P.. Ast.Struct P.$ R.fromList
-    [ ("name", Ast.toAst name)
+    [ ("name", Ast.toAst lookupPersonByNameName)
     ]
 
 instance C.HasType State where

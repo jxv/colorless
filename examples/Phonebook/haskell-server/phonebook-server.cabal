@@ -18,6 +18,7 @@ executable phonebook-server
   ghc-options: -Wall
   build-depends:
       base >= 4.9 && < 5
+    , containers
     , colorless
     , colorless-scotty
     , mtl

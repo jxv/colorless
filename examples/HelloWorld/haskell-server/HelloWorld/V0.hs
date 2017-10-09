@@ -62,10 +62,10 @@ class C.ServiceThrower m => HelloWorld'Thrower m where
 
 -- Service
 class P.Monad m => HelloWorld'Service meta m where
-  hello :: meta -> Hello -> m R.Text
+  helloWorld'hello :: meta -> Hello -> m R.Text
 
 instance HelloWorld'Service meta m => HelloWorld'Service meta (M.ExceptT C.Response m) where
-  hello _meta = M.lift  P.. hello _meta
+  helloWorld'hello _meta = M.lift  P.. helloWorld'hello _meta
 
 --------------------------------------------------------
 -- Types
@@ -73,7 +73,7 @@ instance HelloWorld'Service meta m => HelloWorld'Service meta (M.ExceptT C.Respo
 
 -- Struct: Hello
 data Hello = Hello
-  { target :: R.Text
+  { helloTarget :: R.Text
   } deriving (P.Show, P.Eq)
 
 --------------------------------------------------------
@@ -123,7 +123,7 @@ helloWorld'ApiCall :: (HelloWorld'Service meta m, C.ServiceThrower m, C.RuntimeT
 helloWorld'ApiCall meta' apiCall' = case C.parseApiCall helloWorld'ApiParser apiCall' of
   P.Nothing -> C.runtimeThrow C.RuntimeError'UnrecognizedCall
   P.Just x' -> case x' of
-    HelloWorld'Api'Hello a' -> C.toVal P.<$> hello meta' a'
+    HelloWorld'Api'Hello a' -> C.toVal P.<$> helloWorld'hello meta' a'
 
 -- API Parser
 helloWorld'ApiParser :: C.ApiParser HelloWorld'Api
@@ -149,9 +149,9 @@ data HelloWorld'Api
 
 instance C.ToVal Hello where
   toVal Hello
-    { target
+    { helloTarget
     } = C.Val'ApiVal P.$ C.ApiVal'Struct P.$ C.Struct P.$ R.fromList
-    [ ("target", C.toVal target)
+    [ ("target", C.toVal helloTarget)
     ]
 
 instance C.FromVal Hello where

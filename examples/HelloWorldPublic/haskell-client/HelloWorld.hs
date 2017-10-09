@@ -18,7 +18,7 @@ module HelloWorld
   , helloWorld'Pull
   , helloWorld'Request
   , Hello(..)
-  , hello
+  , helloWorld'hello
   , hello'Mk
   , hello'
   , hello'target
@@ -55,7 +55,7 @@ helloWorld'Pull = C.Pull "http" "127.0.0.1" "/" 8080
 
 -- Struct: Hello
 data Hello = Hello
-  { target :: R.Text
+  { helloTarget :: R.Text
   } deriving (P.Show, P.Eq)
 
 --------------------------------------------------------
@@ -65,8 +65,8 @@ data Hello = Hello
 helloWorld'Request :: (Ast.ToAst a, C.HasType a, R.FromJSON a) => () -> C.Expr a -> C.Request () a
 helloWorld'Request _meta _query = C.Request (C.Version 0 0) helloWorld'Version _meta _query
 
-hello :: C.Expr Hello -> C.Expr R.Text
-hello = C.unsafeExpr P.. Ast.Ast'StructCall P.. Ast.StructCall "Hello" P.. Ast.toAst
+helloWorld'hello :: C.Expr Hello -> C.Expr R.Text
+helloWorld'hello = C.unsafeExpr P.. Ast.Ast'StructCall P.. Ast.StructCall "Hello" P.. Ast.toAst
 
 hello'Mk :: C.Expr (R.Text -> Hello)
 hello'Mk = C.unsafeStructExpr ["target"]
@@ -99,9 +99,9 @@ instance C.HasType Hello where
 
 instance C.ToVal Hello where
   toVal Hello
-    { target
+    { helloTarget
     } = C.Val'ApiVal P.$ C.ApiVal'Struct P.$ C.Struct P.$ R.fromList
-    [ ("target", C.toVal target)
+    [ ("target", C.toVal helloTarget)
     ]
 
 instance C.FromVal Hello where
@@ -122,8 +122,8 @@ instance R.FromJSON Hello where
 
 instance Ast.ToAst Hello where
   toAst Hello
-    { target
+    { helloTarget
     } = Ast.Ast'Struct P.. Ast.Struct P.$ R.fromList
-    [ ("target", Ast.toAst target)
+    [ ("target", Ast.toAst helloTarget)
     ]
 

@@ -76,7 +76,7 @@ const struct = (types) => types.filter(type => type.n && type.m).map(type => ({
   lowercaseName: lowercaseFirstLetter(langTypeName(type.n)),
   label: langTypeLabel(type.n),
   members: type.m.map(member => {
-    const key = Object.keys(member);
+    const key = Object.keys(member)[0];
     return {
       name: langTypeName(key),
       label: langTypeLabel(key),
@@ -103,7 +103,7 @@ const enumeration = (types) => types.filter(type => type.n && type.e).map(type =
         tag: langTypeName(enumeral.tag),
         label: langTypeLabel(enumeral.tag),
         members: enumeral.m && enumeral.m.map(member => {
-          const key = Object.keys(member);
+          const key = Object.keys(member)[0];
           return {
             name: langTypeName(key),
             label: langTypeLabel(key),

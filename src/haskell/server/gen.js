@@ -110,7 +110,7 @@ const mkServiceCalls = (s) => {
     .filter(isFunc);
 };
 
-const genService = (name, calls) => {
+const genService = (name, lowercaseName, calls) => {
   var lines = new Lines([
     '\n',
     '-- Service\n',
@@ -118,7 +118,7 @@ const genService = (name, calls) => {
   ]);
   calls.forEach(call =>
     lines.add([
-      '  ', call.func, ' :: meta ->', call.name ? (' ' + call.name + ' ->') : '', ' m ', call.output, '\n',
+      '  ', lowercaseName, '\'', call.func, ' :: meta ->', call.name ? (' ' + call.name + ' ->') : '', ' m ', call.output, '\n',
     ])
   );
 
@@ -128,7 +128,7 @@ const genService = (name, calls) => {
   ]);
   calls.forEach(call =>
     lines.add([
-      '  ', call.func, ' _meta = M.lift ', call.name ? ' P.. ' : ' P.$ ', call.func, ' _meta\n',
+      '  ', lowercaseName, '\'', call.func, ' _meta = M.lift ', call.name ? ' P.. ' : ' P.$ ', lowercaseName, '\'', call.func, ' _meta\n',
     ])
   );
 
@@ -227,12 +227,12 @@ const genApiLookup = (name, lowercaseName, calls) => {
   ]);
   calls.hollow.forEach(hollow =>
     lines.add([
-      '    ', name, '\'Api\'', hollow.name, ' -> C.toVal P.<$> ', hollow.func, ' meta\'\n',
+      '    ', name, '\'Api\'', hollow.name, ' -> C.toVal P.<$> ', lowercaseName, '\'', hollow.func, ' meta\'\n',
     ])
   );
   calls.filled.forEach(filled =>
     lines.add([
-      '    ', name, '\'Api\'', filled.name, ' a\' -> C.toVal P.<$> ', filled.func, ' meta\' a\'\n',
+      '    ', name, '\'Api\'', filled.name, ' a\' -> C.toVal P.<$> ', lowercaseName, '\'', filled.func, ' meta\' a\'\n',
     ])
   );
   return lines;
@@ -376,7 +376,7 @@ const gen = (s, addons) => {
   lines.add('--------------------------------------------------------\n');
 
   lines.add(genThrower(s.name, s.lowercaseName, s.error));
-  lines.add(genService(s.name, serviceCalls));
+  lines.add(genService(s.name, s.lowercaseName, serviceCalls));
 
   lines.add('\n');
   lines.add('--------------------------------------------------------\n');

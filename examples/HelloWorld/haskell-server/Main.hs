@@ -11,7 +11,7 @@ newtype App a = App { unApp :: IO a }
   deriving (Functor, Applicative, Monad, MonadIO)
 
 instance HelloWorld'Service () App where
-  hello () Hello{target} = return $ "Hello, " `mappend` target
+  helloWorld'hello () Hello{helloTarget} = return $ "Hello, " `mappend` helloTarget
 
 main :: IO ()
 main = runServer helloWorld'Pull unApp routes
