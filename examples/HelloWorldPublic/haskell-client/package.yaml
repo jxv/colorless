@@ -1,0 +1,29 @@
+name: helloworld-client
+version: "0.0.0"
+maintainer: Joe Vargas
+synopsis: Hello World Example
+description: Hello World Example
+stability: experimental
+license: MIT
+
+dependencies:
+  - aeson
+  - base >= 4.9 && < 5
+  - bytestring
+  - colorless
+  - colorless-http-client
+  - mtl
+  - text
+  - http-client-tls
+
+default-extensions:
+  - GeneralizedNewtypeDeriving
+  - NamedFieldPuns
+  - OverloadedStrings
+  - FlexibleInstances
+  - MultiParamTypeClasses
+
+executables:
+  helloworld-client:
+    main: Main.hs
+    ghc-options: -Wall
