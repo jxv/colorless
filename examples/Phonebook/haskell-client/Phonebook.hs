@@ -315,6 +315,8 @@ instance C.ToVal PersonId where
 instance C.FromVal PersonId where
   fromVal _v = PersonId P.<$> C.fromVal _v
 
+instance C.ToExpr PersonId
+
 instance R.ToJSON PersonId where
   toJSON = R.toJSON P.. C.toVal
 
@@ -336,6 +338,8 @@ instance C.ToVal Name where
 
 instance C.FromVal Name where
   fromVal _v = Name P.<$> C.fromVal _v
+
+instance C.ToExpr Name
 
 instance R.ToJSON Name where
   toJSON = R.toJSON P.. C.toVal
@@ -359,6 +363,8 @@ instance C.ToVal Phone where
 instance C.FromVal Phone where
   fromVal _v = Phone P.<$> C.fromVal _v
 
+instance C.ToExpr Phone
+
 instance R.ToJSON Phone where
   toJSON = R.toJSON P.. C.toVal
 
@@ -380,6 +386,8 @@ instance C.ToVal Street where
 
 instance C.FromVal Street where
   fromVal _v = Street P.<$> C.fromVal _v
+
+instance C.ToExpr Street
 
 instance R.ToJSON Street where
   toJSON = R.toJSON P.. C.toVal
@@ -403,6 +411,8 @@ instance C.ToVal City where
 instance C.FromVal City where
   fromVal _v = City P.<$> C.fromVal _v
 
+instance C.ToExpr City
+
 instance R.ToJSON City where
   toJSON = R.toJSON P.. C.toVal
 
@@ -424,6 +434,8 @@ instance C.ToVal Zipcode where
 
 instance C.FromVal Zipcode where
   fromVal _v = Zipcode P.<$> C.fromVal _v
+
+instance C.ToExpr Zipcode
 
 instance R.ToJSON Zipcode where
   toJSON = R.toJSON P.. C.toVal
@@ -462,6 +474,8 @@ instance C.FromVal Address where
       P.<*> C.getMember _m "zipcode"
       P.<*> C.getMember _m "state"
     _ -> P.Nothing
+
+instance C.ToExpr Address
 
 instance R.ToJSON Address where
   toJSON = R.toJSON P.. C.toVal
@@ -511,6 +525,8 @@ instance C.FromVal Person where
       P.<*> C.getMember _m "friends"
     _ -> P.Nothing
 
+instance C.ToExpr Person
+
 instance R.ToJSON Person where
   toJSON = R.toJSON P.. C.toVal
 
@@ -550,6 +566,8 @@ instance C.FromVal LookupPerson where
       P.<$> C.getMember _m "id"
     _ -> P.Nothing
 
+instance C.ToExpr LookupPerson
+
 instance R.ToJSON LookupPerson where
   toJSON = R.toJSON P.. C.toVal
 
@@ -583,6 +601,8 @@ instance C.FromVal LookupPersonByName where
       P.<$> C.getMember _m "name"
     _ -> P.Nothing
 
+instance C.ToExpr LookupPersonByName
+
 instance R.ToJSON LookupPersonByName where
   toJSON = R.toJSON P.. C.toVal
 
@@ -615,6 +635,8 @@ instance C.FromVal InsertPerson where
     C.Val'ApiVal (C.ApiVal'Struct (C.Struct _m)) -> InsertPerson
       P.<$> C.getMember _m "person"
     _ -> P.Nothing
+
+instance C.ToExpr InsertPerson
 
 instance R.ToJSON InsertPerson where
   toJSON = R.toJSON P.. C.toVal
@@ -650,6 +672,8 @@ instance C.FromVal State where
       ("TX", P.Nothing) -> P.Just State'TX
       _ -> P.Nothing
     _ -> P.Nothing
+
+instance C.ToExpr State
 
 instance R.ToJSON State where
   toJSON = R.toJSON P.. C.toVal

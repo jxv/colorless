@@ -12,7 +12,7 @@ main :: IO ()
 main = do
   manager <- newTlsManager
 
-  let helloBob = helloWorld'Hello $ hello'Mk <:> string "Bob"
+  let helloBob = helloWorld'Hello $ hello'Mk <: "Bob"
   let req = helloWorld'request () helloBob
 
   putStrLn "\n\"Request\""

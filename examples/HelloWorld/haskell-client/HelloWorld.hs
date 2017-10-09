@@ -110,6 +110,8 @@ instance C.FromVal Hello where
       P.<$> C.getMember _m "target"
     _ -> P.Nothing
 
+instance C.ToExpr Hello
+
 instance R.ToJSON Hello where
   toJSON = R.toJSON P.. C.toVal
 

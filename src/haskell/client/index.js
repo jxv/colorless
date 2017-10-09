@@ -340,6 +340,14 @@ const genEnumeralExpr = ({name, lowercaseName, enumerals}) => {
   return lines;
 };
 
+const genToExpr = ({name}) => {
+  return new Lines([
+    '\n',
+    'instance C.ToExpr ', name, '\n',
+  ]);
+}
+
+
 const gen = (specs, addons) => {
   const spec = specs[specs.length - 1];
   const exportTypes = mkExportTypes(spec);
@@ -419,6 +427,7 @@ const gen = (specs, addons) => {
     lines.add(genHasType(ty));
     lines.add(genWrapToVal(ty));
     lines.add(genWrapFromVal(ty));
+    lines.add(genToExpr(ty));
     lines.add(genToJson(ty));
     lines.add(genFromJson(ty));
     lines.add(genWrapToAst(ty));
@@ -427,6 +436,7 @@ const gen = (specs, addons) => {
     lines.add(genHasType(ty));
     lines.add(genStructToVal(ty));
     lines.add(genStructFromVal(ty));
+    lines.add(genToExpr(ty));
     lines.add(genToJson(ty));
     lines.add(genFromJson(ty));
     lines.add(genStructToAst(ty));
@@ -435,6 +445,7 @@ const gen = (specs, addons) => {
     lines.add(genHasType(ty));
     lines.add(genEnumerationToVal(ty));
     lines.add(genEnumerationFromVal(ty));
+    lines.add(genToExpr(ty));
     lines.add(genToJson(ty));
     lines.add(genFromJson(ty));
     lines.add(genEnumerationToAst(ty));
