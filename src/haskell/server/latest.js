@@ -11,15 +11,15 @@ const genModule = (prefix, name, lowercaseName, major, exportTypes, values) => {
     '\n',
     '-- Module\n',
     'module ', prefix, '\n',
-    '  ( handler\'Map\n',
-    '  , handler\'PublicSpec\n',
+    '  ( ', lowercaseName, '\'handlerMap\n',
+    '  , ', lowercaseName, '\'spec\n',
     '  , Meta\'Middlewares(..)\n',
   ]);
   values.forEach(value => lines.add('  , ' + value + '\n'));
   lines.add([
     '  , V', major, '.', name,'\'Service(..)\n',
     '  , V', major, '.', name,'\'Thrower(..)\n',
-    '  , V', major, '.', lowercaseName,'\'Pull\n',
+    '  , V', major, '.', lowercaseName,'\'pull\n',
   ]);
   lines.add(exportTypes.map(type => '  , V' + major  + '.' + type + '(..)\n'))
   lines.add('  ) where\n');
@@ -45,10 +45,10 @@ const genVersionImports = (prefix, name, lowercaseName, major, exportTypes) => {
   lines.add([
     '  ( ', name,'\'Service(..)\n',
     '  , ', name,'\'Thrower(..)\n',
-    '  , ', lowercaseName, '\'Handler\n',
-    '  , ', lowercaseName, '\'Version\n',
-    '  , ', lowercaseName, '\'Pull\n',
-    '  , ', lowercaseName, '\'Spec\n',
+    '  , ', lowercaseName, '\'handler\n',
+    '  , ', lowercaseName, '\'version\n',
+    '  , ', lowercaseName, '\'pull\n',
+    '  , ', lowercaseName, '\'spec\n',
   ]);
   lines.add(exportTypes.map(type => '  , ' + type + '(..)\n'));
   lines.add('  )\n');
@@ -79,7 +79,7 @@ const genHandlerMap = (specs) => {
   var lines = new Lines();
   lines.add([
     '\n',
-    'handler\'Map\n',
+    specs[0].lowercaseName, '\'handlerMap\n',
     '  ::\n',
     '    ( R.MonadIO m\n',
   ]);
@@ -97,7 +97,7 @@ const genHandlerMap = (specs) => {
   lines.add([
     '\n',
     '  -> R.Map C.Major (C.Minor, C.Request -> m (P.Either C.Response C.Response))\n',
-    'handler\'Map options metaMiddlewares = R.fromList\n',
+    specs[0].lowercaseName, '\'handlerMap options metaMiddlewares = R.fromList\n',
   ]);
 
   lines.add(
@@ -115,12 +115,12 @@ const genHandlerMap = (specs) => {
 const genPublicSpec = (lowercaseName, specs) => {
   var lines = new Lines([
     '\n',
-    'handler\'PublicSpec :: R.Value\n',
-    'handler\'PublicSpec = R.toJSON\n',
-    '  [ V', specs[0].version.major, '\.', specs[0].lowercaseName, '\'Spec\n',
+    lowercaseName, '\'spec :: R.Value\n',
+    lowercaseName, '\'spec = R.toJSON\n',
+    '  [ V', specs[0].version.major, '\.', specs[0].lowercaseName, '\'spec\n',
   ]);
   specs.slice(1).forEach(spec =>
-    lines.add(['  , V', spec.version.major,  '\.', specs[0].lowercaseName, '\'Spec\n'])
+    lines.add(['  , V', spec.version.major,  '\.', specs[0].lowercaseName, '\'spec\n'])
   );
   lines.add('  ]\n');
   return lines;

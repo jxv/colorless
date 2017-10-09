@@ -3,14 +3,14 @@
 
 -- Module
 module HelloWorld
-  ( handler'Map
-  , handler'PublicSpec
+  ( helloWorld'handlerMap
+  , helloWorld'spec
   , Meta'Middlewares(..)
-  , helloWorld'Scotty'SendResponse
-  , helloWorld'Scotty'GetSpec
+  , helloWorld'Scotty'Post
+  , helloWorld'Scotty'Get
   , V0.HelloWorld'Service(..)
   , V0.HelloWorld'Thrower(..)
-  , V0.helloWorld'Pull
+  , V0.helloWorld'pull
   , V0.Hello(..)
   ) where
 
@@ -22,10 +22,10 @@ import qualified Colorless.Server.Scotty as Scotty
 import qualified HelloWorld.V0 as V0
   ( HelloWorld'Service(..)
   , HelloWorld'Thrower(..)
-  , helloWorld'Handler
-  , helloWorld'Version
-  , helloWorld'Pull
-  , helloWorld'Spec
+  , helloWorld'handler
+  , helloWorld'version
+  , helloWorld'pull
+  , helloWorld'spec
   , Hello(..)
   )
 
@@ -34,7 +34,7 @@ data Meta'Middlewares m meta0
   { meta'Middleware0 :: () -> m meta0
   }
 
-handler'Map
+helloWorld'handlerMap
   ::
     ( R.MonadIO m
     , V0.HelloWorld'Service meta0 m
@@ -42,16 +42,16 @@ handler'Map
   => C.Options
   -> Meta'Middlewares m meta0
   -> R.Map C.Major (C.Minor, C.Request -> m (P.Either C.Response C.Response))
-handler'Map options metaMiddlewares = R.fromList
+helloWorld'handlerMap options metaMiddlewares = R.fromList
     [ (0, (0, V0.helloWorld'Handler options P.$ meta'Middleware0 metaMiddlewares))
     ]
 
-handler'PublicSpec :: R.Value
-handler'PublicSpec = R.toJSON
-  [ V0.helloWorld'Spec
+helloWorld'spec :: R.Value
+helloWorld'spec = R.toJSON
+  [ V0.helloWorld'spec
   ]
 
-helloWorld'Scotty'SendResponse
+helloWorld'Scotty'Post
   ::
     ( Scotty.ScottyError e
     , R.MonadIO m
@@ -61,8 +61,8 @@ helloWorld'Scotty'SendResponse
   -> Meta'Middlewares m meta0
   -> C.Pull
   -> Scotty.ScottyT e m ()
-helloWorld'Scotty'SendResponse options metaMiddlewares pull = Scotty.sendResponse pull (handler'Map options metaMiddlewares)
+helloWorld'Scotty'Post options metaMiddlewares pull = Scotty.sendResponse pull (helloWorld'handlerMap options metaMiddlewares)
 
-helloWorld'Scotty'GetSpec :: (Scotty.ScottyError e, R.MonadIO m) => C.Pull -> Scotty.ScottyT e m ()
-helloWorld'Scotty'GetSpec = Scotty.getSpec handler'PublicSpec
+helloWorld'Scotty'Get :: (Scotty.ScottyError e, R.MonadIO m) => C.Pull -> Scotty.ScottyT e m ()
+helloWorld'Scotty'Get = Scotty.getSpec helloWorld'spec
 

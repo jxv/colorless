@@ -14,10 +14,10 @@
 
 -- Module
 module Phonebook.V0
-  ( phonebook'Version
-  , phonebook'Pull
-  , phonebook'Handler
-  , phonebook'Spec
+  ( phonebook'version
+  , phonebook'pull
+  , phonebook'handler
+  , phonebook'spec
   , Phonebook'Thrower(..)
   , Phonebook'Service(..)
   , PersonId(..)
@@ -31,8 +31,8 @@ module Phonebook.V0
   , LookupPerson(..)
   , LookupPersonByName(..)
   , State(..)
-  , phonebook'Scotty'SendResponse
-  , phonebook'Scotty'GetSpec
+  , phonebook'Scotty'Post
+  , phonebook'Scotty'Get
   ) where
 
 -- Imports
@@ -55,11 +55,11 @@ import qualified Colorless.Server.Scotty as Scotty
 --------------------------------------------------------
 
 -- Version
-phonebook'Version :: C.Version
-phonebook'Version = C.Version 0 0
+phonebook'version :: C.Version
+phonebook'version = C.Version 0 0
 
-phonebook'Pull :: C.Pull
-phonebook'Pull = C.Pull "http" "127.0.0.1" "/" 8000
+phonebook'pull :: C.Pull
+phonebook'pull = C.Pull "http" "127.0.0.1" "/" 8000
 
 --------------------------------------------------------
 -- Interfaces
@@ -72,12 +72,12 @@ class C.ServiceThrower m => Phonebook'Thrower m where
 
 -- Service
 class P.Monad m => Phonebook'Service meta m where
-  phonebook'lookupPerson :: meta -> LookupPerson -> m (P.Maybe Person)
-  phonebook'lookupPersonByName :: meta -> LookupPersonByName -> m [Person]
+  phonebook'LookupPerson :: meta -> LookupPerson -> m (P.Maybe Person)
+  phonebook'LookupPersonByName :: meta -> LookupPersonByName -> m [Person]
 
 instance Phonebook'Service meta m => Phonebook'Service meta (M.ExceptT C.Response m) where
-  phonebook'lookupPerson _meta = M.lift  P.. phonebook'lookupPerson _meta
-  phonebook'lookupPersonByName _meta = M.lift  P.. phonebook'lookupPersonByName _meta
+  phonebook'LookupPerson _meta = M.lift  P.. phonebook'LookupPerson _meta
+  phonebook'LookupPersonByName _meta = M.lift  P.. phonebook'LookupPersonByName _meta
 
 --------------------------------------------------------
 -- Types
@@ -144,29 +144,29 @@ data State
 -- Add-ons
 --------------------------------------------------------
 
-phonebook'Scotty'SendResponse
+phonebook'Scotty'Post
   :: (Scotty.ScottyError e, R.MonadIO m, Phonebook'Service meta m)
   => C.Options
   -> (() -> m meta)
   -> C.Pull
   -> Scotty.ScottyT e m ()
-phonebook'Scotty'SendResponse _options _metaMiddleware _pull = Scotty.sendResponseSingleton _pull phonebook'Version (phonebook'Handler _options _metaMiddleware)
+phonebook'Scotty'Post _options _metaMiddleware _pull = Scotty.sendResponseSingleton _pull phonebook'version (phonebook'handler _options _metaMiddleware)
 
-phonebook'Scotty'GetSpec :: (Scotty.ScottyError e, R.MonadIO m) => C.Pull -> Scotty.ScottyT e m ()
-phonebook'Scotty'GetSpec = Scotty.getSpec P.$ R.toJSON [phonebook'Spec]
+phonebook'Scotty'Get :: (Scotty.ScottyError e, R.MonadIO m) => C.Pull -> Scotty.ScottyT e m ()
+phonebook'Scotty'Get = Scotty.getSpec P.$ R.toJSON [phonebook'spec]
 
 --------------------------------------------------------
 -- Request handling
 --------------------------------------------------------
 
 -- Handler
-phonebook'Handler
+phonebook'handler
   :: (Phonebook'Service meta m, R.MonadIO m)
   => C.Options
   -> (() -> m meta)
   -> C.Request
   -> m (P.Either C.Response C.Response)
-phonebook'Handler options metaMiddleware C.Request{meta,query} = M.runExceptT P.$ do
+phonebook'handler options metaMiddleware C.Request{meta,query} = M.runExceptT P.$ do
   meta' <- P.maybe (C.runtimeThrow C.RuntimeError'UnparsableMeta) P.return (C.fromValFromJson meta)
   xformMeta <- M.lift P.$ metaMiddleware meta'
   envRef <- R.liftIO C.emptyEnv
@@ -187,8 +187,8 @@ phonebook'ApiCall :: (Phonebook'Service meta m, C.ServiceThrower m, C.RuntimeThr
 phonebook'ApiCall meta' apiCall' = case C.parseApiCall phonebook'ApiParser apiCall' of
   P.Nothing -> C.runtimeThrow C.RuntimeError'UnrecognizedCall
   P.Just x' -> case x' of
-    Phonebook'Api'LookupPerson a' -> C.toVal P.<$> phonebook'lookupPerson meta' a'
-    Phonebook'Api'LookupPersonByName a' -> C.toVal P.<$> phonebook'lookupPersonByName meta' a'
+    Phonebook'Api'LookupPerson a' -> C.toVal P.<$> phonebook'LookupPerson meta' a'
+    Phonebook'Api'LookupPersonByName a' -> C.toVal P.<$> phonebook'LookupPersonByName meta' a'
 
 -- API Parser
 phonebook'ApiParser :: C.ApiParser Phonebook'Api
@@ -445,7 +445,7 @@ instance R.FromJSON State where
       P.Nothing -> P.mzero
       P.Just _y -> P.return _y
 
-phonebook'Spec :: R.Value
-phonebook'Spec = v
+phonebook'spec :: R.Value
+phonebook'spec = v
   where P.Just v = R.decode "{\"colorless\":{\"major\":0,\"minor\":0},\"types\":[{\"n\":\"PersonId\",\"w\":\"String\"},{\"n\":\"Name\",\"w\":\"String\"},{\"n\":\"Phone\",\"w\":\"String\"},{\"n\":\"Street\",\"w\":\"String\"},{\"n\":\"City\",\"w\":\"String\"},{\"n\":\"State\",\"e\":[{\"tag\":\"CA\"},{\"tag\":\"NY\"},{\"tag\":\"TX\"}]},{\"n\":\"Zipcode\",\"w\":\"String\"},{\"n\":\"Address\",\"m\":[{\"street\":\"Street\"},{\"city\":\"City\"},{\"zipcode\":\"Zipcode\"},{\"state\":\"State\"}]},{\"n\":\"Person\",\"m\":[{\"name\":\"Name\"},{\"phone\":\"Phone\"},{\"address\":{\"n\":\"Option\",\"p\":\"Address\"}},{\"friends\":{\"n\":\"List\",\"p\":\"PersonId\"}}]},{\"n\":\"LookupPerson\",\"m\":[{\"id\":\"PersonId\"}],\"o\":{\"n\":\"Option\",\"p\":\"Person\"}},{\"n\":\"LookupPersonByName\",\"m\":[{\"name\":\"Name\"}],\"o\":{\"n\":\"List\",\"p\":\"Person\"}}],\"pull\":{\"protocol\":\"http\",\"name\":\"Phonebook\",\"host\":\"127.0.0.1\",\"path\":\"/\",\"port\":8000,\"error\":\"Unit\",\"meta\":\"Unit\"},\"version\":{\"major\":0,\"minor\":0}}"
 

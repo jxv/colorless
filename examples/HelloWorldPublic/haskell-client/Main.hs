@@ -12,13 +12,13 @@ main :: IO ()
 main = do
   manager <- newTlsManager
 
-  let helloBob = helloWorld'hello $ hello'Mk <:> string "Bob"
-  let req = helloWorld'Request () helloBob
+  let helloBob = helloWorld'Hello $ hello'Mk <:> string "Bob"
+  let req = helloWorld'request () helloBob
 
   putStrLn "\n\"Request\""
   printJSON req
 
-  resp <- helloWorld'HttpClient'SendRequest manager helloWorld'Pull [] req
+  resp <- helloWorld'HttpClient'SendRequest manager helloWorld'pull [] req
 
   putStrLn "\n\"Response\""
   printJSON $ snd resp

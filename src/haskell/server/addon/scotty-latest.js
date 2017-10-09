@@ -5,15 +5,15 @@ const importing = (s) => [
 ];
 
 const exporting = (s) => [
-    s.lowercaseName + '\'Scotty\'SendResponse',
-    s.lowercaseName + '\'Scotty\'GetSpec',
+    s.lowercaseName + '\'Scotty\'Post',
+    s.lowercaseName + '\'Scotty\'Get',
 ];
 
 const gen = (specs) => {
   const s = specs[specs.length - 1];
   var lines = new Lines([
     '\n',
-    s.lowercaseName, '\'Scotty\'SendResponse\n',
+    s.lowercaseName, '\'Scotty\'Post\n',
     '  ::\n',
     '    ( Scotty.ScottyError e\n',
     '    , R.MonadIO m\n',
@@ -33,10 +33,10 @@ const gen = (specs) => {
     '\n',
     '  -> C.Pull\n',
     '  -> Scotty.ScottyT e m ()\n',
-    s.lowercaseName, '\'Scotty\'SendResponse options metaMiddlewares pull = Scotty.sendResponse pull (handler\'Map options metaMiddlewares)\n',
+    s.lowercaseName, '\'Scotty\'Post options metaMiddlewares pull = Scotty.sendResponse pull (', s.lowercaseName, '\'handlerMap options metaMiddlewares)\n',
     '\n',
-    s.lowercaseName, '\'Scotty\'GetSpec :: (Scotty.ScottyError e, R.MonadIO m) => C.Pull -> Scotty.ScottyT e m ()\n',
-    s.lowercaseName, '\'Scotty\'GetSpec = Scotty.getSpec handler\'PublicSpec\n',
+    s.lowercaseName, '\'Scotty\'Get :: (Scotty.ScottyError e, R.MonadIO m) => C.Pull -> Scotty.ScottyT e m ()\n',
+    s.lowercaseName, '\'Scotty\'Get = Scotty.getSpec ', s.lowercaseName,'\'spec\n',
   ]);
   return lines;
 };

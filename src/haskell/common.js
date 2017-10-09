@@ -53,8 +53,8 @@ const genVersion = (lowercaseName, major, minor) => {
   return new Lines([
     '\n',
     '-- Version\n',
-    lowercaseName, '\'Version :: C.Version\n',
-    lowercaseName, '\'Version = C.Version ', major, ' ', minor, '\n',
+    lowercaseName, '\'version :: C.Version\n',
+    lowercaseName, '\'version = C.Version ', major, ' ', minor, '\n',
   ]);
 };
 
@@ -280,8 +280,8 @@ const genPull = ({lowercaseName, pull}) => {
   var lines = new Lines();
   lines.add([
     '\n',
-    lowercaseName, '\'Pull :: C.Pull\n',
-    lowercaseName, '\'Pull = C.Pull "', pull.protocol, '" "', pull.host, '" "', pull.path, '" ', pull.port, '\n',
+    lowercaseName, '\'pull :: C.Pull\n',
+    lowercaseName, '\'pull = C.Pull "', pull.protocol, '" "', pull.host, '" "', pull.path, '" ', pull.port, '\n',
   ]);
   return lines;
 };

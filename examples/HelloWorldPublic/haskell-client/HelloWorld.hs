@@ -14,11 +14,11 @@
 
 -- Module
 module HelloWorld
-  ( helloWorld'Version
-  , helloWorld'Pull
-  , helloWorld'Request
+  ( helloWorld'version
+  , helloWorld'pull
+  , helloWorld'request
   , Hello(..)
-  , helloWorld'hello
+  , helloWorld'Hello
   , hello'Mk
   , hello'
   , hello'target
@@ -43,11 +43,11 @@ import qualified Colorless.Client.HttpClient as HttpClient
 --------------------------------------------------------
 
 -- Version
-helloWorld'Version :: C.Version
-helloWorld'Version = C.Version 0 0
+helloWorld'version :: C.Version
+helloWorld'version = C.Version 0 0
 
-helloWorld'Pull :: C.Pull
-helloWorld'Pull = C.Pull "http" "127.0.0.1" "/" 8080
+helloWorld'pull :: C.Pull
+helloWorld'pull = C.Pull "http" "127.0.0.1" "/" 8080
 
 --------------------------------------------------------
 -- Types
@@ -62,11 +62,11 @@ data Hello = Hello
 -- API
 --------------------------------------------------------
 
-helloWorld'Request :: (Ast.ToAst a, C.HasType a, R.FromJSON a) => () -> C.Expr a -> C.Request () a
-helloWorld'Request _meta _query = C.Request (C.Version 0 0) helloWorld'Version _meta _query
+helloWorld'request :: (Ast.ToAst a, C.HasType a, R.FromJSON a) => () -> C.Expr a -> C.Request () a
+helloWorld'request _meta _query = C.Request (C.Version 0 0) helloWorld'version _meta _query
 
-helloWorld'hello :: C.Expr Hello -> C.Expr R.Text
-helloWorld'hello = C.unsafeExpr P.. Ast.Ast'StructCall P.. Ast.StructCall "Hello" P.. Ast.toAst
+helloWorld'Hello :: C.Expr Hello -> C.Expr R.Text
+helloWorld'Hello = C.unsafeExpr P.. Ast.Ast'StructCall P.. Ast.StructCall "Hello" P.. Ast.toAst
 
 hello'Mk :: C.Expr (R.Text -> Hello)
 hello'Mk = C.unsafeStructExpr ["target"]

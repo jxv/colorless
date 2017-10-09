@@ -118,7 +118,7 @@ const genService = (name, lowercaseName, calls) => {
   ]);
   calls.forEach(call =>
     lines.add([
-      '  ', lowercaseName, '\'', call.func, ' :: meta ->', call.name ? (' ' + call.name + ' ->') : '', ' m ', call.output, '\n',
+      '  ', lowercaseName, '\'', call.name, ' :: meta ->', call.name ? (' ' + call.name + ' ->') : '', ' m ', call.output, '\n',
     ])
   );
 
@@ -128,7 +128,7 @@ const genService = (name, lowercaseName, calls) => {
   ]);
   calls.forEach(call =>
     lines.add([
-      '  ', lowercaseName, '\'', call.func, ' _meta = M.lift ', call.name ? ' P.. ' : ' P.$ ', lowercaseName, '\'', call.func, ' _meta\n',
+      '  ', lowercaseName, '\'', call.name, ' _meta = M.lift ', call.name ? ' P.. ' : ' P.$ ', lowercaseName, '\'', call.name, ' _meta\n',
     ])
   );
 
@@ -227,12 +227,12 @@ const genApiLookup = (name, lowercaseName, calls) => {
   ]);
   calls.hollow.forEach(hollow =>
     lines.add([
-      '    ', name, '\'Api\'', hollow.name, ' -> C.toVal P.<$> ', lowercaseName, '\'', hollow.func, ' meta\'\n',
+      '    ', name, '\'Api\'', hollow.name, ' -> C.toVal P.<$> ', lowercaseName, '\'', hollow.name, ' meta\'\n',
     ])
   );
   calls.filled.forEach(filled =>
     lines.add([
-      '    ', name, '\'Api\'', filled.name, ' a\' -> C.toVal P.<$> ', lowercaseName, '\'', filled.func, ' meta\' a\'\n',
+      '    ', name, '\'Api\'', filled.name, ' a\' -> C.toVal P.<$> ', lowercaseName, '\'', filled.name, ' meta\' a\'\n',
     ])
   );
   return lines;
@@ -242,13 +242,13 @@ const genHandleRequest = (name, lowercaseName, meta) => {
   return new Lines([
     '\n',
     '-- Handler\n',
-    lowercaseName, '\'Handler\n',
+    lowercaseName, '\'handler\n',
     '  :: (', name, '\'Service meta m, R.MonadIO m)\n',
     '  => C.Options\n',
     '  -> (', meta, ' -> m meta)\n',
     '  -> C.Request\n',
     '  -> m (P.Either C.Response C.Response)\n',
-    lowercaseName, '\'Handler options metaMiddleware C.Request{meta,query} = M.runExceptT P.$ do\n',
+    lowercaseName, '\'handler options metaMiddleware C.Request{meta,query} = M.runExceptT P.$ do\n',
     '  meta\' <- P.maybe (C.runtimeThrow C.RuntimeError\'UnparsableMeta) P.return (C.fromValFromJson meta)\n',
     '  xformMeta <- M.lift P.$ metaMiddleware meta\'\n',
     '  envRef <- R.liftIO C.emptyEnv\n',
@@ -272,10 +272,10 @@ const genModule = (name, lowercaseName, prefix, version, types, values) => {
     '\n',
     '-- Module\n',
     'module ', prefix, '.V', version.major, '\n',
-    '  ( ', lowercaseName, '\'Version\n',
-    '  , ', lowercaseName, '\'Pull\n',
-    '  , ', lowercaseName,'\'Handler\n',
-    '  , ', lowercaseName,'\'Spec\n',
+    '  ( ', lowercaseName, '\'version\n',
+    '  , ', lowercaseName, '\'pull\n',
+    '  , ', lowercaseName,'\'handler\n',
+    '  , ', lowercaseName,'\'spec\n',
     '  , ', name, '\'Thrower(..)\n',
     '  , ', name, '\'Service(..)\n',
   ]);
@@ -329,8 +329,8 @@ const genSpec = ({lowercaseName, original}) => {
   var lines = new Lines();
   lines.add([
     '\n',
-    lowercaseName, '\'Spec :: R.Value\n',
-    lowercaseName, '\'Spec = v\n',
+    lowercaseName, '\'spec :: R.Value\n',
+    lowercaseName, '\'spec = v\n',
     '  where P.Just v = R.decode ', JSON.stringify(JSON.stringify(original)), '\n',
   ]);
   return lines;

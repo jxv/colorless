@@ -44,9 +44,9 @@ const genModule = (name, lowercaseName, prefix, version, types, values) => {
     '\n',
     '-- Module\n',
     'module ', prefix, '\n',
-    '  ( ', lowercaseName, '\'Version\n',
-    '  , ', lowercaseName, '\'Pull\n',
-    '  , ', lowercaseName, '\'Request\n',
+    '  ( ', lowercaseName, '\'version\n',
+    '  , ', lowercaseName, '\'pull\n',
+    '  , ', lowercaseName, '\'request\n',
   ]);
   types.forEach(type =>
     lines.add([
@@ -86,8 +86,8 @@ const genImports = (imports) => {
 const genRequest = (s) => {
   return new Lines([
     '\n',
-    s.lowercaseName, '\'Request :: (Ast.ToAst a, C.HasType a, R.FromJSON a) => ', s.meta ,' -> C.Expr a -> C.Request ', s.meta,' a\n',
-    s.lowercaseName, '\'Request _meta _query = C.Request (C.Version ', 0,' ', 0, ') ', s.lowercaseName,'\'Version _meta _query\n',
+    s.lowercaseName, '\'request :: (Ast.ToAst a, C.HasType a, R.FromJSON a) => ', s.meta ,' -> C.Expr a -> C.Request ', s.meta,' a\n',
+    s.lowercaseName, '\'request _meta _query = C.Request (C.Version ', 0,' ', 0, ') ', s.lowercaseName,'\'version _meta _query\n',
   ]);
 };
 
@@ -96,32 +96,32 @@ const genService = (s) => {
   s.hollow.filter(isFunc).forEach(call => {
     lines.add([
       '\n',
-      s.lowercaseName, '\'', call.func, ' :: C.Expr ', call.output, '\n',
-      s.lowercaseName, '\'', call.func, ' = C.unsafeExpr (Ast.Ast\'HollowCall (Ast.HollowCall "', call.label, '"))\n',
+      s.lowercaseName, '\'', call.name, ' :: C.Expr ', call.output, '\n',
+      s.lowercaseName, '\'', call.name, ' = C.unsafeExpr (Ast.Ast\'HollowCall (Ast.HollowCall "', call.label, '"))\n',
     ]);
   });
 
   s.wrap.filter(isFunc).forEach(call => {
     lines.add([
       '\n',
-      s.lowercaseName, '\'', call.func, ' :: C.Expr ', call.name, ' -> C.Expr ', call.output, '\n',
-      s.lowercaseName, '\'', call.func, ' = C.unsafeExpr P.. Ast.Ast\'WrapCall P.. Ast.WrapCall "', call.label, '" P.. Ast.toAst\n',
+      s.lowercaseName, '\'', call.name, ' :: C.Expr ', call.name, ' -> C.Expr ', call.output, '\n',
+      s.lowercaseName, '\'', call.name, ' = C.unsafeExpr P.. Ast.Ast\'WrapCall P.. Ast.WrapCall "', call.label, '" P.. Ast.toAst\n',
     ]);
   });
 
   s.struct.filter(isFunc).forEach(call => {
     lines.add([
       '\n',
-      s.lowercaseName, '\'', call.func, ' :: C.Expr ', call.name, ' -> C.Expr ', call.output, '\n',
-      s.lowercaseName, '\'', call.func, ' = C.unsafeExpr P.. Ast.Ast\'StructCall P.. Ast.StructCall "', call.label, '" P.. Ast.toAst\n',
+      s.lowercaseName, '\'', call.name, ' :: C.Expr ', call.name, ' -> C.Expr ', call.output, '\n',
+      s.lowercaseName, '\'', call.name, ' = C.unsafeExpr P.. Ast.Ast\'StructCall P.. Ast.StructCall "', call.label, '" P.. Ast.toAst\n',
     ]);
   });
 
   s.enumeration.filter(isFunc).forEach(call => {
     lines.add([
       '\n',
-      s.lowercaseName, '\'', call.func, ' :: C.Expr ', call.name, ' -> C.Expr ', call.output, '\n',
-      s.lowercaseName, '\'', call.func, ' = C.unsafeExpr P.. Ast.Ast\'EnumerationCall P.. Ast.EnumerationCall "', call.label, '" P.. Ast.toAst\n',
+      s.lowercaseName, '\'', call.name, ' :: C.Expr ', call.name, ' -> C.Expr ', call.output, '\n',
+      s.lowercaseName, '\'', call.name, ' = C.unsafeExpr P.. Ast.Ast\'EnumerationCall P.. Ast.EnumerationCall "', call.label, '" P.. Ast.toAst\n',
     ]);
   });
 
@@ -132,7 +132,7 @@ const mkExportValues = (s) => {
   var calls =
     [].concat(s.hollow).concat(s.wrap).concat(s.struct).concat(s.enumeration)
       .filter(isFunc)
-      .map(x => s.lowercaseName + '\'' + x.lowercaseName);
+      .map(x => s.lowercaseName + '\'' + x.name);
 
   var exprMk =
     [].concat(s.struct).concat(s.wrap)

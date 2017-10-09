@@ -14,15 +14,15 @@
 
 -- Module
 module HelloWorld.V0
-  ( helloWorld'Version
-  , helloWorld'Pull
-  , helloWorld'Handler
-  , helloWorld'Spec
+  ( helloWorld'version
+  , helloWorld'pull
+  , helloWorld'handler
+  , helloWorld'spec
   , HelloWorld'Thrower(..)
   , HelloWorld'Service(..)
   , Hello(..)
-  , helloWorld'Scotty'SendResponse
-  , helloWorld'Scotty'GetSpec
+  , helloWorld'Scotty'Post
+  , helloWorld'Scotty'Get
   ) where
 
 -- Imports
@@ -45,11 +45,11 @@ import qualified Colorless.Server.Scotty as Scotty
 --------------------------------------------------------
 
 -- Version
-helloWorld'Version :: C.Version
-helloWorld'Version = C.Version 0 0
+helloWorld'version :: C.Version
+helloWorld'version = C.Version 0 0
 
-helloWorld'Pull :: C.Pull
-helloWorld'Pull = C.Pull "http" "127.0.0.1" "/" 8080
+helloWorld'pull :: C.Pull
+helloWorld'pull = C.Pull "http" "127.0.0.1" "/" 8080
 
 --------------------------------------------------------
 -- Interfaces
@@ -62,10 +62,10 @@ class C.ServiceThrower m => HelloWorld'Thrower m where
 
 -- Service
 class P.Monad m => HelloWorld'Service meta m where
-  helloWorld'hello :: meta -> Hello -> m R.Text
+  helloWorld'Hello :: meta -> Hello -> m R.Text
 
 instance HelloWorld'Service meta m => HelloWorld'Service meta (M.ExceptT C.Response m) where
-  helloWorld'hello _meta = M.lift  P.. helloWorld'hello _meta
+  helloWorld'Hello _meta = M.lift  P.. helloWorld'Hello _meta
 
 --------------------------------------------------------
 -- Types
@@ -80,29 +80,29 @@ data Hello = Hello
 -- Add-ons
 --------------------------------------------------------
 
-helloWorld'Scotty'SendResponse
+helloWorld'Scotty'Post
   :: (Scotty.ScottyError e, R.MonadIO m, HelloWorld'Service meta m)
   => C.Options
   -> (() -> m meta)
   -> C.Pull
   -> Scotty.ScottyT e m ()
-helloWorld'Scotty'SendResponse _options _metaMiddleware _pull = Scotty.sendResponseSingleton _pull helloWorld'Version (helloWorld'Handler _options _metaMiddleware)
+helloWorld'Scotty'Post _options _metaMiddleware _pull = Scotty.sendResponseSingleton _pull helloWorld'version (helloWorld'handler _options _metaMiddleware)
 
-helloWorld'Scotty'GetSpec :: (Scotty.ScottyError e, R.MonadIO m) => C.Pull -> Scotty.ScottyT e m ()
-helloWorld'Scotty'GetSpec = Scotty.getSpec P.$ R.toJSON [helloWorld'Spec]
+helloWorld'Scotty'Get :: (Scotty.ScottyError e, R.MonadIO m) => C.Pull -> Scotty.ScottyT e m ()
+helloWorld'Scotty'Get = Scotty.getSpec P.$ R.toJSON [helloWorld'spec]
 
 --------------------------------------------------------
 -- Request handling
 --------------------------------------------------------
 
 -- Handler
-helloWorld'Handler
+helloWorld'handler
   :: (HelloWorld'Service meta m, R.MonadIO m)
   => C.Options
   -> (() -> m meta)
   -> C.Request
   -> m (P.Either C.Response C.Response)
-helloWorld'Handler options metaMiddleware C.Request{meta,query} = M.runExceptT P.$ do
+helloWorld'handler options metaMiddleware C.Request{meta,query} = M.runExceptT P.$ do
   meta' <- P.maybe (C.runtimeThrow C.RuntimeError'UnparsableMeta) P.return (C.fromValFromJson meta)
   xformMeta <- M.lift P.$ metaMiddleware meta'
   envRef <- R.liftIO C.emptyEnv
@@ -123,7 +123,7 @@ helloWorld'ApiCall :: (HelloWorld'Service meta m, C.ServiceThrower m, C.RuntimeT
 helloWorld'ApiCall meta' apiCall' = case C.parseApiCall helloWorld'ApiParser apiCall' of
   P.Nothing -> C.runtimeThrow C.RuntimeError'UnrecognizedCall
   P.Just x' -> case x' of
-    HelloWorld'Api'Hello a' -> C.toVal P.<$> helloWorld'hello meta' a'
+    HelloWorld'Api'Hello a' -> C.toVal P.<$> helloWorld'Hello meta' a'
 
 -- API Parser
 helloWorld'ApiParser :: C.ApiParser HelloWorld'Api
@@ -170,7 +170,7 @@ instance R.FromJSON Hello where
       P.Nothing -> P.mzero
       P.Just _y -> P.return _y
 
-helloWorld'Spec :: R.Value
-helloWorld'Spec = v
+helloWorld'spec :: R.Value
+helloWorld'spec = v
   where P.Just v = R.decode "{\"colorless\":{\"major\":0,\"minor\":0},\"version\":{\"major\":0,\"minor\":0},\"types\":[{\"n\":\"Hello\",\"m\":[{\"target\":\"String\"}],\"o\":\"String\"}],\"pull\":{\"protocol\":\"http\",\"name\":\"HelloWorld\",\"host\":\"127.0.0.1\",\"meta\":\"Unit\",\"path\":\"/\",\"port\":8080,\"error\":\"Unit\"}}"
 

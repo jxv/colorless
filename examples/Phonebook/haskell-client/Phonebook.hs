@@ -14,9 +14,9 @@
 
 -- Module
 module Phonebook
-  ( phonebook'Version
-  , phonebook'Pull
-  , phonebook'Request
+  ( phonebook'version
+  , phonebook'pull
+  , phonebook'request
   , PersonId(..)
   , Name(..)
   , Phone(..)
@@ -28,8 +28,8 @@ module Phonebook
   , LookupPerson(..)
   , LookupPersonByName(..)
   , State(..)
-  , phonebook'lookupPerson
-  , phonebook'lookupPersonByName
+  , phonebook'LookupPerson
+  , phonebook'LookupPersonByName
   , address'Mk
   , person'Mk
   , lookupPerson'Mk
@@ -85,11 +85,11 @@ import qualified Colorless.Client.HttpClient as HttpClient
 --------------------------------------------------------
 
 -- Version
-phonebook'Version :: C.Version
-phonebook'Version = C.Version 0 0
+phonebook'version :: C.Version
+phonebook'version = C.Version 0 0
 
-phonebook'Pull :: C.Pull
-phonebook'Pull = C.Pull "http" "127.0.0.1" "/" 8000
+phonebook'pull :: C.Pull
+phonebook'pull = C.Pull "http" "127.0.0.1" "/" 8000
 
 --------------------------------------------------------
 -- Types
@@ -156,14 +156,14 @@ data State
 -- API
 --------------------------------------------------------
 
-phonebook'Request :: (Ast.ToAst a, C.HasType a, R.FromJSON a) => () -> C.Expr a -> C.Request () a
-phonebook'Request _meta _query = C.Request (C.Version 0 0) phonebook'Version _meta _query
+phonebook'request :: (Ast.ToAst a, C.HasType a, R.FromJSON a) => () -> C.Expr a -> C.Request () a
+phonebook'request _meta _query = C.Request (C.Version 0 0) phonebook'version _meta _query
 
-phonebook'lookupPerson :: C.Expr LookupPerson -> C.Expr (P.Maybe Person)
-phonebook'lookupPerson = C.unsafeExpr P.. Ast.Ast'StructCall P.. Ast.StructCall "LookupPerson" P.. Ast.toAst
+phonebook'LookupPerson :: C.Expr LookupPerson -> C.Expr (P.Maybe Person)
+phonebook'LookupPerson = C.unsafeExpr P.. Ast.Ast'StructCall P.. Ast.StructCall "LookupPerson" P.. Ast.toAst
 
-phonebook'lookupPersonByName :: C.Expr LookupPersonByName -> C.Expr [Person]
-phonebook'lookupPersonByName = C.unsafeExpr P.. Ast.Ast'StructCall P.. Ast.StructCall "LookupPersonByName" P.. Ast.toAst
+phonebook'LookupPersonByName :: C.Expr LookupPersonByName -> C.Expr [Person]
+phonebook'LookupPersonByName = C.unsafeExpr P.. Ast.Ast'StructCall P.. Ast.StructCall "LookupPersonByName" P.. Ast.toAst
 
 personId'Mk :: C.Expr (R.Text -> PersonId)
 personId'Mk = C.unsafeWrapExpr
