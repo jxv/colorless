@@ -12,9 +12,9 @@ main :: IO ()
 main = do
   manager <- newTlsManager
 
-  let req = phonebook'request () $ begin $ do
-        let eva = Person "Eva" "123456789" Nothing []
-        evaId <- def "evaId" $ phonebook'InsertPerson $ ex (InsertPerson eva)
+  let req = phonebook'request () $ dO $ do
+        eva <- def "eva" $ ex $ Person "Eva" "123456789" Nothing []
+        evaId <- def "evaId" $ phonebook'InsertPerson $ insertPerson'Mk <:> eva
         aliceId <- def "aliceId" $ phonebook'InsertPerson $ insertPerson'Mk
           <:> (person'Mk <: "Alice" <: "8675309" <: Nothing <:> list [evaId])
         stmt $ tuple2 evaId aliceId
