@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 
-name:           helloworld
+name:           helloworld-server
 version:        0.0.0
 synopsis:       Hello World Example
 description:    Hello World Example
@@ -12,7 +12,7 @@ license:        MIT
 build-type:     Simple
 cabal-version:  >= 1.10
 
-executable helloworld
+executable helloworld-server
   main-is: Main.hs
   default-extensions: GeneralizedNewtypeDeriving NamedFieldPuns OverloadedStrings FlexibleInstances MultiParamTypeClasses
   ghc-options: -Wall

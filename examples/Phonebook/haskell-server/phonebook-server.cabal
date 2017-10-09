@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 
-name:           phonebook
+name:           phonebook-server
 version:        0.0.0
 synopsis:       Phonebook Example
 description:    Phonebook Example
@@ -12,9 +12,9 @@ license:        MIT
 build-type:     Simple
 cabal-version:  >= 1.10
 
-executable phonebook
+executable phonebook-server
   main-is: Main.hs
-  default-extensions: GeneralizedNewtypeDeriving NamedFieldPuns
+  default-extensions: GeneralizedNewtypeDeriving NamedFieldPuns OverloadedStrings FlexibleInstances MultiParamTypeClasses
   ghc-options: -Wall
   build-depends:
       base >= 4.9 && < 5

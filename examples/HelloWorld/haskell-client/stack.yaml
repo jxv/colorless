@@ -3,6 +3,6 @@ packages:
 - '.'
 extra-deps:
 - 'colorless-2.2.10'
-- 'colorless-scotty-0.0.1'
+- 'colorless-http-client-0.0.3'
 flags: {}
 extra-package-dbs: []

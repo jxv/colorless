@@ -126,4 +126,3 @@ instance Ast.ToAst Hello where
     } = Ast.Ast'Struct P.. Ast.Struct P.$ R.fromList
     [ ("target", Ast.toAst target)
     ]
-

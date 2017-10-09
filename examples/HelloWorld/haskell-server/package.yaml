@@ -1,4 +1,4 @@
-name: helloworld
+name: helloworld-server
 version: "0.0.0"
 maintainer: Joe Vargas
 synopsis: Hello World Example
@@ -21,6 +21,6 @@ default-extensions:
   - MultiParamTypeClasses
 
 executables:
-  helloworld:
+  helloworld-server:
     main: Main.hs
     ghc-options: -Wall

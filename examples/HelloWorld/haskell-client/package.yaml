@@ -1,17 +1,20 @@
-name: phonebook-server
+name: helloworld-client
 version: "0.0.0"
 maintainer: Joe Vargas
-synopsis: Phonebook Example
-description: Phonebook Example
+synopsis: Hello World Example
+description: Hello World Example
 stability: experimental
 license: MIT
 
 dependencies:
+  - aeson
   - base >= 4.9 && < 5
+  - bytestring
   - colorless
-  - colorless-scotty
+  - colorless-http-client
   - mtl
   - text
+  - http-client-tls
 
 default-extensions:
   - GeneralizedNewtypeDeriving
@@ -21,6 +24,6 @@ default-extensions:
   - MultiParamTypeClasses
 
 executables:
-  phonebook-server:
+  helloworld-client:
     main: Main.hs
     ghc-options: -Wall
