@@ -68,8 +68,8 @@ phonebook'pull = C.Pull "http" "127.0.0.1" "/" 8000
 
 -- Thrower
 class C.ServiceThrower m => Phonebook'Thrower m where
-  phonebook'Throw :: () -> m a
-  phonebook'Throw = C.serviceThrow P.. R.toJSON
+  phonebook'throw :: () -> m a
+  phonebook'throw = C.serviceThrow P.. R.toJSON P.. C.toVal
 
 -- Service
 class P.Monad m => Phonebook'Service meta m where
@@ -153,7 +153,7 @@ data State
 --------------------------------------------------------
 
 phonebook'Scotty'Post
-  :: (Scotty.ScottyError e, R.MonadIO m, Phonebook'Service meta m)
+  :: (Scotty.ScottyError e, R.MonadIO m, Phonebook'Service meta m, R.MonadCatch m)
   => C.Options
   -> (() -> m meta)
   -> C.Pull
@@ -169,26 +169,28 @@ phonebook'Scotty'Get = Scotty.getSpec P.$ R.toJSON [phonebook'spec]
 
 -- Handler
 phonebook'handler
-  :: (Phonebook'Service meta m, R.MonadIO m)
+  :: (Phonebook'Service meta m, R.MonadIO m, R.MonadCatch m)
   => C.Options
   -> (() -> m meta)
   -> C.Request
   -> m (P.Either C.Response C.Response)
-phonebook'handler options metaMiddleware C.Request{meta,query} = M.runExceptT P.$ do
-  meta' <- P.maybe (C.runtimeThrow C.RuntimeError'UnparsableMeta) P.return (C.fromValFromJson meta)
-  xformMeta <- M.lift P.$ metaMiddleware meta'
-  envRef <- R.liftIO C.emptyEnv
-  variableBaseCount <- R.liftIO (R.size P.<$> IO.readIORef envRef)
-  let options' = C.Options
-        { variableLimit = P.fmap (P.+ variableBaseCount) (C.variableLimit options)
-        }
-  let evalConfig = C.EvalConfig
-        { C.options = options'
-        , C.apiCall = phonebook'ApiCall xformMeta
-        }
-  query' <- P.maybe (C.runtimeThrow C.RuntimeError'UnparsableQuery) P.return (C.jsonToExpr query)
-  vals <- C.runEval (C.forceVal P.=<< C.eval query' envRef) evalConfig
-  P.return (C.Response'Success (R.toJSON vals))
+phonebook'handler options metaMiddleware C.Request{meta,query} = R.catch
+  (M.runExceptT P.$ do
+    meta' <- P.maybe (C.runtimeThrow C.RuntimeError'UnparsableMeta) P.return (C.fromValFromJson meta)
+    xformMeta <- M.lift P.$ metaMiddleware meta'
+    envRef <- R.liftIO C.emptyEnv
+    variableBaseCount <- R.liftIO (R.size P.<$> IO.readIORef envRef)
+    let options' = C.Options
+          { variableLimit = P.fmap (P.+ variableBaseCount) (C.variableLimit options)
+          }
+    let evalConfig = C.EvalConfig
+          { C.options = options'
+          , C.apiCall = phonebook'ApiCall xformMeta
+          }
+    query' <- P.maybe (C.runtimeThrow C.RuntimeError'UnparsableQuery) P.return (C.jsonToExpr query)
+    vals <- C.runEval (C.forceVal P.=<< C.eval query' envRef) evalConfig
+    P.return (C.Response'Success (R.toJSON vals)))
+  (\_err -> P.return P.$ P.Left (C.Response'Error (C.ResponseError'Service _err)))
 
 -- API
 phonebook'ApiCall :: (Phonebook'Service meta m, C.ServiceThrower m, C.RuntimeThrower m) => meta -> C.ApiCall -> m C.Val

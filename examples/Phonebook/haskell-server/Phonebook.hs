@@ -59,13 +59,14 @@ data Meta'Middlewares m meta0
 phonebook'handlerMap
   ::
     ( R.MonadIO m
+    , R.MonadCatch m
     , V0.Phonebook'Service meta0 m
     )
   => C.Options
   -> Meta'Middlewares m meta0
   -> R.Map C.Major (C.Minor, C.Request -> m (P.Either C.Response C.Response))
 phonebook'handlerMap options metaMiddlewares = R.fromList
-    [ (0, (0, V0.phonebook'Handler options P.$ meta'Middleware0 metaMiddlewares))
+    [ (0, (0, V0.phonebook'handler options P.$ meta'Middleware0 metaMiddlewares))
     ]
 
 phonebook'spec :: R.Value
@@ -77,6 +78,7 @@ phonebook'Scotty'Post
   ::
     ( Scotty.ScottyError e
     , R.MonadIO m
+    , R.MonadCatch m
     , V0.Phonebook'Service meta0 m
     )
   => C.Options

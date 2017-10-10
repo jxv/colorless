@@ -8,16 +8,18 @@ import Control.Monad.IO.Class
 import Control.Monad.Reader
 import Control.Concurrent.MVar
 import Colorless.Types
+import Colorless.Server
 import Colorless.Server.Scotty
 import Data.Map (Map)
 import System.Random
 
+import Phonebook ()
 import Phonebook.V0
 
 type DB = Map PersonId Person
 
 newtype App a = App { unApp :: ReaderT (MVar DB) IO a }
-  deriving (Functor, Applicative, Monad, MonadIO, MonadReader (MVar DB))
+  deriving (Functor, Applicative, Monad, MonadIO, MonadReader (MVar DB), MonadCatch, MonadThrow)
 
 getDB :: App DB
 getDB = ask >>= liftIO . readMVar

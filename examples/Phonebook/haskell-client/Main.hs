@@ -1,6 +1,5 @@
 module Main where
 
-
 import qualified Data.ByteString.Lazy.Char8 as BL (putStrLn)
 import Network.HTTP.Client.TLS
 import Data.Aeson (encode, ToJSON(..))
@@ -18,7 +17,6 @@ main = do
         aliceId <- def "aliceId" $ phonebook'InsertPerson $ insertPerson'Mk
           <:> (person'Mk <: "Alice" <: "8675309" <: Nothing <:> list [evaId])
         stmt $ tuple2 evaId aliceId
-
 
   putStrLn "\n\"Request\""
   printJSON req

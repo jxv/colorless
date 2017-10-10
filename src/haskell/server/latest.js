@@ -82,6 +82,7 @@ const genHandlerMap = (specs) => {
     specs[0].lowercaseName, '\'handlerMap\n',
     '  ::\n',
     '    ( R.MonadIO m\n',
+    '    , R.MonadCatch m\n'
   ]);
   lines.add(specs.map(spec =>
     '    , V' + spec.version.major + '.' +  spec.name + '\'Service meta' + spec.version.major + ' m\n',
@@ -101,10 +102,10 @@ const genHandlerMap = (specs) => {
   ]);
 
   lines.add(
-    '    [ (' + specs[0].version.major + ', (' + specs[0].version.minor + ', V' + specs[0].version.major + '.' + specs[0].lowercaseName + '\'Handler options P.$ meta\'Middleware' + specs[0].version.major + ' metaMiddlewares))\n'
+    '    [ (' + specs[0].version.major + ', (' + specs[0].version.minor + ', V' + specs[0].version.major + '.' + specs[0].lowercaseName + '\'handler options P.$ meta\'Middleware' + specs[0].version.major + ' metaMiddlewares))\n'
   );
   lines.add(specs.slice(1).map(spec =>
-    '    , (' + spec.version.major + ', (' + spec.version.minor + ', V' + spec.version.major + '.' + spec.lowercaseName + '\'Handler options P.$ meta\'Middleware' + spec.version.major + ' metaMiddlewares))\n'
+    '    , (' + spec.version.major + ', (' + spec.version.minor + ', V' + spec.version.major + '.' + spec.lowercaseName + '\'handler options P.$ meta\'Middleware' + spec.version.major + ' metaMiddlewares))\n'
   ));
   lines.add(
     '    ]\n'

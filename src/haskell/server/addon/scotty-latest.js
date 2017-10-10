@@ -17,6 +17,7 @@ const gen = (specs) => {
     '  ::\n',
     '    ( Scotty.ScottyError e\n',
     '    , R.MonadIO m\n',
+    '    , R.MonadCatch m\n'
   ]);
   lines.add(specs.map(({version}) =>
     '    , V' + version.major + '.' + s.name + '\'Service meta' + version.major + ' m\n'

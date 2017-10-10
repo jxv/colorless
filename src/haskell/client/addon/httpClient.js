@@ -12,7 +12,7 @@ const gen = (s) => {
   return new Lines([
     '\n',
     s.lowercaseName, '\'HttpClient\'Post\n',
-    '  :: (C.HasType a, Ast.ToAst a, R.FromJSON a)\n',
+    '  :: (C.HasType a, Ast.ToAst a, C.FromVal a)\n',
     '  => HttpClient.Manager\n',
     '  -> C.Pull\n',
     '  -> HttpClient.RequestHeaders\n',

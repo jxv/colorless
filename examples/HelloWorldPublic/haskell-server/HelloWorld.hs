@@ -37,13 +37,14 @@ data Meta'Middlewares m meta0
 helloWorld'handlerMap
   ::
     ( R.MonadIO m
+    , R.MonadCatch m
     , V0.HelloWorld'Service meta0 m
     )
   => C.Options
   -> Meta'Middlewares m meta0
   -> R.Map C.Major (C.Minor, C.Request -> m (P.Either C.Response C.Response))
 helloWorld'handlerMap options metaMiddlewares = R.fromList
-    [ (0, (0, V0.helloWorld'Handler options P.$ meta'Middleware0 metaMiddlewares))
+    [ (0, (0, V0.helloWorld'handler options P.$ meta'Middleware0 metaMiddlewares))
     ]
 
 helloWorld'spec :: R.Value
@@ -55,6 +56,7 @@ helloWorld'Scotty'Post
   ::
     ( Scotty.ScottyError e
     , R.MonadIO m
+    , R.MonadCatch m
     , V0.HelloWorld'Service meta0 m
     )
   => C.Options

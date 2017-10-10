@@ -57,8 +57,8 @@ helloWorld'pull = C.Pull "http" "127.0.0.1" "/" 8080
 
 -- Thrower
 class C.ServiceThrower m => HelloWorld'Thrower m where
-  helloWorld'Throw :: () -> m a
-  helloWorld'Throw = C.serviceThrow P.. R.toJSON
+  helloWorld'throw :: () -> m a
+  helloWorld'throw = C.serviceThrow P.. R.toJSON P.. C.toVal
 
 -- Service
 class P.Monad m => HelloWorld'Service meta m where
@@ -81,7 +81,7 @@ data Hello = Hello
 --------------------------------------------------------
 
 helloWorld'Scotty'Post
-  :: (Scotty.ScottyError e, R.MonadIO m, HelloWorld'Service meta m)
+  :: (Scotty.ScottyError e, R.MonadIO m, HelloWorld'Service meta m, R.MonadCatch m)
   => C.Options
   -> (() -> m meta)
   -> C.Pull
@@ -97,26 +97,28 @@ helloWorld'Scotty'Get = Scotty.getSpec P.$ R.toJSON [helloWorld'spec]
 
 -- Handler
 helloWorld'handler
-  :: (HelloWorld'Service meta m, R.MonadIO m)
+  :: (HelloWorld'Service meta m, R.MonadIO m, R.MonadCatch m)
   => C.Options
   -> (() -> m meta)
   -> C.Request
   -> m (P.Either C.Response C.Response)
-helloWorld'handler options metaMiddleware C.Request{meta,query} = M.runExceptT P.$ do
-  meta' <- P.maybe (C.runtimeThrow C.RuntimeError'UnparsableMeta) P.return (C.fromValFromJson meta)
-  xformMeta <- M.lift P.$ metaMiddleware meta'
-  envRef <- R.liftIO C.emptyEnv
-  variableBaseCount <- R.liftIO (R.size P.<$> IO.readIORef envRef)
-  let options' = C.Options
-        { variableLimit = P.fmap (P.+ variableBaseCount) (C.variableLimit options)
-        }
-  let evalConfig = C.EvalConfig
-        { C.options = options'
-        , C.apiCall = helloWorld'ApiCall xformMeta
-        }
-  query' <- P.maybe (C.runtimeThrow C.RuntimeError'UnparsableQuery) P.return (C.jsonToExpr query)
-  vals <- C.runEval (C.forceVal P.=<< C.eval query' envRef) evalConfig
-  P.return (C.Response'Success (R.toJSON vals))
+helloWorld'handler options metaMiddleware C.Request{meta,query} = R.catch
+  (M.runExceptT P.$ do
+    meta' <- P.maybe (C.runtimeThrow C.RuntimeError'UnparsableMeta) P.return (C.fromValFromJson meta)
+    xformMeta <- M.lift P.$ metaMiddleware meta'
+    envRef <- R.liftIO C.emptyEnv
+    variableBaseCount <- R.liftIO (R.size P.<$> IO.readIORef envRef)
+    let options' = C.Options
+          { variableLimit = P.fmap (P.+ variableBaseCount) (C.variableLimit options)
+          }
+    let evalConfig = C.EvalConfig
+          { C.options = options'
+          , C.apiCall = helloWorld'ApiCall xformMeta
+          }
+    query' <- P.maybe (C.runtimeThrow C.RuntimeError'UnparsableQuery) P.return (C.jsonToExpr query)
+    vals <- C.runEval (C.forceVal P.=<< C.eval query' envRef) evalConfig
+    P.return (C.Response'Success (R.toJSON vals)))
+  (\_err -> P.return P.$ P.Left (C.Response'Error (C.ResponseError'Service _err)))
 
 -- API
 helloWorld'ApiCall :: (HelloWorld'Service meta m, C.ServiceThrower m, C.RuntimeThrower m) => meta -> C.ApiCall -> m C.Val

@@ -13,7 +13,7 @@ const gen = (s) => {
   return new Lines([
     '\n',
     s.lowercaseName, '\'Scotty\'Post\n',
-    '  :: (Scotty.ScottyError e, R.MonadIO m, ', s.name,'\'Service meta m)\n',
+    '  :: (Scotty.ScottyError e, R.MonadIO m, ', s.name,'\'Service meta m, R.MonadCatch m)\n',
     '  => C.Options\n',
     '  -> (', s.meta,' -> m meta)\n',
     '  -> C.Pull\n',

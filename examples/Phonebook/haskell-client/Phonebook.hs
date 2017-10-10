@@ -294,7 +294,7 @@ state' = C.unsafeExpr P.. Ast.toAst
 --------------------------------------------------------
 
 phonebook'HttpClient'Post
-  :: (C.HasType a, Ast.ToAst a, R.FromJSON a)
+  :: (C.HasType a, Ast.ToAst a, C.FromVal a)
   => HttpClient.Manager
   -> C.Pull
   -> HttpClient.RequestHeaders
