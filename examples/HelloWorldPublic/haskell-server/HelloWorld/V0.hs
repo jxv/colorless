@@ -102,17 +102,17 @@ helloWorld'handler
   -> (() -> m meta)
   -> C.Request
   -> m (P.Either C.Response C.Response)
-helloWorld'handler options metaMiddleware C.Request{meta,query} = R.catch
+helloWorld'handler _options metaMiddleware C.Request{meta,query} = R.catch
   (M.runExceptT P.$ do
     meta' <- P.maybe (C.runtimeThrow C.RuntimeError'UnparsableMeta) P.return (C.fromValFromJson meta)
     xformMeta <- M.lift P.$ metaMiddleware meta'
     envRef <- R.liftIO C.emptyEnv
     variableBaseCount <- R.liftIO (R.size P.<$> IO.readIORef envRef)
-    let options' = C.Options
-          { variableLimit = P.fmap (P.+ variableBaseCount) (C.variableLimit options)
+    let _options' = _options
+          { C.hardVariableLimit = P.fmap (P.+ variableBaseCount) (C.hardVariableLimit _options)
           }
     let evalConfig = C.EvalConfig
-          { C.options = options'
+          { C.options = _options'
           , C.apiCall = helloWorld'ApiCall xformMeta
           }
     query' <- P.maybe (C.runtimeThrow C.RuntimeError'UnparsableQuery) P.return (C.jsonToExpr query)
