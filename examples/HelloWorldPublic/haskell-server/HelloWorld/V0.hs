@@ -108,11 +108,17 @@ helloWorld'handler _options metaMiddleware C.Request{meta,query} = R.catch
     xformMeta <- M.lift P.$ metaMiddleware meta'
     envRef <- R.liftIO C.emptyEnv
     variableBaseCount <- R.liftIO (R.size P.<$> IO.readIORef envRef)
-    let _options' = _options
-          { C.hardVariableLimit = P.fmap (P.+ variableBaseCount) (C.hardVariableLimit _options)
+    let _limits' = (C.hardLimits _options)
+          { C.variableLimit = P.fmap (P.+ variableBaseCount) (C.variableLimit P.$ C.hardLimits _options)
           }
+    _serviceCallCountRef <- R.liftIO (IO.newIORef 0)
+    _lambdaCountRef <- R.liftIO (IO.newIORef 0)
+    _exprCountRef <- R.liftIO (IO.newIORef 0)
     let evalConfig = C.EvalConfig
-          { C.options = _options'
+          { C.limits = _limits'
+          , C.langServiceCallCount = _serviceCallCountRef
+          , C.langLambdaCount = _lambdaCountRef
+          , C.langExprCount = _exprCountRef
           , C.apiCall = helloWorld'ApiCall xformMeta
           }
     query' <- P.maybe (C.runtimeThrow C.RuntimeError'UnparsableQuery) P.return (C.jsonToExpr query)
