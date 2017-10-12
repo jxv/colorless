@@ -13,7 +13,6 @@ const genModule = (prefix, name, lowercaseName, major, exportTypes, values) => {
     'module ', prefix, '\n',
     '  ( ', lowercaseName, '\'handlerMap\n',
     '  , ', lowercaseName, '\'spec\n',
-    '  , Meta\'Middlewares(..)\n',
   ]);
   values.forEach(value => lines.add('  , ' + value + '\n'));
   lines.add([
@@ -30,7 +29,7 @@ const genImports = (importing) => {
   var lines = new Lines([
     '\n',
     'import qualified Prelude as P\n',
-    'import qualified Colorless.Server as C (RuntimeThrower, Options, Request, Response, Major, Minor, Pull)\n',
+    'import qualified Colorless.Server as C (RuntimeThrower, Hooks, Request, Response, Major, Minor, Pull)\n',
     'import qualified Colorless.Imports as R\n'
   ]);
   importing.forEach(imp => lines.add(imp + '\n'));
@@ -55,26 +54,6 @@ const genVersionImports = (prefix, name, lowercaseName, major, exportTypes) => {
   return lines;
 };
 
-const genMetaMiddlewares = (specs) => {
-  var lines = new Lines([
-    '\n',
-    'data Meta\'Middlewares m',
-  ]);
-  lines.add(specs.map(({version}) =>
-    ' meta' + version.major
-  ))
-  lines.add([
-    '\n',
-    '  = Meta\'Middlewares\n',
-  ]);
-  lines.add(['  { meta\'Middleware', specs[0].version.major ,' :: ', specs[0].metaVersion, ' -> m meta', specs[0].version.major,'\n']);
-  specs.slice(1).forEach(spec =>
-    lines.add(['  , meta\'Middleware', spec.version.major ,' :: ', spec.metaVersion, ' -> m meta', spec.version.major,'\n'])
-  );
-  lines.add('  }\n');
-  return lines;
-}
-
 const genHandlerMap = (specs) => {
   var lines = new Lines();
   lines.add([
@@ -85,27 +64,31 @@ const genHandlerMap = (specs) => {
     '    , R.MonadCatch m\n'
   ]);
   lines.add(specs.map(spec =>
-    '    , V' + spec.version.major + '.' +  spec.name + '\'Service meta' + spec.version.major + ' m\n',
+    '    , V' + spec.version.major + '.' +  spec.name + '\'Service meta' + spec.version.major + ' m\n'
   ));
   lines.add([
     '    )\n',
-    '  => C.Options\n',
-    '  -> Meta\'Middlewares m',
+    '  => C.Hooks m ' +  specs[0].meta + ' meta' + specs[0].version.major + '\n',
   ]);
-  lines.add(specs.map(({version}) =>
-    ' meta' + version.major
+  lines.add(specs.slice(1).map(({version, meta}) =>
+    '  -> C.Hooks m ' +  meta + ' meta' + version.major + '\n'
   ));
   lines.add([
     '\n',
     '  -> R.Map C.Major (C.Minor, C.Request -> m (P.Either C.Response C.Response))\n',
-    specs[0].lowercaseName, '\'handlerMap options metaMiddlewares = R.fromList\n',
+    specs[0].lowercaseName, '\'handlerMap'
+  ]);
+  lines.add(specs.map(({version, meta}) =>
+    ' hooks' + version.major
+  ));
+
+  lines.add(' = R.fromList\n');
+  lines.add([
+    '    [ (' + specs[0].version.major, ', (', specs[0].version.minor, ', V', specs[0].version.major, '.', specs[0].lowercaseName, '\'handler hooks', specs[0].version.major, '))\n'
   ]);
 
-  lines.add(
-    '    [ (' + specs[0].version.major + ', (' + specs[0].version.minor + ', V' + specs[0].version.major + '.' + specs[0].lowercaseName + '\'handler options P.$ meta\'Middleware' + specs[0].version.major + ' metaMiddlewares))\n'
-  );
   lines.add(specs.slice(1).map(spec =>
-    '    , (' + spec.version.major + ', (' + spec.version.minor + ', V' + spec.version.major + '.' + spec.lowercaseName + '\'handler options P.$ meta\'Middleware' + spec.version.major + ' metaMiddlewares))\n'
+    '    , (' + spec.version.major + ', (' + spec.version.minor + ', V' + spec.version.major + '.' + spec.lowercaseName + '\'handler hooks' + spec.version.major + '))\n'
   ));
   lines.add(
     '    ]\n'
@@ -151,7 +134,6 @@ const latest = (specs, addons) => {
   specs.forEach(spec =>
     lines.add(genVersionImports(spec.module, spec.name, spec.lowercaseName, spec.version.major, mkExportTypes(spec)))
   );
-  lines.add(genMetaMiddlewares(specs));
   lines.add(genHandlerMap(specs));
   lines.add(genPublicSpec(spec.lowercaseName, specs))
   addonGen.forEach(gen => lines.add(gen));

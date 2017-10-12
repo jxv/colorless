@@ -24,17 +24,28 @@ const gen = (specs) => {
   ));
   lines.add([
     '    )\n',
-    '  => C.Options\n',
-    '  -> Meta\'Middlewares m',
+    '  => C.Pull\n',
   ]);
-  lines.add(specs.map(({version}) =>
-    ' meta' + version.major
-  ));
+  specs.forEach(({meta, version}) => lines.add([
+    '  -> C.Hooks m ', meta,' meta', version.major, '\n',
+  ]));
   lines.add([
-    '\n',
-    '  -> C.Pull\n',
     '  -> Scotty.ScottyT e m ()\n',
-    s.lowercaseName, '\'Scotty\'Post options metaMiddlewares pull = Scotty.sendResponse pull (', s.lowercaseName, '\'handlerMap options metaMiddlewares)\n',
+    s.lowercaseName, '\'Scotty\'Post pull'
+  ]);
+  specs.forEach(({meta, version}) => lines.add([
+    ' hooks', version.major,
+  ]));
+  lines.add([
+    ' = Scotty.sendResponse pull (', s.lowercaseName, '\'handlerMap',
+  ]);
+  specs.forEach(({meta, version}) => lines.add([
+    ' hooks', version.major,
+  ]));
+  lines.add([
+    ')\n'
+  ]);
+  lines.add([
     '\n',
     s.lowercaseName, '\'Scotty\'Get :: (Scotty.ScottyError e, R.MonadIO m) => C.Pull -> Scotty.ScottyT e m ()\n',
     s.lowercaseName, '\'Scotty\'Get = Scotty.getSpec ', s.lowercaseName,'\'spec\n',

@@ -52,5 +52,5 @@ main = do
 
 routes :: ScottyT TL.Text App ()
 routes = do
-  phonebook'Scotty'Post defOptions return phonebook'pull
+  phonebook'Scotty'Post defHooks phonebook'pull
   phonebook'Scotty'Get phonebook'pull

@@ -25,5 +25,5 @@ main = runServer helloWorld'pull unApp routes
 
 routes :: ScottyT Text App ()
 routes = do
-  helloWorld'Scotty'Post defOptions return helloWorld'pull
+  helloWorld'Scotty'Post defHooks helloWorld'pull
   helloWorld'Scotty'Get helloWorld'pull

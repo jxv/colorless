@@ -5,7 +5,6 @@
 module HelloWorld
   ( helloWorld'handlerMap
   , helloWorld'spec
-  , Meta'Middlewares(..)
   , helloWorld'Scotty'Post
   , helloWorld'Scotty'Get
   , V0.HelloWorld'Service(..)
@@ -15,7 +14,7 @@ module HelloWorld
   ) where
 
 import qualified Prelude as P
-import qualified Colorless.Server as C (RuntimeThrower, Options, Request, Response, Major, Minor, Pull)
+import qualified Colorless.Server as C (RuntimeThrower, Hooks, Request, Response, Major, Minor, Pull)
 import qualified Colorless.Imports as R
 import qualified Colorless.Server.Scotty as Scotty
 
@@ -29,22 +28,17 @@ import qualified HelloWorld.V0 as V0
   , Hello(..)
   )
 
-data Meta'Middlewares m meta0
-  = Meta'Middlewares
-  { meta'Middleware0 :: () -> m meta0
-  }
-
 helloWorld'handlerMap
   ::
     ( R.MonadIO m
     , R.MonadCatch m
     , V0.HelloWorld'Service meta0 m
     )
-  => C.Options
-  -> Meta'Middlewares m meta0
+  => C.Hooks m () meta0
+
   -> R.Map C.Major (C.Minor, C.Request -> m (P.Either C.Response C.Response))
-helloWorld'handlerMap options metaMiddlewares = R.fromList
-    [ (0, (0, V0.helloWorld'handler options P.$ meta'Middleware0 metaMiddlewares))
+helloWorld'handlerMap hooks0 = R.fromList
+    [ (0, (0, V0.helloWorld'handler hooks0))
     ]
 
 helloWorld'spec :: R.Value
@@ -59,11 +53,10 @@ helloWorld'Scotty'Post
     , R.MonadCatch m
     , V0.HelloWorld'Service meta0 m
     )
-  => C.Options
-  -> Meta'Middlewares m meta0
-  -> C.Pull
+  => C.Pull
+  -> C.Hooks m () meta0
   -> Scotty.ScottyT e m ()
-helloWorld'Scotty'Post options metaMiddlewares pull = Scotty.sendResponse pull (helloWorld'handlerMap options metaMiddlewares)
+helloWorld'Scotty'Post pull hooks0 = Scotty.sendResponse pull (helloWorld'handlerMap hooks0)
 
 helloWorld'Scotty'Get :: (Scotty.ScottyError e, R.MonadIO m) => C.Pull -> Scotty.ScottyT e m ()
 helloWorld'Scotty'Get = Scotty.getSpec helloWorld'spec

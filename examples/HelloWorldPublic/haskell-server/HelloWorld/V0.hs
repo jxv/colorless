@@ -82,11 +82,10 @@ data Hello = Hello
 
 helloWorld'Scotty'Post
   :: (Scotty.ScottyError e, R.MonadIO m, HelloWorld'Service meta m, R.MonadCatch m)
-  => C.Options
-  -> (() -> m meta)
+  => C.Hooks m () meta
   -> C.Pull
   -> Scotty.ScottyT e m ()
-helloWorld'Scotty'Post _options _metaMiddleware _pull = Scotty.sendResponseSingleton _pull helloWorld'version (helloWorld'handler _options _metaMiddleware)
+helloWorld'Scotty'Post _hooks _pull = Scotty.sendResponseSingleton _pull helloWorld'version (helloWorld'handler _hooks)
 
 helloWorld'Scotty'Get :: (Scotty.ScottyError e, R.MonadIO m) => C.Pull -> Scotty.ScottyT e m ()
 helloWorld'Scotty'Get = Scotty.getSpec P.$ R.toJSON [helloWorld'spec]
@@ -98,18 +97,18 @@ helloWorld'Scotty'Get = Scotty.getSpec P.$ R.toJSON [helloWorld'spec]
 -- Handler
 helloWorld'handler
   :: (HelloWorld'Service meta m, R.MonadIO m, R.MonadCatch m)
-  => C.Options
-  -> (() -> m meta)
+  => C.Hooks m () meta
   -> C.Request
   -> m (P.Either C.Response C.Response)
-helloWorld'handler _options metaMiddleware C.Request{meta,query} = R.catch
+helloWorld'handler _hooks C.Request{meta,query} = R.catch
   (M.runExceptT P.$ do
     meta' <- P.maybe (C.runtimeThrow C.RuntimeError'UnparsableMeta) P.return (C.fromValFromJson meta)
-    xformMeta <- M.lift P.$ metaMiddleware meta'
+    xformMeta <- M.lift P.$ C.metaMiddleware _hooks meta'
     envRef <- R.liftIO C.emptyEnv
     variableBaseCount <- R.liftIO (R.size P.<$> IO.readIORef envRef)
-    let _limits' = (C.hardLimits _options)
-          { C.variableLimit = P.fmap (P.+ variableBaseCount) (C.variableLimit P.$ C.hardLimits _options)
+    _limits <- M.lift P.$ C.sandboxLimits _hooks xformMeta
+    let _limits' = _limits
+          { C.variableLimit = P.fmap (P.+ variableBaseCount) (C.variableLimit _limits)
           }
     _serviceCallCountRef <- R.liftIO (IO.newIORef 0)
     _lambdaCountRef <- R.liftIO (IO.newIORef 0)
