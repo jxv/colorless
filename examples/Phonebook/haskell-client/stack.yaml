@@ -1,7 +1,6 @@
 resolver: lts-9.6
 packages:
 - '.'
-- '../../../../colorless-haskell/colorless'
 extra-deps:
 - 'colorless-2.2.18'
 - 'colorless-http-client-0.0.4'
