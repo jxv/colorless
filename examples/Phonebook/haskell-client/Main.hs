@@ -12,6 +12,7 @@ main = do
   manager <- newTlsManager
 
   let req = phonebook'request () $ dO $ do
+        r <- def "r" $ reduceList -< (fn2 "x" "y" addI32, i32 1, ex [10])
         cmp <- defn "cmp" $ fn1 "x" $ \x -> eq x (i8 10)
         f <- defn "f" $ fn1 "x" $ \x -> addI8 x (i8 8)
         oleOneTwo <- def "oleOneTwo" $ filterList -< (cmp, mapList -< (f, ex[1, 2]))
@@ -19,7 +20,7 @@ main = do
         evaId <- def "evaId" $ phonebook'InsertPerson $ insertPerson'Mk <:> eva
         aliceId <- def "aliceId" $ phonebook'InsertPerson $ insertPerson'Mk
           <:> (person'Mk <: "Alice" <: "8675309" <: Nothing <:> list [evaId])
-        stmt $ tuple3 evaId aliceId oleOneTwo
+        stmt $ tuple4 evaId aliceId oleOneTwo r
 
   putStrLn "\n\"Request\""
   printJSON req
