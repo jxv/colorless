@@ -152,8 +152,18 @@ const mkExportValues = (s) => {
   s.struct.forEach(struct =>
     struct.members.forEach(member =>
       paths.push(struct.lowercaseName + '\'' + member.name)));
+  s.enumeration.forEach(({lowercaseName, enumerals}) =>
+    enumerals.forEach(({tag, members}) => {
+      if (members) {
+        members.forEach(member =>
+          paths.push(lowercaseName + '\'' + tag + '\'' + member.name)
+        );
+      }
+    }));
 
-  return calls.concat(exprMk).concat(expr).concat(paths);
+  var match = s.enumeration.map(({lowercaseName}) => lowercaseName + '\'Match');
+
+  return calls.concat(exprMk).concat(expr).concat(paths).concat(match);
 };
 
 const genWrapExpr = ({name, lowercaseName, type}) => {
@@ -253,6 +263,60 @@ const genStructExpr = ({name, lowercaseName, members}) => {
     lowercaseName, '\' = C.unsafeExpr P.. Ast.toAst\n',
   ]);
 
+  return lines;
+};
+
+const genEnumerationPath = ({name, lowercaseName, enumerals}) => {
+  var lines = new Lines();
+  enumerals.forEach(({tag, members}) => {
+    if (members) {
+      members.forEach(member =>
+        lines.add([
+          '\n',
+          lowercaseName, '\'', tag, '\'', member.name, ' :: C.Path (', name,'\'', tag, '\'Members -> ', member.type, ')\n',
+          lowercaseName, '\'', tag, '\'', member.name, ' = C.unsafePath ["', member.label ,'"]\n',
+        ])
+      );
+    }
+  });
+  return lines;
+};
+
+const genEnumerationMatch = ({name, lowercaseName, enumerals}) => {
+  var lines = new Lines();
+  lines.add('\n');
+  lines.add([
+    lowercaseName, '\'Match\n',
+    '  :: (C.HasType a, Ast.ToAst a)\n',
+    '  => C.Expr ', name, '\n',
+  ]);
+  enumerals.forEach(({tag, members}) => {
+    if (!members) {
+      lines.add(['  -> C.Expr a -- ', tag, '\n']);
+    } else {
+      lines.add(['  -> (C.Symbol, C.Expr ', name, '\'', tag, '\'Members -> C.Expr a) -- | ', tag, '\n']);
+    }
+  });
+  lines.add('  -> C.Expr a\n');
+  lines.add([lowercaseName, '\'', 'Match _enumeral']);
+  enumerals.forEach(({tag}) => lines.add([' _', tag]));
+  lines.add([
+    ' = C.unsafeExpr P.$ Ast.Ast\'Match P.$ Ast.Match (Ast.toAst _enumeral)\n',
+    '  [ ',
+  ]);
+  enumerals.forEach(({members, label, tag}, ix) => {
+    if (ix !== 0) {
+      lines.add('\n  , ');
+    }
+    if (!members) {
+      lines.add(['Ast.MatchCase\'Tag "', label, '" ', '(Ast.toAst _', tag, ')'])
+    } else {
+      let sym = ['(P.fst _', tag,')'].join('');
+      let ref = ['(C.unsafeExpr P.$ Ast.Ast\'Ref P.$ Ast.Ref ', sym,')'].join('');
+      lines.add(['Ast.MatchCase\'Members "', label, '" ', sym, ' (Ast.toAst P.$ P.snd _', tag, ' ', ref, ')']);
+    }
+  });
+  lines.add('\n  ]\n');
   return lines;
 };
 
@@ -410,6 +474,7 @@ const gen = (specs, addons) => {
   });
   spec.enumeration.forEach(ty => {
     lines.add(genEnumeralExpr(ty));
+    lines.add(genEnumerationPath(ty));
   });
 
   lines.add('\n');
@@ -443,12 +508,18 @@ const gen = (specs, addons) => {
   });
   spec.enumeration.forEach(ty => {
     lines.add(genHasType(ty));
+    ty.enumerals.forEach(enumeral => {
+      if (enumeral.members) {
+        lines.add(genHasType({name: ty.name + '\'' + enumeral.tag + '\'Members', label: ty.label}))
+      }
+    });
     lines.add(genEnumerationToVal(ty));
     lines.add(genEnumerationFromVal(ty));
     lines.add(genToExpr(ty));
     lines.add(genToJson(ty));
     lines.add(genFromJson(ty));
     lines.add(genEnumerationToAst(ty));
+    lines.add(genEnumerationMatch(ty));
   });
   lines.add('\n');
   return lines.collapse();

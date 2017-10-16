@@ -20,7 +20,15 @@ main = do
         evaId <- def "evaId" $ phonebook'InsertPerson $ insertPerson'Mk <:> eva
         aliceId <- def "aliceId" $ phonebook'InsertPerson $ insertPerson'Mk
           <:> (person'Mk <: "Alice" <: "8675309" <: Nothing <:> list [evaId])
-        stmt $ tuple4 evaId aliceId oleOneTwo r
+
+        val <- def "str" $ state'Match (ex $ State'Other $ State'Other'Members "HI")
+          (string "cali")
+          (string "new york")
+          (string "tex")
+          ("state", \c -> dO $ do
+            name <- def "name" $ get state'Other'name c
+            stmt $ name `concaT` name `concaT` name `concaT` name)
+        stmt $ tuple5 evaId aliceId oleOneTwo r val
 
   putStrLn "\n\"Request\""
   printJSON req

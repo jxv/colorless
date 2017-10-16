@@ -32,6 +32,7 @@ module Phonebook.V0
   , LookupPersonByName(..)
   , InsertPerson(..)
   , State(..)
+  , State'Other'Members(..)
   , phonebook'Scotty'Post
   , phonebook'Scotty'Get
   ) where
@@ -146,7 +147,12 @@ data State
   = State'CA 
   | State'NY
   | State'TX
+  | State'Other State'Other'Members
   deriving (P.Show, P.Eq)
+
+data State'Other'Members = State'Other'Members
+  { state'OtherName :: R.Text
+  } deriving (P.Show, P.Eq)
 
 --------------------------------------------------------
 -- Add-ons
@@ -466,6 +472,11 @@ instance C.ToVal State where
     State'CA -> C.Val'ApiVal P.$ C.ApiVal'Enumeral P.$ C.Enumeral "CA" P.Nothing
     State'NY -> C.Val'ApiVal P.$ C.ApiVal'Enumeral P.$ C.Enumeral "NY" P.Nothing
     State'TX -> C.Val'ApiVal P.$ C.ApiVal'Enumeral P.$ C.Enumeral "TX" P.Nothing
+    State'Other State'Other'Members
+      { state'OtherName
+      } -> C.Val'ApiVal P.$ C.ApiVal'Enumeral P.$ C.Enumeral "Other" P.$ P.Just P.$ R.fromList
+      [ ("name", C.toVal state'OtherName)
+      ]
 
 instance C.FromVal State where
   fromVal = \case
@@ -473,6 +484,9 @@ instance C.FromVal State where
       ("CA", P.Nothing) -> P.Just State'CA
       ("NY", P.Nothing) -> P.Just State'NY
       ("TX", P.Nothing) -> P.Just State'TX
+      ("Other", P.Just _m') -> State'Other P.<$> (State'Other'Members
+          P.<$> C.getMember _m' "name"
+        )
       _ -> P.Nothing
     _ -> P.Nothing
 
@@ -488,5 +502,5 @@ instance R.FromJSON State where
 
 phonebook'spec :: R.Value
 phonebook'spec = v
-  where P.Just v = R.decode "{\"colorless\":{\"major\":0,\"minor\":0},\"types\":[{\"n\":\"PersonId\",\"w\":\"String\"},{\"n\":\"Name\",\"w\":\"String\"},{\"n\":\"Phone\",\"w\":\"String\"},{\"n\":\"Street\",\"w\":\"String\"},{\"n\":\"City\",\"w\":\"String\"},{\"n\":\"State\",\"e\":[{\"tag\":\"CA\"},{\"tag\":\"NY\"},{\"tag\":\"TX\"}]},{\"n\":\"Zipcode\",\"w\":\"String\"},{\"n\":\"Address\",\"m\":[{\"street\":\"Street\"},{\"city\":\"City\"},{\"zipcode\":\"Zipcode\"},{\"state\":\"State\"}]},{\"n\":\"Person\",\"m\":[{\"name\":\"Name\"},{\"phone\":\"Phone\"},{\"address\":{\"n\":\"Option\",\"p\":\"Address\"}},{\"friends\":{\"n\":\"List\",\"p\":\"PersonId\"}}]},{\"n\":\"LookupPerson\",\"m\":[{\"id\":\"PersonId\"}],\"o\":{\"n\":\"Option\",\"p\":\"Person\"}},{\"n\":\"LookupPersonByName\",\"m\":[{\"name\":\"Name\"}],\"o\":{\"n\":\"List\",\"p\":\"Person\"}},{\"n\":\"InsertPerson\",\"m\":[{\"person\":\"Person\"}],\"o\":\"PersonId\"}],\"pull\":{\"protocol\":\"http\",\"name\":\"Phonebook\",\"host\":\"127.0.0.1\",\"path\":\"/\",\"port\":8000,\"error\":\"Unit\",\"meta\":\"Unit\"},\"version\":{\"major\":0,\"minor\":0}}"
+  where P.Just v = R.decode "{\"colorless\":{\"major\":0,\"minor\":0},\"types\":[{\"n\":\"PersonId\",\"w\":\"String\"},{\"n\":\"Name\",\"w\":\"String\"},{\"n\":\"Phone\",\"w\":\"String\"},{\"n\":\"Street\",\"w\":\"String\"},{\"n\":\"City\",\"w\":\"String\"},{\"n\":\"State\",\"e\":[{\"tag\":\"CA\"},{\"tag\":\"NY\"},{\"tag\":\"TX\"},{\"tag\":\"Other\",\"m\":[{\"name\":\"String\"}]}]},{\"n\":\"Zipcode\",\"w\":\"String\"},{\"n\":\"Address\",\"m\":[{\"street\":\"Street\"},{\"city\":\"City\"},{\"zipcode\":\"Zipcode\"},{\"state\":\"State\"}]},{\"n\":\"Person\",\"m\":[{\"name\":\"Name\"},{\"phone\":\"Phone\"},{\"address\":{\"n\":\"Option\",\"p\":\"Address\"}},{\"friends\":{\"n\":\"List\",\"p\":\"PersonId\"}}]},{\"n\":\"LookupPerson\",\"m\":[{\"id\":\"PersonId\"}],\"o\":{\"n\":\"Option\",\"p\":\"Person\"}},{\"n\":\"LookupPersonByName\",\"m\":[{\"name\":\"Name\"}],\"o\":{\"n\":\"List\",\"p\":\"Person\"}},{\"n\":\"InsertPerson\",\"m\":[{\"person\":\"Person\"}],\"o\":\"PersonId\"}],\"pull\":{\"protocol\":\"http\",\"name\":\"Phonebook\",\"host\":\"127.0.0.1\",\"path\":\"/\",\"port\":8000,\"error\":\"Unit\",\"meta\":\"Unit\"},\"version\":{\"major\":0,\"minor\":0}}"
 

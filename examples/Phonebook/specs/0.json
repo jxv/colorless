@@ -6,7 +6,7 @@
       { "n": "Phone", "w": "String" },
       { "n": "Street", "w": "String" },
       { "n": "City", "w": "String" },
-      { "n": "State", "e": ["CA","NY","TX"] },
+      { "n": "State", "e": ["CA","NY","TX",{"tag":"Other","m":[{"name":"String"}]}] },
       { "n": "Zipcode", "w": "String" },
       { "n": "Address", "m": [ {"street":"Street"}, {"city":"City"}, {"zipcode":"Zipcode"}, {"state":"State"} ] },
       { "n": "Person", "m": [ {"name": "Name"}, {"phone": "Phone"}, {"address":{"n":"Option","p":"Address"}}, {"friends": {"n":"List", "p": "PersonId"}} ] },

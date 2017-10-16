@@ -29,6 +29,7 @@ module Phonebook
   , LookupPersonByName(..)
   , InsertPerson(..)
   , State(..)
+  , State'Other'Members(..)
   , phonebook'LookupPerson
   , phonebook'LookupPersonByName
   , phonebook'InsertPerson
@@ -46,6 +47,7 @@ module Phonebook
   , state'CA'Mk
   , state'NY'Mk
   , state'TX'Mk
+  , state'Other'Mk
   , address'
   , person'
   , lookupPerson'
@@ -69,6 +71,8 @@ module Phonebook
   , lookupPerson'id
   , lookupPersonByName'name
   , insertPerson'person
+  , state'Other'name
+  , state'Match
   , phonebook'HttpClient'Post
   ) where
 
@@ -160,7 +164,12 @@ data State
   = State'CA 
   | State'NY
   | State'TX
+  | State'Other State'Other'Members
   deriving (P.Show, P.Eq)
+
+data State'Other'Members = State'Other'Members
+  { state'OtherName :: R.Text
+  } deriving (P.Show, P.Eq)
 
 --------------------------------------------------------
 -- API
@@ -286,8 +295,14 @@ state'NY'Mk = C.unsafeExpr P.. Ast.toAst P.$ State'NY
 state'TX'Mk :: C.Expr State
 state'TX'Mk = C.unsafeExpr P.. Ast.toAst P.$ State'TX
 
+state'Other'Mk :: C.Expr (R.Text -> State)
+state'Other'Mk = C.unsafeEnumeralExpr "Other" ["name"]
+
 state' :: State -> C.Expr State
 state' = C.unsafeExpr P.. Ast.toAst
+
+state'Other'name :: C.Path (State'Other'Members -> R.Text)
+state'Other'name = C.unsafePath ["name"]
 
 --------------------------------------------------------
 -- Add-ons
@@ -658,11 +673,19 @@ instance Ast.ToAst InsertPerson where
 instance C.HasType State where
   getType _ = "State"
 
+instance C.HasType State'Other'Members where
+  getType _ = "State"
+
 instance C.ToVal State where
   toVal = \case
     State'CA -> C.Val'ApiVal P.$ C.ApiVal'Enumeral P.$ C.Enumeral "CA" P.Nothing
     State'NY -> C.Val'ApiVal P.$ C.ApiVal'Enumeral P.$ C.Enumeral "NY" P.Nothing
     State'TX -> C.Val'ApiVal P.$ C.ApiVal'Enumeral P.$ C.Enumeral "TX" P.Nothing
+    State'Other State'Other'Members
+      { state'OtherName
+      } -> C.Val'ApiVal P.$ C.ApiVal'Enumeral P.$ C.Enumeral "Other" P.$ P.Just P.$ R.fromList
+      [ ("name", C.toVal state'OtherName)
+      ]
 
 instance C.FromVal State where
   fromVal = \case
@@ -670,6 +693,9 @@ instance C.FromVal State where
       ("CA", P.Nothing) -> P.Just State'CA
       ("NY", P.Nothing) -> P.Just State'NY
       ("TX", P.Nothing) -> P.Just State'TX
+      ("Other", P.Just _m') -> State'Other P.<$> (State'Other'Members
+          P.<$> C.getMember _m' "name"
+        )
       _ -> P.Nothing
     _ -> P.Nothing
 
@@ -690,4 +716,24 @@ instance Ast.ToAst State where
     State'CA -> Ast.Ast'Enumeral P.$ Ast.Enumeral "CA" P.Nothing
     State'NY -> Ast.Ast'Enumeral P.$ Ast.Enumeral "NY" P.Nothing
     State'TX -> Ast.Ast'Enumeral P.$ Ast.Enumeral "TX" P.Nothing
+    State'Other State'Other'Members
+      { state'OtherName
+      } -> Ast.Ast'Enumeral P.$ Ast.Enumeral "Other" P.$ P.Just P.$ R.fromList
+      [ ("name", Ast.toAst state'OtherName)
+      ]
+
+state'Match
+  :: (C.HasType a, Ast.ToAst a)
+  => C.Expr State
+  -> C.Expr a -- CA
+  -> C.Expr a -- NY
+  -> C.Expr a -- TX
+  -> (C.Symbol, C.Expr State'Other'Members -> C.Expr a) -- | Other
+  -> C.Expr a
+state'Match _enumeral _CA _NY _TX _Other = C.unsafeExpr P.$ Ast.Ast'Match P.$ Ast.Match (Ast.toAst _enumeral)
+  [ Ast.MatchCase'Tag "CA" (Ast.toAst _CA)
+  , Ast.MatchCase'Tag "NY" (Ast.toAst _NY)
+  , Ast.MatchCase'Tag "TX" (Ast.toAst _TX)
+  , Ast.MatchCase'Members "Other" (P.fst _Other) (Ast.toAst P.$ P.snd _Other (C.unsafeExpr P.$ Ast.Ast'Ref P.$ Ast.Ref (P.fst _Other)))
+  ]
 

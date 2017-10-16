@@ -22,6 +22,7 @@ module Phonebook
   , V0.LookupPersonByName(..)
   , V0.InsertPerson(..)
   , V0.State(..)
+  , V0.State'Other'Members(..)
   ) where
 
 import qualified Prelude as P
@@ -48,6 +49,7 @@ import qualified Phonebook.V0 as V0
   , LookupPersonByName(..)
   , InsertPerson(..)
   , State(..)
+  , State'Other'Members(..)
   )
 
 phonebook'handlerMap
