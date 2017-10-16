@@ -270,7 +270,7 @@ const genHandleRequest = (name, lowercaseName, meta) => {
     '    query\' <- P.maybe (C.runtimeThrow C.RuntimeError\'UnparsableQuery) P.return (C.jsonToExpr query)\n',
     '    vals <- C.runEval (C.forceVal P.=<< C.eval query\' envRef) evalConfig\n',
     '    P.return (C.Response\'Success (R.toJSON vals)))\n',
-    '  (\\_err -> P.return P.$ P.Left (C.Response\'Error (C.ResponseError\'Service _err)))\n'
+    '  (\\(C.ThrownValue _err) -> P.return P.$ P.Left (C.Response\'Error (C.ResponseError\'Service _err)))\n'
   ]);
 };
 
