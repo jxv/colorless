@@ -1,9 +1,8 @@
 resolver: lts-9.6
 packages:
 - '.'
-- '../../../../colorless-haskell/colorless'
 extra-deps:
 - 'colorless-2.2.19'
-- 'colorless-scotty-0.0.1'
+- 'colorless-scotty-0.0.2'
 flags: {}
 extra-package-dbs: []

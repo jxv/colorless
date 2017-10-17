@@ -200,8 +200,8 @@ phonebook'handler _hooks C.Request{meta,query} = R.catch
           }
     query' <- P.maybe (C.runtimeThrow C.RuntimeError'UnparsableQuery) P.return (C.jsonToExpr query)
     vals <- C.runEval (C.forceVal P.=<< C.eval query' envRef) evalConfig
-    P.return (C.Response'Success (R.toJSON vals)))
-  (\(C.ThrownValue _err) -> P.return P.$ P.Left (C.Response'Error (C.ResponseError'Service _err)))
+    P.return P.$ C.Response'Success (R.toJSON vals))
+  (\(C.ThrownValue _err) -> P.return P.. P.Left P.$ C.Response'Error (C.ResponseError'Service _err))
 
 -- API
 phonebook'ApiCall :: (Phonebook'Service meta m, C.ServiceThrower m, C.RuntimeThrower m) => meta -> C.ApiCall -> m C.Val
