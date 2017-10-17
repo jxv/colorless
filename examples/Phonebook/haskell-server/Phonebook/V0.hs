@@ -186,7 +186,7 @@ phonebook'handler _hooks C.Request{meta,query} = R.catch
     variableBaseCount <- R.liftIO (R.size P.<$> IO.readIORef envRef)
     _limits <- M.lift P.$ C.sandboxLimits _hooks xformMeta
     let _limits' = _limits
-          { C.variableLimit = P.fmap (P.+ variableBaseCount) (C.variableLimit _limits)
+          { C.variables = P.fmap (P.+ variableBaseCount) (C.variables _limits)
           }
     _serviceCallCountRef <- R.liftIO (IO.newIORef 0)
     _lambdaCountRef <- R.liftIO (IO.newIORef 0)
@@ -200,7 +200,7 @@ phonebook'handler _hooks C.Request{meta,query} = R.catch
           }
     query' <- P.maybe (C.runtimeThrow C.RuntimeError'UnparsableQuery) P.return (C.jsonToExpr query)
     vals <- C.runEval (C.forceVal P.=<< C.eval query' envRef) evalConfig
-    P.return P.$ C.Response'Success (R.toJSON vals))
+    P.return P.$ C.Response'Success (R.toJSON vals) _limits)
   (\(C.ThrownValue _err) -> P.return P.. P.Left P.$ C.Response'Error (C.ResponseError'Service _err))
 
 -- API

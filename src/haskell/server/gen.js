@@ -255,7 +255,7 @@ const genHandleRequest = (name, lowercaseName, meta) => {
     '    variableBaseCount <- R.liftIO (R.size P.<$> IO.readIORef envRef)\n',
     '    _limits <- M.lift P.$ C.sandboxLimits _hooks xformMeta\n',
     '    let _limits\' = _limits\n',
-    '          { C.variableLimit = P.fmap (P.+ variableBaseCount) (C.variableLimit _limits)\n',
+    '          { C.variables = P.fmap (P.+ variableBaseCount) (C.variables _limits)\n',
     '          }\n',
     '    _serviceCallCountRef <- R.liftIO (IO.newIORef 0)\n',
     '    _lambdaCountRef <- R.liftIO (IO.newIORef 0)\n',
@@ -269,7 +269,7 @@ const genHandleRequest = (name, lowercaseName, meta) => {
     '          }\n',
     '    query\' <- P.maybe (C.runtimeThrow C.RuntimeError\'UnparsableQuery) P.return (C.jsonToExpr query)\n',
     '    vals <- C.runEval (C.forceVal P.=<< C.eval query\' envRef) evalConfig\n',
-    '    P.return P.$ C.Response\'Success (R.toJSON vals))\n',
+    '    P.return P.$ C.Response\'Success (R.toJSON vals) _limits)\n',
     '  (\\(C.ThrownValue _err) -> P.return P.. P.Left P.$ C.Response\'Error (C.ResponseError\'Service _err))\n',
   ]);
 };
