@@ -7,9 +7,9 @@ import Control.Monad
 import Control.Monad.IO.Class
 import Control.Monad.Reader
 import Control.Concurrent.MVar
-import Colorless.Types
-import Colorless.Server
-import Colorless.Server.Scotty
+import Fluid.Types
+import Fluid.Server
+import Fluid.Server.Scotty
 import Data.Map (Map)
 import System.Random
 
@@ -52,5 +52,5 @@ main = do
 
 routes :: ScottyT TL.Text App ()
 routes = do
-  phonebook'Scotty'Post defHooks phonebook'pull
+  phonebook'Scotty'Post (const defHooks) phonebook'pull
   phonebook'Scotty'Get phonebook'pull

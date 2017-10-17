@@ -4,7 +4,7 @@ module Main where
 import qualified Data.ByteString.Lazy.Char8 as BL (putStrLn)
 import Network.HTTP.Client.TLS
 import Data.Aeson (encode, ToJSON(..))
-import Colorless.Client
+import Fluid.Client
 
 import HelloWorld
 

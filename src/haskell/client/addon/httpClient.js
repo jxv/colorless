@@ -1,7 +1,7 @@
 var Lines = require('../../../lines.js').Lines;
 
 const importing = (s) => [
-  'import qualified Colorless.Client.HttpClient as HttpClient',
+  'import qualified Fluid.Client.HttpClient as HttpClient',
 ];
 
 const exporting = (s) => [

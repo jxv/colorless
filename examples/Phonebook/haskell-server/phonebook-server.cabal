@@ -19,8 +19,8 @@ executable phonebook-server
   build-depends:
       base >= 4.9 && < 5
     , containers
-    , colorless
-    , colorless-scotty
+    , fluid-idl
+    , fluid-idl-scotty
     , random
     , mtl
     , text

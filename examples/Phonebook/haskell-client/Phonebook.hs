@@ -83,11 +83,11 @@ import qualified Data.String as P (IsString)
 import qualified Data.Word as I
 import qualified Data.Int as I
 import qualified Data.IORef as IO
-import qualified Colorless.Client as C
-import qualified Colorless.Client.Expr as C
-import qualified Colorless.Ast as Ast
-import qualified Colorless.Imports as R
-import qualified Colorless.Client.HttpClient as HttpClient
+import qualified Fluid.Client as C
+import qualified Fluid.Client.Expr as C
+import qualified Fluid.Ast as Ast
+import qualified Fluid.Imports as R
+import qualified Fluid.Client.HttpClient as HttpClient
 
 --------------------------------------------------------
 -- Configs

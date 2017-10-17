@@ -1,7 +1,7 @@
 {
-  "name": "colorless-cli",
+  "name": "fluid-cli",
   "version": "0.0.0",
-  "description": "Generate colorless client and server code through the command line",
+  "description": "Generate fluid client and server code through the command line",
   "main": "index.js",
   "directories": {
     "example": "examples"
@@ -25,21 +25,21 @@
     "test": "mocha --watch --reporter spec",
     "build": "babel src -d lib --presets es2017",
     "bin": {
-      "colorless": "./lib/cli.js"
+      "fluid": "./lib/cli.js"
     }
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jxv/colorless.git"
+    "url": "git+https://github.com/jxv/fluid.git"
   },
   "keywords": [
-    "colorless",
+    "fluid",
     "idl"
   ],
   "author": "jxv",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/jxv/colorless/issues"
+    "url": "https://github.com/jxv/fluid/issues"
   },
-  "homepage": "https://github.com/jxv/colorless#readme"
+  "homepage": "https://github.com/jxv/fluid#readme"
 }

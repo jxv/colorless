@@ -73,10 +73,10 @@ const genImports = (imports) => {
     'import qualified Data.Int as I\n',
     'import qualified Data.IORef as IO\n',
 
-    'import qualified Colorless.Client as C\n',
-    'import qualified Colorless.Client.Expr as C\n',
-    'import qualified Colorless.Ast as Ast\n',
-    'import qualified Colorless.Imports as R\n'
+    'import qualified Fluid.Client as C\n',
+    'import qualified Fluid.Client.Expr as C\n',
+    'import qualified Fluid.Ast as Ast\n',
+    'import qualified Fluid.Imports as R\n'
   ]);
   imports.forEach(x => lines.add(x));
   lines.add('\n');

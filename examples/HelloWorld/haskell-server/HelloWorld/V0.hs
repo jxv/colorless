@@ -34,11 +34,11 @@ import qualified Data.Int as I
 import qualified Data.IORef as IO
 import qualified Data.String as P (IsString)
 
-import qualified Colorless.Imports as R
-import qualified Colorless.Server as C
+import qualified Fluid.Imports as R
+import qualified Fluid.Server as C
 
 
-import qualified Colorless.Server.Scotty as Scotty
+import qualified Fluid.Server.Scotty as Scotty
 
 --------------------------------------------------------
 -- Configs
@@ -82,10 +82,10 @@ data Hello = Hello
 
 helloWorld'Scotty'Post
   :: (Scotty.ScottyError e, R.MonadIO m, HelloWorld'Service meta m, R.MonadCatch m)
-  => C.Hooks m () meta
+  => ([(Scotty.LazyText, Scotty.LazyText)] -> C.Hooks m () meta)
   -> C.Pull
   -> Scotty.ScottyT e m ()
-helloWorld'Scotty'Post _hooks _pull = Scotty.sendResponseSingleton _pull helloWorld'version (helloWorld'handler _hooks)
+helloWorld'Scotty'Post _hooks _pull = Scotty.respondSingleton _pull helloWorld'version (\_xtra -> helloWorld'handler _hooks _xtra)
 
 helloWorld'Scotty'Get :: (Scotty.ScottyError e, R.MonadIO m) => C.Pull -> Scotty.ScottyT e m ()
 helloWorld'Scotty'Get = Scotty.getSpec P.$ R.toJSON [helloWorld'spec]
@@ -97,12 +97,14 @@ helloWorld'Scotty'Get = Scotty.getSpec P.$ R.toJSON [helloWorld'spec]
 -- Handler
 helloWorld'handler
   :: (HelloWorld'Service meta m, R.MonadIO m, R.MonadCatch m)
-  => C.Hooks m () meta
+  => (xtra -> C.Hooks m () meta)
+  -> xtra
   -> C.Request
   -> m (P.Either C.Response C.Response)
-helloWorld'handler _hooks C.Request{meta,query} = R.catch
+helloWorld'handler _hooksBuilder xtra C.Request{meta,query} = R.catch
   (M.runExceptT P.$ do
     meta' <- P.maybe (C.runtimeThrow C.RuntimeError'UnparsableMeta) P.return (C.fromValFromJson meta)
+    let _hooks = _hooksBuilder xtra
     xformMeta <- M.lift P.$ C.metaMiddleware _hooks meta'
     envRef <- R.liftIO C.emptyEnv
     variableBaseCount <- R.liftIO (R.size P.<$> IO.readIORef envRef)
@@ -179,5 +181,5 @@ instance R.FromJSON Hello where
 
 helloWorld'spec :: R.Value
 helloWorld'spec = v
-  where P.Just v = R.decode "{\"colorless\":{\"major\":0,\"minor\":0},\"types\":[{\"n\":\"Hello\",\"m\":[{\"target\":\"String\"}],\"o\":\"String\"}],\"pull\":{\"protocol\":\"http\",\"name\":\"HelloWorld\",\"host\":\"127.0.0.1\",\"meta\":\"Unit\",\"path\":\"/\",\"port\":8080,\"error\":\"Unit\"},\"version\":{\"major\":0,\"minor\":0}}"
+  where P.Just v = R.decode "{\"fluid\":{\"major\":0,\"minor\":0},\"types\":[{\"n\":\"Hello\",\"m\":[{\"target\":\"String\"}],\"o\":\"String\"}],\"pull\":{\"protocol\":\"http\",\"name\":\"HelloWorld\",\"host\":\"127.0.0.1\",\"meta\":\"Unit\",\"path\":\"/\",\"port\":8080,\"error\":\"Unit\"},\"version\":{\"major\":0,\"minor\":0}}"
 

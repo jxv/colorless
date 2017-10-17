@@ -1,4 +1,4 @@
-import { assert } from '../../colorless';
+import { assert } from '../../fluid';
 
 export const version = {
   major: 0,

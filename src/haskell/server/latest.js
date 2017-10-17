@@ -29,8 +29,8 @@ const genImports = (importing) => {
   var lines = new Lines([
     '\n',
     'import qualified Prelude as P\n',
-    'import qualified Colorless.Server as C (RuntimeThrower, Hooks, Request, Response, Major, Minor, Pull)\n',
-    'import qualified Colorless.Imports as R\n'
+    'import qualified Fluid.Server as C (RuntimeThrower, Hooks, Request, Response, Major, Minor, Pull)\n',
+    'import qualified Fluid.Imports as R\n'
   ]);
   importing.forEach(imp => lines.add(imp + '\n'));
   return lines;
@@ -68,13 +68,13 @@ const genHandlerMap = (specs) => {
   ));
   lines.add([
     '    )\n',
-    '  => C.Hooks m ' +  specs[0].meta + ' meta' + specs[0].version.major + '\n',
+    '  => (xtra -> C.Hooks m ' +  specs[0].meta + ' meta' + specs[0].version.major + ')\n',
   ]);
   lines.add(specs.slice(1).map(({version, meta}) =>
     '  -> C.Hooks m ' +  meta + ' meta' + version.major + '\n'
   ));
   lines.add([
-    '\n',
+    '  -> xtra\n',
     '  -> R.Map C.Major (C.Minor, C.Request -> m (P.Either C.Response C.Response))\n',
     specs[0].lowercaseName, '\'handlerMap'
   ]);
@@ -82,13 +82,13 @@ const genHandlerMap = (specs) => {
     ' hooks' + version.major
   ));
 
-  lines.add(' = R.fromList\n');
+  lines.add(' xtra = R.fromList\n');
   lines.add([
-    '    [ (' + specs[0].version.major, ', (', specs[0].version.minor, ', V', specs[0].version.major, '.', specs[0].lowercaseName, '\'handler hooks', specs[0].version.major, '))\n'
+    '    [ (' + specs[0].version.major, ', (', specs[0].version.minor, ', V', specs[0].version.major, '.', specs[0].lowercaseName, '\'handler hooks', specs[0].version.major, ' xtra))\n'
   ]);
 
   lines.add(specs.slice(1).map(spec =>
-    '    , (' + spec.version.major + ', (' + spec.version.minor + ', V' + spec.version.major + '.' + spec.lowercaseName + '\'handler hooks' + spec.version.major + '))\n'
+    '    , (' + spec.version.major + ', (' + spec.version.minor + ', V' + spec.version.major + '.' + spec.lowercaseName + '\'handler hooks' + spec.version.major + ' xtra))\n'
   ));
   lines.add(
     '    ]\n'
