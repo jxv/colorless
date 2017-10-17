@@ -1,9 +1,9 @@
 module Main where
 
 import Control.Monad.IO.Class
-import Colorless.Types
-import Colorless.Server.Scotty
-import Colorless.Server
+import Fluid.Types
+import Fluid.Server.Scotty
+import Fluid.Server
 import Data.Text.Lazy
 
 import HelloWorld ()
@@ -23,5 +23,5 @@ main = runServer helloWorld'pull unApp routes
 
 routes :: ScottyT Text App ()
 routes = do
-  helloWorld'Scotty'Post defHooks helloWorld'pull
+  helloWorld'Scotty'Post (const defHooks) helloWorld'pull
   helloWorld'Scotty'Get helloWorld'pull

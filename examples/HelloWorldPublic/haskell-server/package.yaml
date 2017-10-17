@@ -8,8 +8,8 @@ license: MIT
 
 dependencies:
   - base >= 4.9 && < 5
-  - colorless
-  - colorless-scotty
+  - fluid-idl
+  - fluid-idl-scotty
   - mtl
   - text
 

@@ -46,11 +46,11 @@ import qualified Data.Int as I
 import qualified Data.IORef as IO
 import qualified Data.String as P (IsString)
 
-import qualified Colorless.Imports as R
-import qualified Colorless.Server as C
+import qualified Fluid.Imports as R
+import qualified Fluid.Server as C
 
 
-import qualified Colorless.Server.Scotty as Scotty
+import qualified Fluid.Server.Scotty as Scotty
 
 --------------------------------------------------------
 -- Configs
@@ -160,10 +160,10 @@ data State'Other'Members = State'Other'Members
 
 phonebook'Scotty'Post
   :: (Scotty.ScottyError e, R.MonadIO m, Phonebook'Service meta m, R.MonadCatch m)
-  => C.Hooks m () meta
+  => ([(Scotty.LazyText, Scotty.LazyText)] -> C.Hooks m () meta)
   -> C.Pull
   -> Scotty.ScottyT e m ()
-phonebook'Scotty'Post _hooks _pull = Scotty.sendResponseSingleton _pull phonebook'version (phonebook'handler _hooks)
+phonebook'Scotty'Post _hooks _pull = Scotty.respondSingleton _pull phonebook'version (\_xtra -> phonebook'handler _hooks _xtra)
 
 phonebook'Scotty'Get :: (Scotty.ScottyError e, R.MonadIO m) => C.Pull -> Scotty.ScottyT e m ()
 phonebook'Scotty'Get = Scotty.getSpec P.$ R.toJSON [phonebook'spec]
@@ -175,12 +175,14 @@ phonebook'Scotty'Get = Scotty.getSpec P.$ R.toJSON [phonebook'spec]
 -- Handler
 phonebook'handler
   :: (Phonebook'Service meta m, R.MonadIO m, R.MonadCatch m)
-  => C.Hooks m () meta
+  => (xtra -> C.Hooks m () meta)
+  -> xtra
   -> C.Request
   -> m (P.Either C.Response C.Response)
-phonebook'handler _hooks C.Request{meta,query} = R.catch
+phonebook'handler _hooksBuilder xtra C.Request{meta,query} = R.catch
   (M.runExceptT P.$ do
     meta' <- P.maybe (C.runtimeThrow C.RuntimeError'UnparsableMeta) P.return (C.fromValFromJson meta)
+    let _hooks = _hooksBuilder xtra
     xformMeta <- M.lift P.$ C.metaMiddleware _hooks meta'
     envRef <- R.liftIO C.emptyEnv
     variableBaseCount <- R.liftIO (R.size P.<$> IO.readIORef envRef)
@@ -502,5 +504,5 @@ instance R.FromJSON State where
 
 phonebook'spec :: R.Value
 phonebook'spec = v
-  where P.Just v = R.decode "{\"colorless\":{\"major\":0,\"minor\":0},\"types\":[{\"n\":\"PersonId\",\"w\":\"String\"},{\"n\":\"Name\",\"w\":\"String\"},{\"n\":\"Phone\",\"w\":\"String\"},{\"n\":\"Street\",\"w\":\"String\"},{\"n\":\"City\",\"w\":\"String\"},{\"n\":\"State\",\"e\":[{\"tag\":\"CA\"},{\"tag\":\"NY\"},{\"tag\":\"TX\"},{\"tag\":\"Other\",\"m\":[{\"name\":\"String\"}]}]},{\"n\":\"Zipcode\",\"w\":\"String\"},{\"n\":\"Address\",\"m\":[{\"street\":\"Street\"},{\"city\":\"City\"},{\"zipcode\":\"Zipcode\"},{\"state\":\"State\"}]},{\"n\":\"Person\",\"m\":[{\"name\":\"Name\"},{\"phone\":\"Phone\"},{\"address\":{\"n\":\"Option\",\"p\":\"Address\"}},{\"friends\":{\"n\":\"List\",\"p\":\"PersonId\"}}]},{\"n\":\"LookupPerson\",\"m\":[{\"id\":\"PersonId\"}],\"o\":{\"n\":\"Option\",\"p\":\"Person\"}},{\"n\":\"LookupPersonByName\",\"m\":[{\"name\":\"Name\"}],\"o\":{\"n\":\"List\",\"p\":\"Person\"}},{\"n\":\"InsertPerson\",\"m\":[{\"person\":\"Person\"}],\"o\":\"PersonId\"}],\"pull\":{\"protocol\":\"http\",\"name\":\"Phonebook\",\"host\":\"127.0.0.1\",\"path\":\"/\",\"port\":8000,\"error\":\"Unit\",\"meta\":\"Unit\"},\"version\":{\"major\":0,\"minor\":0}}"
+  where P.Just v = R.decode "{\"fluid\":{\"major\":0,\"minor\":0},\"types\":[{\"n\":\"PersonId\",\"w\":\"String\"},{\"n\":\"Name\",\"w\":\"String\"},{\"n\":\"Phone\",\"w\":\"String\"},{\"n\":\"Street\",\"w\":\"String\"},{\"n\":\"City\",\"w\":\"String\"},{\"n\":\"State\",\"e\":[{\"tag\":\"CA\"},{\"tag\":\"NY\"},{\"tag\":\"TX\"},{\"tag\":\"Other\",\"m\":[{\"name\":\"String\"}]}]},{\"n\":\"Zipcode\",\"w\":\"String\"},{\"n\":\"Address\",\"m\":[{\"street\":\"Street\"},{\"city\":\"City\"},{\"zipcode\":\"Zipcode\"},{\"state\":\"State\"}]},{\"n\":\"Person\",\"m\":[{\"name\":\"Name\"},{\"phone\":\"Phone\"},{\"address\":{\"n\":\"Option\",\"p\":\"Address\"}},{\"friends\":{\"n\":\"List\",\"p\":\"PersonId\"}}]},{\"n\":\"LookupPerson\",\"m\":[{\"id\":\"PersonId\"}],\"o\":{\"n\":\"Option\",\"p\":\"Person\"}},{\"n\":\"LookupPersonByName\",\"m\":[{\"name\":\"Name\"}],\"o\":{\"n\":\"List\",\"p\":\"Person\"}},{\"n\":\"InsertPerson\",\"m\":[{\"person\":\"Person\"}],\"o\":\"PersonId\"}],\"pull\":{\"protocol\":\"http\",\"name\":\"Phonebook\",\"host\":\"127.0.0.1\",\"path\":\"/\",\"port\":8000,\"error\":\"Unit\",\"meta\":\"Unit\"},\"version\":{\"major\":0,\"minor\":0}}"
 

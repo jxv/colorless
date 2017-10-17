@@ -2,7 +2,7 @@ resolver: lts-9.6
 packages:
 - '.'
 extra-deps:
-- 'colorless-2.2.20'
-- 'colorless-scotty-0.0.2'
+- 'fluid-idl-0.0.0'
+- 'fluid-idl-scotty-0.0.0'
 flags: {}
 extra-package-dbs: []

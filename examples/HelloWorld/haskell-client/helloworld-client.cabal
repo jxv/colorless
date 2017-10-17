@@ -20,8 +20,8 @@ executable helloworld-client
       aeson
     , base >= 4.9 && < 5
     , bytestring
-    , colorless
-    , colorless-http-client
+    , fluid
+    , fluid-http-client
     , mtl
     , text
     , http-client-tls

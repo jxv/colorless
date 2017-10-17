@@ -1,5 +1,5 @@
 {
-    "colorless": { "major": 0, "minor": 0 },
+    "fluid": { "major": 0, "minor": 0 },
     "types": [
       { "n": "PersonId", "w": "String" },
       { "n": "Name", "w": "String" },

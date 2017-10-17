@@ -18,8 +18,8 @@ executable helloworld-server
   ghc-options: -Wall
   build-depends:
       base >= 4.9 && < 5
-    , colorless
-    , colorless-scotty
+    , fluid-idl
+    , fluid-idl-scotty
     , mtl
     , text
   default-language: Haskell2010

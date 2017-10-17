@@ -7,7 +7,7 @@ const clientLatest = (specs) => {
   var lines = new Lines();
 
   lines.add([
-    'import { assert } from \'../../colorless\';\n',
+    'import { assert } from \'../../fluid\';\n',
   ]);
   lines.add([
     '\n',

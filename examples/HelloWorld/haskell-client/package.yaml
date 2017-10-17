@@ -10,8 +10,8 @@ dependencies:
   - aeson
   - base >= 4.9 && < 5
   - bytestring
-  - colorless
-  - colorless-http-client
+  - fluid-idl
+  - fluid-idl-http-client
   - mtl
   - text
   - http-client-tls

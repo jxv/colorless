@@ -1,7 +1,7 @@
 var Lines = require('../../../lines.js').Lines;
 
 const importing = (s) => [
-  'import qualified Colorless.Server.Scotty as Scotty',
+  'import qualified Fluid.Server.Scotty as Scotty',
 ];
 
 const exporting = (s) => [
@@ -27,7 +27,7 @@ const gen = (specs) => {
     '  => C.Pull\n',
   ]);
   specs.forEach(({meta, version}) => lines.add([
-    '  -> C.Hooks m ', meta,' meta', version.major, '\n',
+    '  -> ([(Scotty.LazyText, Scotty.LazyText)] -> C.Hooks m ', meta,' meta', version.major, ')\n',
   ]));
   lines.add([
     '  -> Scotty.ScottyT e m ()\n',
@@ -37,7 +37,7 @@ const gen = (specs) => {
     ' hooks', version.major,
   ]));
   lines.add([
-    ' = Scotty.sendResponse pull (', s.lowercaseName, '\'handlerMap',
+    ' = Scotty.respond pull (', s.lowercaseName, '\'handlerMap',
   ]);
   specs.forEach(({meta, version}) => lines.add([
     ' hooks', version.major,

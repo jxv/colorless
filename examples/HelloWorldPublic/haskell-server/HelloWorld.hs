@@ -14,9 +14,9 @@ module HelloWorld
   ) where
 
 import qualified Prelude as P
-import qualified Colorless.Server as C (RuntimeThrower, Hooks, Request, Response, Major, Minor, Pull)
-import qualified Colorless.Imports as R
-import qualified Colorless.Server.Scotty as Scotty
+import qualified Fluid.Server as C (RuntimeThrower, Hooks, Request, Response, Major, Minor, Pull)
+import qualified Fluid.Imports as R
+import qualified Fluid.Server.Scotty as Scotty
 
 import qualified HelloWorld.V0 as V0
   ( HelloWorld'Service(..)
@@ -34,11 +34,11 @@ helloWorld'handlerMap
     , R.MonadCatch m
     , V0.HelloWorld'Service meta0 m
     )
-  => C.Hooks m () meta0
-
+  => (xtra -> C.Hooks m () meta0)
+  -> xtra
   -> R.Map C.Major (C.Minor, C.Request -> m (P.Either C.Response C.Response))
-helloWorld'handlerMap hooks0 = R.fromList
-    [ (0, (0, V0.helloWorld'handler hooks0))
+helloWorld'handlerMap hooks0 xtra = R.fromList
+    [ (0, (0, V0.helloWorld'handler hooks0 xtra))
     ]
 
 helloWorld'spec :: R.Value
@@ -54,9 +54,9 @@ helloWorld'Scotty'Post
     , V0.HelloWorld'Service meta0 m
     )
   => C.Pull
-  -> C.Hooks m () meta0
+  -> ([(Scotty.LazyText, Scotty.LazyText)] -> C.Hooks m () meta0)
   -> Scotty.ScottyT e m ()
-helloWorld'Scotty'Post pull hooks0 = Scotty.sendResponse pull (helloWorld'handlerMap hooks0)
+helloWorld'Scotty'Post pull hooks0 = Scotty.respond pull (helloWorld'handlerMap hooks0)
 
 helloWorld'Scotty'Get :: (Scotty.ScottyError e, R.MonadIO m) => C.Pull -> Scotty.ScottyT e m ()
 helloWorld'Scotty'Get = Scotty.getSpec helloWorld'spec
