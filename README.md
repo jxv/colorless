@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://www.fluid-idl.org/">
-    <img alt="fluid" src="https://raw.githubusercontent.com/jxv/fluid-data/master/fluid.png" width="570" height="250">
+    <b>Fluid</b>
   </a>
 </p>
 
