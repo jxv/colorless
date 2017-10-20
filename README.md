@@ -18,7 +18,8 @@
 </p>
 
 ```shell
+yarn
 yarn install
 yarn build
-sudo ln ${PWD}/lib/cli.js -s /usr/local/bin/fluid
+ln -s ${PWD}/lib/cli.js /SOMEWHERE/IN/YOUR/PATH/fluid
 ```
