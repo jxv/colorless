@@ -99,11 +99,7 @@ const genThrower = (name, lowercaseName, error) => {
 const mkServiceCalls = (s) => {
   return []
     .concat(s.hollow
-      .map(x => {
-        var copy = Object.assign({}, x);
-        delete copy.name;
-        return copy;
-      }))
+      .map(x => R.merge(x, { hollow: true })))
     .concat(s.wrap)
     .concat(s.struct)
     .concat(s.enumeration)
@@ -118,7 +114,7 @@ const genService = (name, lowercaseName, calls) => {
   ]);
   calls.forEach(call =>
     lines.add([
-      '  ', lowercaseName, '\'', call.name, ' :: meta ->', call.name ? (' ' + call.name + ' ->') : '', ' m ', call.output, '\n',
+      '  ', lowercaseName, '\'', call.name, ' :: meta ->', !call.hollow ? (' ' + call.name + ' ->') : '', ' m ', call.output, '\n',
     ])
   );
 
@@ -128,7 +124,7 @@ const genService = (name, lowercaseName, calls) => {
   ]);
   calls.forEach(call =>
     lines.add([
-      '  ', lowercaseName, '\'', call.name, ' _meta = M.lift ', call.name ? ' P.. ' : ' P.$ ', lowercaseName, '\'', call.name, ' _meta\n',
+      '  ', lowercaseName, '\'', call.name, ' _meta = M.lift ', !call.hollow ? ' P.. ' : ' P.$ ', lowercaseName, '\'', call.name, ' _meta\n',
     ])
   );
 

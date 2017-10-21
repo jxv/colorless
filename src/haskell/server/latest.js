@@ -68,7 +68,7 @@ const genHandlerMap = (specs) => {
   ));
   lines.add([
     '    )\n',
-    '  => (xtra -> C.Hooks m ' +  specs[0].meta + ' meta' + specs[0].version.major + ')\n',
+    '  => (xtra -> C.Hooks m V' + specs[0].version.major + '\.' +  specs[0].meta + ' meta' + specs[0].version.major + ')\n',
   ]);
   lines.add(specs.slice(1).map(({version, meta}) =>
     '  -> C.Hooks m ' +  meta + ' meta' + version.major + '\n'
