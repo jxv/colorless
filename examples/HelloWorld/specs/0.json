@@ -1,8 +1,8 @@
 {
   "fluid": { "major": 0, "minor": 0 },
-  "types": [
-    { "n": "Hello", "m": [ {"target":"String"} ], "o": "String" }
-  ],
+  "schema": {
+    "Hello": { "m": [ {"target":"String"} ], "o": "String" }
+  },
   "pull": {
     "protocol": "http",
     "name": "HelloWorld",

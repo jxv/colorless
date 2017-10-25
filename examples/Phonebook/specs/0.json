@@ -1,19 +1,19 @@
 {
     "fluid": { "major": 0, "minor": 0 },
-    "types": [
-      { "n": "PersonId", "w": "String" },
-      { "n": "Name", "w": "String" },
-      { "n": "Phone", "w": "String" },
-      { "n": "Street", "w": "String" },
-      { "n": "City", "w": "String" },
-      { "n": "State", "e": ["CA","NY","TX",{"tag":"Other","m":[{"name":"String"}]}] },
-      { "n": "Zipcode", "w": "String" },
-      { "n": "Address", "m": [ {"street":"Street"}, {"city":"City"}, {"zipcode":"Zipcode"}, {"state":"State"} ] },
-      { "n": "Person", "m": [ {"name": "Name"}, {"phone": "Phone"}, {"address":{"n":"Option","p":"Address"}}, {"friends": {"n":"List", "p": "PersonId"}} ] },
-      { "n": "LookupPerson", "m": [{"id": "PersonId"}], "o": {"n":"Option","p":"Person"} },
-      { "n": "LookupPersonByName", "m": [{"name": "Name"}], "o": {"n":"List","p":"Person"} },
-      { "n": "InsertPerson", "m": [{"person":"Person"}], "o": "PersonId" }
-    ],
+    "schema": {
+      "PersonId": "String",
+      "Name": "String",
+      "Phone": "String",
+      "Street": "String",
+      "City": "String",
+      "State": ["CA","NY","TX", {"tag":"Other","m":[{"name":"String"}]}],
+      "Zipcode": "String",
+      "Address": { "m": [ {"street":"Street"}, {"city":"City"}, {"zipcode":"Zipcode"}, {"state":"State"} ] },
+      "Person": { "m": [ {"name": "Name"}, {"phone": "Phone"}, {"address":{"n":"Option","p":"Address"}}, {"friends": {"n":"List", "p": "PersonId"}} ] },
+      "LookupPerson": { "m": [{"id": "PersonId"}], "o": {"n":"Option","p":"Person"} },
+      "LookupPersonByName": { "m": [{"name": "Name"}], "o": {"n":"List","p":"Person"} },
+      "InsertPerson": { "m": [{"person":"Person"}], "o": "PersonId" }
+    },
     "pull": {
       "protocol": "http",
       "name": "Phonebook",

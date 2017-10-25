@@ -43,13 +43,17 @@ const diffSpecs = (specs) => {
 const supportedSpecs = (prefix, specForLang, diffs, jsonSpecs) => {
   // assert(diffs.length == jsonSpecs.length - 1)
 
- // by major version, extract the req specs and decide where to place the types
+  // by major version, extract the req specs and decide where to place the types
   var version = jsonSpecs[0].version || { major: 0, minor: 0 };
   var specs = [];
+
+  if (!jsonSpecs[0].types) {
+    console.log('jsonSpecs ', typeof jsonSpecs[0].types)
+  }
   var tyVers = [initTypeVersions(jsonSpecs[0].types.map(ty => ty.n), version)];
 
   for (var i = 0; i < jsonSpecs.length; i++) {
-    const original = R.merge(jsonSpecs[i], {version});
+    const original = R.dissoc('types', R.merge(jsonSpecs[i], {version}));
     specs.push(R.merge(specForLang(prefix, version, jsonSpecs[i]), {original}));
     if (i < diffs.length) {
       const change = typeChanges(diffs[i]);
@@ -97,12 +101,28 @@ const nextVersion = ({major, minor}, delta) => ({
   minor: delta === 'minor' ? minor + 1 : (delta === 'major' ? 0 : minor),
 });
 
-const expandTypes = s => R.merge(s, {
-  types: s.types.map(ty => ty.e
-      ? R.merge(ty, { e: (ty.e.map(e => typeof e === 'string' ? { tag: e } : e)) })
-      : ty
-    )
-});
+const expandTypes = s => {
+  const types = R.values(
+    R.mapObjIndexed((ty, n) =>
+        R.merge({n}, (() => {
+            if (typeof ty === 'string') {
+              return { w: ty };
+            }
+            if (Array.isArray(ty)) {
+              return { e: (ty.map(e => typeof e === 'string' ? { tag: e } : e)) };
+            }
+            if (ty.e) {
+              return R.merge(ty, { e: (ty.e.map(e => typeof e === 'string' ? { tag: e } : e)) });
+            }
+            return ty;
+          })()
+        ),
+      s.schema));
+  if (!types) {
+    console.log('types: null', s.schema)
+  }
+  return R.merge(s, { types });
+};
 
 const initTypeVersions = (types, version) => ({
   version: version,
@@ -278,7 +298,7 @@ const generate = (program, lang, side, gen) => {
         console.log('JSON source is not an array of specs');
         return;
       }
-      gen(program, jsonSpecs);
+      gen(program, jsonSpecs.map(expandTypes));
     } else {
       fs.readdir(program.src, function (err, items) {
         if (err) {
