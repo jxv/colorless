@@ -1,21 +1,5 @@
 var R = require('ramda');
-
-const primMap = {
-  'Unit': '()',
-  'Bool': 'P.Bool',
-  'U8': 'I.Word8',
-  'U16': 'I.Word16',
-  'U32': 'I.Word32',
-  'U64': 'I.Word64',
-  'I8': 'I.Int8',
-  'I16': 'I.Int16',
-  'I32': 'I.Int32',
-  'I64': 'I.Int64',
-  'F32': 'P.Float',
-  'F64': 'P.Float',
-  'Char': 'P.Char',
-  'String': 'R.Text',
-};
+var { primMap } = require('./common.js');
 
 const lowercaseFirstLetter = s => s.charAt(0).toLowerCase() + s.slice(1);
 
