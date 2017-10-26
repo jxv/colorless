@@ -9,6 +9,7 @@ var program = require('commander');
 
 const Haskell = require('./haskell/index.js');
 const JavaScript = require('./javascript/index.js');
+const Ruby = require('./ruby/index.js');
 
 program
   .version('0.0.0')
@@ -47,9 +48,6 @@ const supportedSpecs = (prefix, specForLang, diffs, jsonSpecs) => {
   var version = jsonSpecs[0].version || { major: 0, minor: 0 };
   var specs = [];
 
-  if (!jsonSpecs[0].types) {
-    console.log('jsonSpecs ', typeof jsonSpecs[0].types)
-  }
   var tyVers = [initTypeVersions(jsonSpecs[0].types.map(ty => ty.n), version)];
 
   for (var i = 0; i < jsonSpecs.length; i++) {
@@ -287,6 +285,38 @@ const generateHaskellServer = (program, jsonSpecs) => {
   });
 };
 
+const generateRubyServer = (program, jsonSpecs) => {
+  if (!jsonSpecs.length) {
+    console.log('No specs');
+    return;
+  }
+
+  const diffs = diffSpecs(jsonSpecs);
+
+  const addons = program.addon ? program.addon.split(',') : [];
+  const specs = supportedSpecs(program.prefix, Ruby.spec, diffs, jsonSpecs);
+
+  if (!specs.length) {
+    console.log('Spec support is too high')
+    return;
+  }
+
+  const rubyPathBuilder = (path, major) => path + '/v' + major + '.rb';
+
+  mkdirp(program.dest, function (err) {
+    if (err) { console.error(err)
+    } else {
+      const path = program.dest + '/' + program.name;
+      mkdirp(path, function (err) {
+        if (err) { console.error(err)
+        } else {
+          writeCode(spec => Ruby.server.gen(spec, addons), rubyPathBuilder, path, specs);
+        }
+      });
+    }
+  });
+};
+
 const generate = (program, lang, side, gen) => {
   if (program.lang === lang && program.side === side &&
       program.name && program.name.length &&
@@ -317,5 +347,6 @@ const generate = (program, lang, side, gen) => {
   generate(program, 'javascript', 'client', generateJavascriptClient) ||
   generate(program, 'haskell', 'server', generateHaskellServer) ||
   generate(program, 'haskell', 'client', generateHaskellClient) ||
+  generate(program, 'ruby', 'server', generateRubyServer) ||
   (() => console.log('Bad args'))();
 })();

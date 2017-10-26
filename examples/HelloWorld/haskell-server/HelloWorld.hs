@@ -60,3 +60,4 @@ helloWorld'Scotty'Post pull hooks0 = Scotty.respond pull (helloWorld'handlerMap 
 
 helloWorld'Scotty'Get :: (Scotty.ScottyError e, R.MonadIO m) => C.Pull -> Scotty.ScottyT e m ()
 helloWorld'Scotty'Get = Scotty.getSpec helloWorld'spec
+
