@@ -17,6 +17,13 @@
   </a>
 </p>
 
+```shell
+yarn
+yarn install
+yarn build
+ln -s ${PWD}/lib/cli.js /SOMEWHERE/IN/YOUR/PATH/fluid
+```
+
 <hr />
 
 ### Language repos
