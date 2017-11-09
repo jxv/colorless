@@ -218,7 +218,7 @@ const genApiLookup = (name, lowercaseName, calls) => {
     '-- API\n',
     lowercaseName, '\'ApiCall :: (', name, '\'Service meta m, C.ServiceThrower m, C.RuntimeThrower m) => meta -> C.ApiCall -> m C.Val\n',
     lowercaseName, '\'ApiCall meta\' apiCall\' = case C.parseApiCall ', lowercaseName,'\'ApiParser apiCall\' of\n',
-    '  P.Nothing -> C.runtimeThrow C.RuntimeError\'UnrecognizedCall\n',
+    '  P.Nothing -> C.runtimeThrow (C.RuntimeError\'UnrecognizedCall P.$ C.apiCallName apiCall\')\n',
     '  P.Just x\' -> case x\' of\n',
   ]);
   calls.hollow.forEach(hollow =>

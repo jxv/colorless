@@ -111,7 +111,7 @@ const genApiParser = (name, lowercaseName, calls) => {
 };
 
 const genApiLookup = (name, lowercaseName, calls) => {
-  var lines = new Lines(['\n', '-- API\n', lowercaseName, '\'ApiCall :: (', name, '\'Service meta m, C.ServiceThrower m, C.RuntimeThrower m) => meta -> C.ApiCall -> m C.Val\n', lowercaseName, '\'ApiCall meta\' apiCall\' = case C.parseApiCall ', lowercaseName, '\'ApiParser apiCall\' of\n', '  P.Nothing -> C.runtimeThrow C.RuntimeError\'UnrecognizedCall\n', '  P.Just x\' -> case x\' of\n']);
+  var lines = new Lines(['\n', '-- API\n', lowercaseName, '\'ApiCall :: (', name, '\'Service meta m, C.ServiceThrower m, C.RuntimeThrower m) => meta -> C.ApiCall -> m C.Val\n', lowercaseName, '\'ApiCall meta\' apiCall\' = case C.parseApiCall ', lowercaseName, '\'ApiParser apiCall\' of\n', '  P.Nothing -> C.runtimeThrow (C.RuntimeError\'UnrecognizedCall P.$ C.apiCallName apiCall\')\n', '  P.Just x\' -> case x\' of\n']);
   calls.hollow.forEach(hollow => lines.add(['    ', name, '\'Api\'', hollow.name, ' -> C.toVal P.<$> ', lowercaseName, '\'', hollow.name, ' meta\'\n']));
   calls.filled.forEach(filled => lines.add(['    ', name, '\'Api\'', filled.name, ' a\' -> C.toVal P.<$> ', lowercaseName, '\'', filled.name, ' meta\' a\'\n']));
   return lines;
