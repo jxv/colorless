@@ -21,12 +21,12 @@
 
 ### Language repos
 
-* [Clojure](https://github.com/jxv/fluid-clojure)
-* [Java](https://github.com/jxv/fluid-java)
-* [JavaScript](https://github.com/jxv/fluid-javascript)
+* Clojure
+* Java
+* JavaScript
 * [Haskell](https://github.com/jxv/fluid-haskell)
-* [Node](https://github.com/jxv/fluid-node)
-* [Python](https://github.com/jxv/fluid-python)
-* [Ruby](https://github.com/jxv/fluid-ruby)
-* [Scala](https://github.com/jxv/fluid-scala)
-* [Swift](https://github.com/jxv/fluid-swift)
+* Node
+* Python
+* Ruby
+* Scala
+* Swift

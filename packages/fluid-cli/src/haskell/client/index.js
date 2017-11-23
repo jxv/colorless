@@ -69,8 +69,6 @@ const genImports = (imports) => {
     'import qualified Prelude as P\n',
     'import qualified Control.Monad as P\n',
     'import qualified Data.String as P (IsString)\n',
-    'import qualified Data.Word as I\n',
-    'import qualified Data.Int as I\n',
     'import qualified Data.IORef as IO\n',
 
     'import qualified Fluid.Client as C\n',

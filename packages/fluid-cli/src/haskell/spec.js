@@ -6,18 +6,8 @@ const lowercaseFirstLetter = s => s.charAt(0).toLowerCase() + s.slice(1);
 const isString = n => n === 'String';
 
 const isNumber = n => (
-  n === 'I8' ||
-  n === 'I16' ||
-  n === 'I32' ||
-  n === 'I64' ||
-
-  n === 'U8' ||
-  n === 'U16' ||
-  n === 'U32' ||
-  n === 'U64' ||
-
-  n === 'F32' ||
-  n === 'F64'
+  n === 'Int' ||
+  n === 'Num'
 );
 
 const langTypeName = n => primMap[n] || n; // convert types to haskell acceptable names.
