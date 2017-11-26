@@ -55,6 +55,29 @@ const clientLatest = specs => {
     }
   });
 
+  lines.add(['\n', 'export default {\n']);
+  spec.hollow.forEach(hollow => {
+    if (hollow.func) {
+      lines.add(['  ', hollow.name, ',\n']);
+    }
+  });
+  spec.wrap.forEach(wrap => {
+    if (wrap.func) {
+      lines.add(['  ', wrap.name, ',\n']);
+    }
+  });
+  spec.struct.forEach(struct => {
+    if (struct.func) {
+      lines.add(['  ', struct.name, ',\n']);
+    }
+  });
+  spec.enumeration.forEach(enumeration => {
+    if (enumeration.func) {
+      lines.add(['  ', enumeration.name, ',\n']);
+    }
+  });
+  lines.add(['};\n']);
+
   return lines.collapse();
 };
 

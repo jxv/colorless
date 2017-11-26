@@ -34,7 +34,7 @@ const genModule = (name, lowercaseName, prefix, version, types, values) => {
 };
 
 const genImports = imports => {
-  var lines = new Lines(['\n', '-- Imports\n', 'import qualified Prelude as P\n', 'import qualified Control.Monad as P\n', 'import qualified Data.String as P (IsString)\n', 'import qualified Data.Word as I\n', 'import qualified Data.Int as I\n', 'import qualified Data.IORef as IO\n', 'import qualified Fluid.Client as C\n', 'import qualified Fluid.Client.Expr as C\n', 'import qualified Fluid.Ast as Ast\n', 'import qualified Fluid.Imports as R\n']);
+  var lines = new Lines(['\n', '-- Imports\n', 'import qualified Prelude as P\n', 'import qualified Control.Monad as P\n', 'import qualified Data.String as P (IsString)\n', 'import qualified Data.IORef as IO\n', 'import qualified Fluid.Client as C\n', 'import qualified Fluid.Client.Expr as C\n', 'import qualified Fluid.Ast as Ast\n', 'import qualified Fluid.Imports as R\n']);
   imports.forEach(x => lines.add(x));
   lines.add('\n');
   return lines;

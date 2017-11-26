@@ -27,7 +27,7 @@ const genPragmas = () => {
 };
 
 const genImports = (prefix, importTypes, importing) => {
-  var lines = new Lines(['\n', '-- Imports\n', 'import qualified Prelude as P\n', 'import qualified Control.Monad as P\n', 'import qualified Control.Monad.Except as M\n', 'import qualified Data.Word as I\n', 'import qualified Data.Int as I\n', 'import qualified Data.IORef as IO\n', 'import qualified Data.String as P (IsString)\n', '\n', 'import qualified Fluid.Imports as R\n', 'import qualified Fluid.Server as C\n', '\n']);
+  var lines = new Lines(['\n', '-- Imports\n', 'import qualified Prelude as P\n', 'import qualified Control.Monad as P\n', 'import qualified Control.Monad.Except as M\n', 'import qualified Data.IORef as IO\n', 'import qualified Data.String as P (IsString)\n', '\n', 'import qualified Fluid.Imports as R\n', 'import qualified Fluid.Server as C\n', '\n']);
   lines.add(importTypes.map(({ name, major }) => 'import ' + prefix + '.V' + major + ' (' + name + '(..))\n'));
   lines.add('\n');
   importing.forEach(x => lines.add(x + '\n'));
