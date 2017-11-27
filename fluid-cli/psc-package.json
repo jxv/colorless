@@ -1,0 +1,16 @@
+{
+    "name": "fluid-cli",
+    "set": "psc-0.11.7",
+    "source": "https://github.com/purescript/package-sets.git",
+    "depends": [
+        "yargs",
+        "prelude",
+        "psci-support",
+        "maybe",
+        "maps",
+        "simple-json",
+        "node-fs",
+        "node-fs-aff",
+        "control"
+    ]
+}
