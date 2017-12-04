@@ -9,7 +9,7 @@ import Data.Either (Either(..))
 import Node.Encoding (Encoding(..))
 import Node.FS.Aff (readTextFile, FS)
 
-import Fluid.Spec (parseSpec)
+import Fluid.Gen.Spec (parseSpec)
 
 main :: forall eff. Eff (fs :: FS, console :: CONSOLE | eff) (Fiber (fs :: FS, console :: CONSOLE | eff) Unit)
 main = launchAff do
