@@ -40,8 +40,8 @@ mkArgs src dest name lang prefix side major addon = pure
 
 getArgs :: forall eff. Eff (console :: Eff.CONSOLE, exception :: EXCEPTION | eff) Args
 getArgs = do
-  let setup = usage "$0 -w Word1 " -- "-w Word2"
-              <> example "$0 -w Hello -w World" "Say hello!"
+  let setup = usage "$0 -l <language> -s <source> -m <module-name> -d <destination-dir> -n <name> -e <side>"
+             <> example "$0 -l haskell -s ./api -m App.Api -n Api -d ./library/App/Api -e server" ""
   runY setup $ mkArgs <$> yarg "s" ["src"] (Just "Directory of specs OR JSON containing array of specs") (Right "Required") true
                       <*> yarg "d" ["dest"] (Just "Directory to generate code") (Right "Required") true
                       <*> yarg "n" ["name"] (Just "Name of top level source file and directory") (Right "Required") true
