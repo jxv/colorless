@@ -11,6 +11,7 @@
         "simple-json",
         "node-fs",
         "node-fs-aff",
-        "control"
+        "control",
+        "yargs"
     ]
 }
