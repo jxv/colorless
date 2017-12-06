@@ -25,6 +25,9 @@ data Type = Type
   , p :: Maybe (Array Type)
   }
 
+instance eqType :: Eq Type where
+  eq (Type a) (Type b) = a.n == b.n && a.p == b.p
+
 instance readForeignType :: ReadForeign Type where
   readImpl = readType
 
@@ -64,11 +67,13 @@ type Pull =
   , error :: Type
   }
 
+type Schema = StrMap TypeDecl
+
 type Spec =
   { fluid :: Version
   , version :: Maybe Version
   , pull :: Pull
-  , schema :: StrMap TypeDecl
+  , schema :: Schema
   }
 
 data TypeDecl
@@ -79,6 +84,13 @@ data TypeDecl
 
 instance readForeignTypeDecl :: ReadForeign TypeDecl where
   readImpl = readTypeDecl
+
+instance eqTypeDecl :: Eq TypeDecl where
+  eq (TypeDecl'Hollow h) (TypeDecl'Hollow h') = h.o == h'.o
+  eq (TypeDecl'Wrap w) (TypeDecl'Wrap w') = w.w == w'.w && w.o == w'.o
+  eq (TypeDecl'Enum e) (TypeDecl'Enum e') = e.e == e'.e && e.o == e'.o
+  eq (TypeDecl'Struct s) (TypeDecl'Struct s') = s.m == s'.m && s.o == s'.o
+  eq _ _ = false
 
 readTypeDecl :: Foreign -> F TypeDecl
 readTypeDecl value =
@@ -144,6 +156,9 @@ data EnumDecl = EnumDecl
   , m :: Maybe (Array MemberDecl)
   }
 
+instance eqEnumDecl :: Eq EnumDecl where
+  eq (EnumDecl a) (EnumDecl b) = a.tag == b.tag && a.m == b.m
+
 instance readForeignEnumDecl :: ReadForeign EnumDecl where
   readImpl = readEnumDecl
 
@@ -170,6 +185,9 @@ data MemberDecl = MemberDecl
   { name :: String
   , ty :: Type
   }
+
+instance eqMemberDecl :: Eq MemberDecl where
+  eq (MemberDecl a) (MemberDecl b) = a.name == b.name && a.ty == b.ty
 
 instance readForeignMemberDecl :: ReadForeign MemberDecl where
   readImpl = readMemberDecl
