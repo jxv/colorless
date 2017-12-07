@@ -1,16 +1,25 @@
 module Fluid.Gen.Diff where
 
-import Control.Applicative
+import Control.Applicative ((<$>), (<*>), map)
 import Data.Array as Array
-import Data.Maybe (Maybe(..))
+import Data.List (List)
+import Data.List as List
+import Data.Maybe (Maybe(..), fromMaybe)
 import Data.StrMap as StrMap
 import Fluid.Gen.Spec (Schema, Type, EnumDecl, MemberDecl, TypeDecl(..))
 import Prelude ((/=), ($), not, (==), (&&))
 
+diffs :: List Schema -> List Diff
+diffs = inBetween diff
+
+inBetween :: forall a b. (a -> a -> b) -> List a -> List b
+inBetween f xs = List.zipWith f xs (List.drop 1 xs)
+
 type Diff =
   { addType :: Array String
   , removeType :: Array String
-  , modifyType :: Array String
+  , modifyType :: Array String -- Adding an output is not considered a breaking 'modify typed'
+  , sameType :: Array String   -- Used for re-exporting instead of generating the same type
   }
 
 diff :: Schema -> Schema -> Diff
@@ -18,10 +27,10 @@ diff prev next =
   { addType: Array.difference nextKeys prevKeys
   , removeType: Array.difference prevKeys nextKeys
   , modifyType: Array.filter
-      (\key ->
-        case typeDeclChange <$> (StrMap.lookup key prev) <*> (StrMap.lookup key next) of
-          Just x -> x
-          Nothing -> false)
+      (\key -> fromMaybe false (typeDeclChange <$> StrMap.lookup key prev <*> StrMap.lookup key next))
+      nextKeys
+  , sameType: Array.filter
+      (\key -> fromMaybe false (map not $ typeDeclChange <$> StrMap.lookup key prev <*> StrMap.lookup key next))
       nextKeys
   }
   where

@@ -20,9 +20,22 @@ type Version =
   , minor :: Int
   }
 
+type TypeName = String
+
+data Param
+  = Param'None
+  | Param'One Type
+  | Param'Two Type Type
+
+instance eqParam :: Eq Param where
+  eq Param'None Param'None = true
+  eq (Param'One t0) (Param'One u0) = t0 == u0
+  eq (Param'Two t0 t1) (Param'Two u0 u1) = t0 == u0 && t1 == u1
+  eq _ _ = false
+
 data Type = Type
-  { n :: String
-  , p :: Maybe (Array Type)
+  { n :: TypeName
+  , p :: Param
   }
 
 instance eqType :: Eq Type where
@@ -37,7 +50,7 @@ readType value = readTypeString value <|> readTypeObject value
 readTypeString :: Foreign -> F Type
 readTypeString value = do
   n <- readString value
-  pure $ Type { n: n, p: Nothing }
+  pure $ Type { n: n, p: Param'None }
 
 readTypeObject :: Foreign -> F Type
 readTypeObject value = do
@@ -45,18 +58,23 @@ readTypeObject value = do
   if hasProperty "p" value
     then do
       p <- value ! "p" >>= (\v -> readTypeParam v <|> readTypeParams v)
-      pure $ Type { n: n, p: Just p }
-    else pure $ Type { n: n, p: Nothing }
+      pure $ Type { n: n, p: p }
+    else pure $ Type { n: n, p: Param'None }
 
-readTypeParam :: Foreign -> F (Array Type)
+readTypeParam :: Foreign -> F Param
 readTypeParam value = do
   param <- readType value
-  pure [param]
+  pure $ Param'One param
 
-readTypeParams :: Foreign -> F (Array Type)
+readTypeParams :: Foreign -> F Param
 readTypeParams value = do
   array <- readArray value
-  traverse readType array
+  types <- traverse readType array
+  case types of
+    [] -> pure Param'None
+    [t0] -> pure (Param'One t0)
+    [t0,t1] -> pure (Param'Two t0 t1)
+    _ -> fail (ForeignError "Too many parameters")
 
 type Pull =
   { protocol :: String
@@ -76,18 +94,23 @@ type Spec =
   , schema :: Schema
   }
 
+type HollowDecl = { o :: Type }
+type WrapDecl = { w :: Type, o :: Maybe Type }
+type EnumerationDecl = { e :: Array EnumDecl, o :: Maybe Type }
+type StructDecl = { m :: Array MemberDecl, o :: Maybe Type }
+
 data TypeDecl
-  = TypeDecl'Hollow { o :: Type }
-  | TypeDecl'Wrap { w :: Type, o :: Maybe Type }
-  | TypeDecl'Enum { e :: Array EnumDecl, o :: Maybe Type }
-  | TypeDecl'Struct { m :: Array MemberDecl, o :: Maybe Type }
+  = TypeDecl'Hollow HollowDecl
+  | TypeDecl'Wrap WrapDecl
+  | TypeDecl'Enum EnumerationDecl
+  | TypeDecl'Struct StructDecl
 
 instance readForeignTypeDecl :: ReadForeign TypeDecl where
   readImpl = readTypeDecl
 
 instance eqTypeDecl :: Eq TypeDecl where
   eq (TypeDecl'Hollow h) (TypeDecl'Hollow h') = h.o == h'.o
-  eq (TypeDecl'Wrap w) (TypeDecl'Wrap w') = w.w == w'.w && w.o == w'.o
+  eq (TypeDecl'Wrap w) (TypeDecl'Wrap w' ) = w.w == w'.w && w.o == w'.o
   eq (TypeDecl'Enum e) (TypeDecl'Enum e') = e.e == e'.e && e.o == e'.o
   eq (TypeDecl'Struct s) (TypeDecl'Struct s') = s.m == s'.m && s.o == s'.o
   eq _ _ = false
@@ -150,6 +173,8 @@ readTypeDeclStruct value = do
   m' <- traverse readImpl m
   o <- readMaybeOutput value
   pure $ TypeDecl'Struct { m: m', o: o }
+
+type TagName = String
 
 data EnumDecl = EnumDecl
   { tag :: String
