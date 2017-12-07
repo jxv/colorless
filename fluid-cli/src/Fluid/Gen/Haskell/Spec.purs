@@ -20,20 +20,41 @@ type Plan =
   , host :: String
   , port :: Int
   , path :: String
-  , wrap :: Array Wrap
+  , wraps :: Array Wrap
+  , hollows :: Array Hollow
   }
 
 data PlanError
   = PlanError'NonGeneratable TypeName
+
+type Func =
+  { name :: TypeName
+  , output :: String
+  }
+
+type Hollow =
+  { name :: TypeName
+  , label :: String
+  , lowercaseName :: TypeName
+  , func :: Maybe Func
+  }
 
 type Wrap =
   { name :: TypeName
   , label :: String
   , lowercaseName :: TypeName
   , type :: String
-  , func :: Maybe { name :: TypeName, output :: String }
+  , func :: Maybe Func
   , instances :: { text :: Boolean, number :: Boolean }
   }
+
+hollow :: Tuple TypeName HollowDecl -> Maybe Hollow
+hollow (Tuple n {o}) = do
+  let name = langTypeName n
+  let label = langTypeLabel n
+  let lowercaseName = lowercaseFirstLetter name
+  func <- makeFunc lowercaseName (Just o)
+  pure { name, label, lowercaseName, func }
 
 wrap :: Tuple TypeName WrapDecl -> Maybe Wrap
 wrap (Tuple n {w: ty@(Type w), o}) = do
@@ -43,14 +64,7 @@ wrap (Tuple n {w: ty@(Type w), o}) = do
   type' <- langType ty
   func <- makeFunc lowercaseName o
   let instances = { text: isString w.n, number: isNumber w.n }
-  pure
-    { name: name
-    , label: label
-    , lowercaseName: lowercaseName
-    , type: type'
-    , func: func
-    , instances: instances
-    }
+  pure { name, label, lowercaseName: lowercaseName, type: type', func, instances }
 
 makeFunc :: TypeName -> Maybe Type -> Maybe (Maybe { name :: TypeName, output :: String })
 makeFunc name output = case map langType output of
@@ -89,16 +103,18 @@ note f t@(Tuple name _) = case f t of
 haskellPlan :: String -> Version -> Spec -> Either PlanError Plan
 haskellPlan prefix version spec = do
   wraps <- traverse (note wrap) (filterWrapDecl spec.schema)
+  hollows <- traverse (note hollow) (filterHollowDecl spec.schema)
   pure
-    { prefix: prefix
+    { prefix
     , error: spec.pull.error
-    , version: version
+    , version
     , name: spec.pull.name
     , protocol: spec.pull.protocol
     , host: spec.pull.host
     , port: spec.pull.port
     , path: spec.pull.path
-    , wrap: wraps
+    , wraps
+    , hollows
     }
 
 primMap :: String -> Maybe String
