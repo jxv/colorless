@@ -164,8 +164,8 @@ applyLangType f t@(Tuple name _) = case f t of
   Nothing -> Left (PlanError'NonGeneratable name)
   Just b -> Right b
 
-haskellPlan :: String -> Version -> Spec -> Either PlanError Plan
-haskellPlan prefix version spec = do
+plan :: String -> Version -> Spec -> Either PlanError Plan
+plan prefix version spec = do
   wraps <- traverse (applyLangType wrap) (filterWrapDecl spec.schema)
   hollows <- traverse (applyLangType hollow) (filterHollowDecl spec.schema)
   structs <- traverse (applyLangType struct) (filterStructDecl spec.schema)

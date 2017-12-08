@@ -12,11 +12,8 @@ import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
 import Data.Path.Pathy (FileName(..), extension)
 import Data.StrMap as StrMap
-import Data.String as Str
-import Data.Tuple (Tuple(..))
-import Data.Traversable (traverse)
 import Fluid.Gen.Diff (Diff)
-import Fluid.Gen.Spec (parseSpec, TypeName, Version, Schema, Spec, Type(..), Param(..), TypeDecl(..), HollowDecl, WrapDecl, EnumerationDecl, StructDecl)
+import Fluid.Gen.Spec (parseSpecs, Spec, TypeName, Version, Schema)
 import Node.Encoding (Encoding(..))
 import Node.FS.Aff (readTextFile, writeTextFile, FS)
 import Node.Path (FilePath)
@@ -35,16 +32,7 @@ type Args =
   }
 
 mkArgs :: forall eff. String -> String -> String -> String -> String -> String -> Int -> Array String -> Eff (console :: Eff.CONSOLE, exception :: EXCEPTION | eff) Args
-mkArgs src dest name lang prefix side major addon = pure
-  { src: src
-  , dest: dest
-  , name: name
-  , lang: lang
-  , prefix: prefix
-  , side: side
-  , major: major
-  , addon: addon
-  }
+mkArgs src dest name lang prefix side major addon = pure { src, dest , name, lang, prefix, side, major, addon }
 
 getArgs :: forall eff. Eff (console :: Eff.CONSOLE, exception :: EXCEPTION | eff) Args
 getArgs = do
@@ -60,13 +48,30 @@ getArgs = do
     <*> yarg "v" ["major"] (Just "Oldest supported major version") (Left 0) true
     <*> yarg "a" ["addon"] (Just "Add-on code for client-side or server-side. May require additional dependencies.") (Left []) true
 
+
 main :: forall eff. Eff (fs :: FS, console :: CONSOLE | eff) (Fiber (fs :: FS, console :: CONSOLE | eff) Unit)
 main = launchAff do
-    args <- liftEff' getArgs
-    contents <- readTextFile UTF8 "./config.json"
-    case parseSpec contents of
-      Right config -> log $ show $ config.pull.protocol
-      Left e -> log e
+  args <- liftEff' getArgs
+  if args.lang == "haskell" && args.side == "server"
+    then do
+      if hasJsonExtension args.src
+        then do
+          contents <- readTextFile UTF8 args.src
+          case parseSpecs contents of
+            Right specs -> do
+              let target = generateHaskellServer args specs
+              pure unit
+            Left e -> log e
+        else pure unit
+    else pure unit
+
+type Target =
+  { path :: String
+  , contents :: String
+  }
+
+generateHaskellServer :: Args -> Array Spec -> Array Target
+generateHaskellServer args specs = []
 
 typeChanges :: Diff -> { major :: Array TypeName, minor :: Array TypeName }
 typeChanges d =
@@ -100,6 +105,10 @@ versionChange d =
     else Delta'Major
 
 --
+
+writeTarget :: forall eff. Target -> Aff (fs :: FS | eff) Unit
+writeTarget target = do
+  writeUTF8File target.path target.contents
 
 writeUTF8File :: forall eff. FilePath -> String -> Aff (fs :: FS | eff) Unit
 writeUTF8File = writeTextFile UTF8

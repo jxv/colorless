@@ -227,3 +227,6 @@ readMemberDecl value = do
 
 parseSpec :: String -> Either String Spec
 parseSpec s = lmap show $ readJSON s
+
+parseSpecs :: String -> Either String (Array Spec)
+parseSpecs s = lmap show $ readJSON s
