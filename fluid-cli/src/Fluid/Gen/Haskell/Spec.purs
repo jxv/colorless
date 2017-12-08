@@ -9,7 +9,7 @@ import Data.StrMap as StrMap
 import Data.String as Str
 import Data.Tuple (Tuple(..))
 import Data.Traversable (traverse)
-import Fluid.Gen.Spec (TypeName, Version, Schema, Spec, Type(..), Param(..), TypeDecl(..), HollowDecl, WrapDecl, EnumerationDecl, StructDecl)
+import Fluid.Gen.Spec (TypeName, Version, Schema, Spec, Type(..), Param(..), TypeDecl(..), HollowDecl, WrapDecl, EnumerationDecl, StructDecl, MemberDecl(..))
 
 type Plan =
   { prefix :: String
@@ -22,6 +22,7 @@ type Plan =
   , path :: String
   , wraps :: Array Wrap
   , hollows :: Array Hollow
+  , structs :: Array Struct
   }
 
 data PlanError
@@ -48,6 +49,14 @@ type Wrap =
   , instances :: { text :: Boolean, number :: Boolean }
   }
 
+type Struct =
+  { name :: TypeName
+  , label :: String
+  , lowercaseName :: TypeName
+  , members :: Array { name :: TypeName, label :: String, type :: String }
+  , func :: Maybe Func
+  }
+
 hollow :: Tuple TypeName HollowDecl -> Maybe Hollow
 hollow (Tuple n {o}) = do
   let name = langTypeName n
@@ -65,6 +74,19 @@ wrap (Tuple n {w: ty@(Type w), o}) = do
   func <- makeFunc lowercaseName o
   let instances = { text: isString w.n, number: isNumber w.n }
   pure { name, label, lowercaseName: lowercaseName, type: type', func, instances }
+
+struct :: Tuple TypeName StructDecl -> Maybe Struct
+struct (Tuple n {m,o}) = do
+  let name = langTypeName n
+  let label = langTypeLabel n
+  let lowercaseName = lowercaseFirstLetter name
+  members <- traverse
+        (\(MemberDecl member) -> do
+          ty <- langType member.ty
+          pure { name: langTypeName member.name, label: langTypeLabel member.name, "type": ty })
+        m
+  func <- makeFunc lowercaseName o
+  pure { name, label, lowercaseName, members, func }
 
 makeFunc :: TypeName -> Maybe Type -> Maybe (Maybe { name :: TypeName, output :: String })
 makeFunc name output = case map langType output of
@@ -95,15 +117,16 @@ filterStructDecl = filterTypeDecl $ \(Tuple n td) -> case td of
   TypeDecl'Struct s -> Just (Tuple n s)
   _ -> Nothing
 
-note :: forall a b. (Tuple String a -> Maybe b) -> Tuple String a -> Either PlanError b
-note f t@(Tuple name _) = case f t of
+applyLangType :: forall a b. (Tuple String a -> Maybe b) -> Tuple String a -> Either PlanError b
+applyLangType f t@(Tuple name _) = case f t of
   Nothing -> Left (PlanError'NonGeneratable name)
   Just b -> Right b
 
 haskellPlan :: String -> Version -> Spec -> Either PlanError Plan
 haskellPlan prefix version spec = do
-  wraps <- traverse (note wrap) (filterWrapDecl spec.schema)
-  hollows <- traverse (note hollow) (filterHollowDecl spec.schema)
+  wraps <- traverse (applyLangType wrap) (filterWrapDecl spec.schema)
+  hollows <- traverse (applyLangType hollow) (filterHollowDecl spec.schema)
+  structs <- traverse (applyLangType struct) (filterStructDecl spec.schema)
   pure
     { prefix
     , error: spec.pull.error
@@ -115,6 +138,7 @@ haskellPlan prefix version spec = do
     , path: spec.pull.path
     , wraps
     , hollows
+    , structs
     }
 
 primMap :: String -> Maybe String
