@@ -9,7 +9,7 @@ import Data.StrMap as StrMap
 import Data.String as Str
 import Data.Tuple (Tuple(..))
 import Data.Traversable (traverse)
-import Fluid.Gen.Spec (TypeName, Version, Schema, Spec, Type(..), Param(..), TypeDecl(..), HollowDecl, WrapDecl, EnumerationDecl, StructDecl, MemberDecl(..))
+import Fluid.Gen.Spec (TypeName, Version, Schema, Spec, Type(..), Param(..), TypeDecl(..), HollowDecl, WrapDecl, EnumerationDecl, StructDecl, EnumDecl(..), MemberDecl(..))
 
 type Plan =
   { prefix :: String
@@ -23,37 +23,58 @@ type Plan =
   , wraps :: Array Wrap
   , hollows :: Array Hollow
   , structs :: Array Struct
+  , enumerations :: Array Enumeration
   }
 
 data PlanError
   = PlanError'NonGeneratable TypeName
 
 type Func =
-  { name :: TypeName
+  { name :: String
   , output :: String
   }
 
 type Hollow =
-  { name :: TypeName
+  { name :: String
   , label :: String
-  , lowercaseName :: TypeName
+  , lowercaseName :: String
   , func :: Maybe Func
   }
 
 type Wrap =
-  { name :: TypeName
+  { name :: String
   , label :: String
-  , lowercaseName :: TypeName
+  , lowercaseName :: String
   , type :: String
   , func :: Maybe Func
   , instances :: { text :: Boolean, number :: Boolean }
   }
 
-type Struct =
-  { name :: TypeName
+type Member =
+  { name :: String
   , label :: String
-  , lowercaseName :: TypeName
-  , members :: Array { name :: TypeName, label :: String, type :: String }
+  , type :: String
+  }
+
+type Struct =
+  { name :: String
+  , label :: String
+  , lowercaseName :: String
+  , members :: Array Member
+  , func :: Maybe Func
+  }
+
+type Enumeral =
+  { tag :: String
+  , label :: String
+  , members :: Maybe (Array Member)
+  }
+
+type Enumeration =
+  { name :: String
+  , lowercaseName :: String
+  , label :: String
+  , enumerals :: Array Enumeral
   , func :: Maybe Func
   }
 
@@ -75,18 +96,39 @@ wrap (Tuple n {w: ty@(Type w), o}) = do
   let instances = { text: isString w.n, number: isNumber w.n }
   pure { name, label, lowercaseName: lowercaseName, type: type', func, instances }
 
+member :: MemberDecl -> Maybe Member
+member (MemberDecl m) = do
+  ty <- langType m.ty
+  pure { name: langTypeName m.name, label: langTypeLabel m.name, "type": ty }
+
 struct :: Tuple TypeName StructDecl -> Maybe Struct
 struct (Tuple n {m,o}) = do
   let name = langTypeName n
   let label = langTypeLabel n
   let lowercaseName = lowercaseFirstLetter name
-  members <- traverse
-        (\(MemberDecl member) -> do
-          ty <- langType member.ty
-          pure { name: langTypeName member.name, label: langTypeLabel member.name, "type": ty })
-        m
+  members <- traverse member m
   func <- makeFunc lowercaseName o
   pure { name, label, lowercaseName, members, func }
+
+enumeral :: EnumDecl -> Maybe Enumeral
+enumeral (EnumDecl {tag,m}) = do
+  let tag' = langTypeName tag
+  let label = langTypeLabel tag
+  members <- case m of
+    Nothing ->  Nothing
+    Just m' -> do
+      members' <- traverse member m'
+      pure (Just members')
+  pure { tag: tag', label, members }
+
+enumeration :: Tuple TypeName EnumerationDecl -> Maybe Enumeration
+enumeration (Tuple n {e,o}) = do
+  let name = langTypeName n
+  let label = langTypeLabel n
+  let lowercaseName = lowercaseFirstLetter name
+  enumerals <- traverse enumeral e
+  func <- makeFunc lowercaseName o
+  pure { name, label, lowercaseName, enumerals, func }
 
 makeFunc :: TypeName -> Maybe Type -> Maybe (Maybe { name :: TypeName, output :: String })
 makeFunc name output = case map langType output of
@@ -127,6 +169,7 @@ haskellPlan prefix version spec = do
   wraps <- traverse (applyLangType wrap) (filterWrapDecl spec.schema)
   hollows <- traverse (applyLangType hollow) (filterHollowDecl spec.schema)
   structs <- traverse (applyLangType struct) (filterStructDecl spec.schema)
+  enumerations <- traverse (applyLangType enumeration) (filterEnumDecl spec.schema)
   pure
     { prefix
     , error: spec.pull.error
@@ -139,6 +182,7 @@ haskellPlan prefix version spec = do
     , wraps
     , hollows
     , structs
+    , enumerations
     }
 
 primMap :: String -> Maybe String
