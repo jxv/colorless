@@ -1,3 +1,5 @@
 /lib
 .*
 node_modules
+fluid-cli/output
+fluid-cli/bin
