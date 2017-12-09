@@ -12,6 +12,7 @@ import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
 import Data.Path.Pathy (FileName(..), extension)
 import Data.StrMap as StrMap
+import Data.Traversable (traverse_)
 import Fluid.Gen.Diff (Diff)
 import Fluid.Gen.Spec (parseSpecs, Spec, TypeName, Version, Schema)
 import Node.Encoding (Encoding(..))
@@ -59,8 +60,9 @@ main = launchAff do
           contents <- readTextFile UTF8 args.src
           case parseSpecs contents of
             Right specs -> do
-              let target = generateHaskellServer args specs
-              pure unit
+              case generateHaskellServer args specs of
+                Left errors -> traverse_ log errors
+                Right targets -> traverse_ writeTarget targets
             Left e -> log e
         else pure unit
     else pure unit
@@ -70,8 +72,8 @@ type Target =
   , contents :: String
   }
 
-generateHaskellServer :: Args -> Array Spec -> Array Target
-generateHaskellServer args specs = []
+generateHaskellServer :: Args -> Array Spec -> Either (Array String) (Array Target)
+generateHaskellServer args specs = Right []
 
 typeChanges :: Diff -> { major :: Array TypeName, minor :: Array TypeName }
 typeChanges d =
