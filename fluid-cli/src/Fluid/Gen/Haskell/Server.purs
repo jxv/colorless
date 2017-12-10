@@ -6,7 +6,7 @@ import Data.Foldable (sequence_)
 import Data.Maybe (Maybe(..), isJust)
 import Data.Traversable (traverse_)
 import Fluid.Gen.Haskell.Common (enumeralNameTagMember)
-import Fluid.Gen.Haskell.Spec (Plan, Func)
+import Fluid.Gen.Haskell.Spec (Plan, Func, Wrap)
 import Fluid.Gen.Lines (Lines, addLine, line, lines, linesContent)
 import Fluid.Gen.Spec (Version)
 
@@ -43,6 +43,13 @@ const mkImportTypes = (s) => {
               .map(x => ({ name: enumeralNameTagMember(e.name, x.tag), major: s.typeSource[e.name] }))))))
 };
 -}
+
+genWrap :: Wrap -> Lines Unit
+genWrap {name, type: type', label, instances: {text, number}} = do
+  line ""
+  addLine ["-- Wrap ", name]
+  addLine ["newtype ", name, " = ", name, " ", type']
+  addLine ["  deriving (P.Eq, P.Ord, ", if text then "P.IsString, R.ToText, " else "", if number then "P.Num, " else "", " P.Show)"]
 
 genVersion :: { lowercase :: String, version :: Version } -> Lines Unit
 genVersion {lowercase, version} = do
@@ -338,12 +345,14 @@ gen plan addonNames = linesContent do
   line "-- Types"
   line "--------------------------------------------------------"
 
+  traverse_ genWrap plan.wraps
+
   line ""
   line "--------------------------------------------------------"
   line "-- Add-ons"
   line "--------------------------------------------------------"
 
-  sequence_ (map (\addon -> addon.gen) addons)
+  traverse_ (\addon -> addon.gen) addons
 
   line ""
   line "--------------------------------------------------------"
