@@ -13,7 +13,7 @@ import Data.Maybe (Maybe(..))
 import Data.Path.Pathy (FileName(..), extension)
 import Data.StrMap as StrMap
 import Data.Traversable (traverse_)
-import Fluid.Gen.Diff (Diff)
+import Fluid.Gen.Diff (Diff, diffs)
 import Fluid.Gen.Spec (parseSpecs, Spec, TypeName, Version, Schema, Bridge)
 import Node.Encoding (Encoding(..))
 import Node.FS.Aff (readTextFile, writeTextFile, FS)
@@ -73,7 +73,9 @@ type Target =
   }
 
 generateHaskellServer :: Args -> Array Spec -> Either (Array String) (Array Target)
-generateHaskellServer args specs = Right []
+generateHaskellServer args specs = do
+  let d = diffs $ Array.toUnfoldable (map (\spec -> spec.schema) specs)
+  Right []
 
 typeChanges :: Diff -> { major :: Array TypeName, minor :: Array TypeName }
 typeChanges d =

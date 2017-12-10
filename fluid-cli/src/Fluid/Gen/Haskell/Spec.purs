@@ -26,7 +26,6 @@ type Plan =
   , hollows :: Array Hollow
   , structs :: Array Struct
   , enumerations :: Array Enumeration
-  , addons :: Array String
   }
 
 data PlanError
@@ -43,7 +42,7 @@ type Hollow =
   { name :: String
   , label :: String
   , lowercase :: String
-  , func :: Maybe Func
+  , func :: Func
   }
 
 type Wrap =
@@ -88,7 +87,8 @@ hollow (Tuple n {o}) = do
   let name = langTypeName n
   let label = langTypeLabel n
   let lowercase = lowercaseFirstLetter name
-  func <- makeFunc lowercase (Just o)
+  output <- langType o
+  let func = { name: lowercase, output }
   pure { name, label, lowercase, func }
 
 wrap :: Tuple TypeName WrapDecl -> Maybe Wrap
@@ -197,7 +197,6 @@ plan prefix version spec addons = do
     , hollows
     , structs
     , enumerations
-    , addons
     }
 
 primMap :: String -> Maybe String

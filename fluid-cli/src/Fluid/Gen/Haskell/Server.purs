@@ -1,14 +1,13 @@
 module Fluid.Gen.Haskell.Server where
 
-import Prelude (Unit, discard, flip, map, show, ($), (<>))
-import Data.Maybe (Maybe(..), isJust)
 import Data.Array as Array
-import Data.Traversable (traverse_)
 import Data.Foldable (sequence_)
-import Fluid.Gen.Lines (Lines, addLine, line, lines, linesContent)
-
-import Fluid.Gen.Haskell.Spec (Plan)
+import Data.Maybe (Maybe(..), isJust)
+import Data.Traversable (traverse_)
 import Fluid.Gen.Haskell.Common (enumeralNameTagMember)
+import Fluid.Gen.Haskell.Spec (Plan, Func)
+import Fluid.Gen.Lines (Lines, addLine, line, lines, linesContent)
+import Prelude (Unit, discard, flip, map, show, ($), (<>))
 
 mkExportTypes :: Plan -> Array String
 mkExportTypes plan =
@@ -60,8 +59,8 @@ genPragmas = lines
   , "{-# LANGUAGE NoImplicitPrelude #-}"
   ]
 
-genImports :: String -> Array { name :: String, major :: Int } -> Array (Lines Unit) -> Lines Unit
-genImports prefix imports importing = do
+genImports :: { prefix :: String, imports :: Array { name :: String, major :: Int }, importing :: Array (Lines Unit) } -> Lines Unit
+genImports {prefix, imports, importing} = do
   line ""
   lines
     [ "-- Imports"
@@ -78,17 +77,31 @@ genImports prefix imports importing = do
     imports
   sequence_ importing
 
-genThrower :: String -> String -> String -> Lines Unit
-genThrower name lowercase error = do
+genThrower :: { name :: String, lowercase :: String, error :: String } -> Lines Unit
+genThrower {name, lowercase, error} = do
   line ""
   line "-- Thrower"
   addLine ["class C.ServiceThrower m => ", name, "'Thrower m where"]
   addLine ["  ", lowercase, "'throw :: ", error, " -> m a"]
   addLine ["  ", lowercase, "'throw = C.serviceThrow P.. R.toJSON P.. C.toVal"]
 
+mkServiceCalls :: Plan -> Array { name :: String, output :: String, hollow :: Boolean }
+mkServiceCalls plan = Array.concat
+  [ map (\x -> { name: x.func.name, output: x.func.output, hollow: true }) plan.hollows
+  , mkCall plan.wraps
+  , mkCall plan.structs
+  , mkCall plan.enumerations
+  ]
+  where
+    mkCall :: forall a. Array { func :: Maybe Func | a } -> Array { name :: String, output :: String, hollow :: Boolean }
+    mkCall types = Array.catMaybes (map extractFunc types)
+      where
+        extractFunc x = case x.func of
+          Nothing -> Nothing
+          Just func -> Just { name: func.name, output: func.output, hollow: false }
 
-genService :: String -> String -> Array { name :: String, output :: String, hollow :: Boolean } -> Lines Unit
-genService name lowercase calls = do
+genService :: { name :: String, lowercase :: String, calls :: Array { name :: String, output :: String, hollow :: Boolean } } -> Lines Unit
+genService {name, lowercase, calls} = do
   line ""
   line "-- Service"
   addLine ["class P.Monad m => ", name, "'Service meta m where"]
@@ -206,8 +219,8 @@ genHandlerRequest name lowercase meta = do
     , "  (\\(C.ThrownValue _err) -> P.return P.. P.Left P.$ C.Response'Error (C.ResponseError'Service _err))"
     ]
 
-genModule :: String -> String -> String -> { major :: Int, minor :: Int } -> Array String -> Array String -> Lines Unit
-genModule name lowercase prefix version types values = do
+genModule :: { name :: String, lowercase :: String, prefix :: String, version :: { major :: Int, minor :: Int }, types :: Array String, values :: Array String } -> Lines Unit
+genModule {name, lowercase, prefix, version, types, values} = do
   line ""
   line "-- Module"
   addLine ["module ", prefix , ".V", show version.major]
@@ -254,16 +267,27 @@ createAddon plan addon = case addon of
   "scotty" -> Just (scottyAddon plan)
   _ -> Nothing
 
-gen :: Plan -> String
-gen plan = linesContent do
+gen :: Plan -> Array String -> String
+gen plan addonNames = linesContent do
   let exportTypes = mkExportTypes plan
   let importTypes = mkImportTypes plan
-  let addons = Array.catMaybes $ map (createAddon plan) plan.addons
+  let serviceCalls = mkServiceCalls plan
+  let addons = Array.catMaybes $ map (createAddon plan) addonNames
   let addonExporting = Array.concatMap (\x -> x.exporting) addons
   let addonImporting = map (\x -> x.importing) addons
+
   genPragmas
-  genModule plan.name plan.lowercase plan.prefix plan.version exportTypes addonExporting
-  genImports plan.prefix importTypes addonImporting
+  genModule
+    { name: plan.name
+    , lowercase: plan.lowercase
+    , prefix: plan.prefix
+    , version: plan.version
+    , types: exportTypes
+    , values: addonExporting }
+  genImports
+    { prefix: plan.prefix
+    , imports: importTypes
+    , importing: addonImporting }
 
   line ""
   line "--------------------------------------------------------"
@@ -274,6 +298,15 @@ gen plan = linesContent do
   line "--------------------------------------------------------"
   line "-- Interfaces"
   line "--------------------------------------------------------"
+
+  genThrower
+    { name: plan.name
+    , lowercase: plan.lowercase
+    , error: plan.error }
+  genService
+    { name: plan.name
+    , lowercase: plan.lowercase
+    , calls: serviceCalls }
 
   line ""
   line "--------------------------------------------------------"
