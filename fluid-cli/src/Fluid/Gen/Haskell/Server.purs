@@ -1,5 +1,6 @@
 module Fluid.Gen.Haskell.Server where
 
+import Prelude (Unit, discard, flip, map, show, ($), (<>))
 import Data.Array as Array
 import Data.Foldable (sequence_)
 import Data.Maybe (Maybe(..), isJust)
@@ -7,7 +8,7 @@ import Data.Traversable (traverse_)
 import Fluid.Gen.Haskell.Common (enumeralNameTagMember)
 import Fluid.Gen.Haskell.Spec (Plan, Func)
 import Fluid.Gen.Lines (Lines, addLine, line, lines, linesContent)
-import Prelude (Unit, discard, flip, map, show, ($), (<>))
+import Fluid.Gen.Spec (Version)
 
 mkExportTypes :: Plan -> Array String
 mkExportTypes plan =
@@ -42,6 +43,13 @@ const mkImportTypes = (s) => {
               .map(x => ({ name: enumeralNameTagMember(e.name, x.tag), major: s.typeSource[e.name] }))))))
 };
 -}
+
+genVersion :: { lowercase :: String, version :: Version } -> Lines Unit
+genVersion {lowercase, version} = do
+  line ""
+  line "-- Version"
+  addLine [lowercase, "'version :: C.Version"]
+  addLine [lowercase, "'version = C.Version", show version.major, " ", show version.minor]
 
 genPragmas :: Lines Unit
 genPragmas = lines
@@ -293,6 +301,11 @@ gen plan addonNames = linesContent do
   line "--------------------------------------------------------"
   line "-- Configs"
   line "--------------------------------------------------------"
+
+  genVersion
+    { lowercase: plan.lowercase
+    , version: plan.version
+    }
 
   line ""
   line "--------------------------------------------------------"
