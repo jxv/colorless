@@ -343,6 +343,8 @@ gen plan addonNames = linesContent do
   line "-- Add-ons"
   line "--------------------------------------------------------"
 
+  sequence_ (map (\addon -> addon.gen) addons)
+
   line ""
   line "--------------------------------------------------------"
   line "-- Request handlers"
