@@ -1,14 +1,14 @@
 module Fluid.Gen.Haskell.Server where
 
-import Prelude (Unit, discard, flip, map, show, ($), (<>))
 import Data.Array as Array
 import Data.Foldable (sequence_)
 import Data.Maybe (Maybe(..), isJust)
 import Data.Traversable (traverse_)
 import Fluid.Gen.Haskell.Common (enumeralNameTagMember)
-import Fluid.Gen.Haskell.Spec (Plan, Func, Wrap)
+import Fluid.Gen.Haskell.Spec (Plan, Func, Wrap, Enumeral)
 import Fluid.Gen.Lines (Lines, addLine, line, lines, linesContent)
 import Fluid.Gen.Spec (Version)
+import Prelude (Unit, discard, flip, map, show, ($), (<>), (/=))
 
 mkExportTypes :: Plan -> Array String
 mkExportTypes plan =
@@ -21,28 +21,19 @@ mkExportTypes plan =
       (Array.filter (\enumeral -> isJust enumeral.members) e.enumerals))
 
 mkImportTypes :: Plan -> Array { name :: String, major :: Int }
-mkImportTypes plan = []
+mkImportTypes plan = Array.filter (\a -> a.major /= plan.version.major) $
+  map (\w -> { name: w.name, major: w.version.major }) plan.wraps <>
+  map (\s -> { name: s.name, major: s.version.major }) plan.structs <>
+  Array.concatMap
+    (\e ->
+      [{ name: e.name, major: e.version.major }] <>
+      Array.catMaybes (map (enumeralImport e.name e.version.major) e.enumerals))
+    plan.enumerations
 
-{-
-const mkImportTypes = (s) => {
-  const differentMajorVersion = ty => s.typeSource[ty.name] !== s.version.major;
-  return []
-    .concat(s.wrap
-      .filter(differentMajorVersion)
-      .map(ty => ({ name: ty.name, major: s.typeSource[ty.name] })))
-    .concat(s.struct
-      .filter(differentMajorVersion)
-      .map(ty => ({ name: ty.name, major: s.typeSource[ty.name] })))
-    .concat([].concat.apply([], s.enumeration
-      .filter(differentMajorVersion)
-      .map(e =>
-        [{ name: e.name, major: s.typeSource[e.name] }]
-          .concat(
-            e.enumerals
-              .filter(x => x.members)
-              .map(x => ({ name: enumeralNameTagMember(e.name, x.tag), major: s.typeSource[e.name] }))))))
-};
--}
+enumeralImport :: String -> Int -> Enumeral -> Maybe { name :: String, major :: Int }
+enumeralImport name major enumeral = case enumeral.members of
+  Nothing -> Nothing
+  Just _ -> Just { name: enumeralNameTagMember name enumeral.tag, major }
 
 genWrap :: Wrap -> Lines Unit
 genWrap {name, type: type', label, instances: {text, number}} = do

@@ -52,6 +52,7 @@ type Wrap =
   , type :: String
   , func :: Maybe Func
   , instances :: { text :: Boolean, number :: Boolean }
+  , version :: Version
   }
 
 type Member =
@@ -66,6 +67,7 @@ type Struct =
   , lowercase :: String
   , members :: Array Member
   , func :: Maybe Func
+  , version :: Version
   }
 
 type Enumeral =
@@ -80,10 +82,11 @@ type Enumeration =
   , label :: String
   , enumerals :: Array Enumeral
   , func :: Maybe Func
+  , version :: Version
   }
 
-hollow :: Tuple TypeName HollowDecl -> Maybe Hollow
-hollow (Tuple n {o}) = do
+hollow :: Version -> Tuple TypeName HollowDecl -> Maybe Hollow
+hollow _ (Tuple n {o}) = do
   let name = langTypeName n
   let label = langTypeLabel n
   let lowercase = lowercaseFirstLetter name
@@ -91,29 +94,29 @@ hollow (Tuple n {o}) = do
   let func = { name: lowercase, output }
   pure { name, label, lowercase, func }
 
-wrap :: Tuple TypeName WrapDecl -> Maybe Wrap
-wrap (Tuple n {w: ty@(Type w), o}) = do
+wrap :: Version -> Tuple TypeName WrapDecl -> Maybe Wrap
+wrap version (Tuple n {w: ty@(Type w), o}) = do
   let name = langTypeName n
   let label = langTypeLabel n
   let lowercase = lowercaseFirstLetter name
   type' <- langType ty
   func <- makeFunc lowercase o
   let instances = { text: isString w.n, number: isNumber w.n }
-  pure { name, label, lowercase: lowercase, type: type', func, instances }
+  pure { name, label, lowercase: lowercase, type: type', func, instances, version }
 
 member :: MemberDecl -> Maybe Member
 member (MemberDecl m) = do
   ty <- langType m.ty
   pure { name: langTypeName m.name, label: langTypeLabel m.name, "type": ty }
 
-struct :: Tuple TypeName StructDecl -> Maybe Struct
-struct (Tuple n {m,o}) = do
+struct :: Version -> Tuple TypeName StructDecl -> Maybe Struct
+struct version (Tuple n {m,o}) = do
   let name = langTypeName n
   let label = langTypeLabel n
   let lowercase = lowercaseFirstLetter name
   members <- traverse member m
   func <- makeFunc lowercase o
-  pure { name, label, lowercase, members, func }
+  pure { name, label, lowercase, members, func, version }
 
 enumeral :: EnumDecl -> Maybe Enumeral
 enumeral (EnumDecl {tag,m}) = do
@@ -126,14 +129,14 @@ enumeral (EnumDecl {tag,m}) = do
       pure (Just members')
   pure { tag: tag', label, members }
 
-enumeration :: Tuple TypeName EnumerationDecl -> Maybe Enumeration
-enumeration (Tuple n {e,o}) = do
+enumeration :: Version -> Tuple TypeName EnumerationDecl -> Maybe Enumeration
+enumeration version (Tuple n {e,o}) = do
   let name = langTypeName n
   let label = langTypeLabel n
   let lowercase = lowercaseFirstLetter name
   enumerals <- traverse enumeral e
   func <- makeFunc lowercase o
-  pure { name, label, lowercase, enumerals, func }
+  pure { name, label, lowercase, enumerals, func, version }
 
 makeFunc :: TypeName -> Maybe Type -> Maybe (Maybe { name :: TypeName, output :: String })
 makeFunc name output = case map langType output of
@@ -164,8 +167,8 @@ filterStructDecl = filterTypeDecl $ \(Tuple n td) -> case td of
   TypeDecl'Struct s -> Just (Tuple n s)
   _ -> Nothing
 
-applyLangType :: forall a b. (Tuple String a -> Maybe b) -> Tuple String a -> Either PlanError b
-applyLangType f t@(Tuple name _) = case f t of
+applyLangType :: forall a b. (TypeName -> Version) -> (Version -> Tuple String a -> Maybe b) -> Tuple String a -> Either PlanError b
+applyLangType v f t@(Tuple name _) = case f (v name) t of
   Nothing -> Left (PlanError'NonGeneratable name)
   Just b -> Right b
 
@@ -174,12 +177,12 @@ langTypeOr a e = case langType a of
   Nothing -> Left e
   Just x -> Right x
 
-plan :: String -> Version -> Spec -> Array String -> Either PlanError Plan
-plan prefix version spec addons = do
-  wraps <- traverse (applyLangType wrap) (filterWrapDecl spec.schema)
-  hollows <- traverse (applyLangType hollow) (filterHollowDecl spec.schema)
-  structs <- traverse (applyLangType struct) (filterStructDecl spec.schema)
-  enumerations <- traverse (applyLangType enumeration) (filterEnumDecl spec.schema)
+plan :: String -> Version -> Spec -> Array String -> (TypeName -> Version) -> Either PlanError Plan
+plan prefix version spec addons latest = do
+  wraps <- traverse (applyLangType latest wrap) (filterWrapDecl spec.schema)
+  hollows <- traverse (applyLangType latest hollow) (filterHollowDecl spec.schema)
+  structs <- traverse (applyLangType latest struct) (filterStructDecl spec.schema)
+  enumerations <- traverse (applyLangType latest enumeration) (filterEnumDecl spec.schema)
   meta <- langTypeOr spec.pull.error (PlanError'NonGeneratableMeta spec.pull.meta)
   error <- langTypeOr spec.pull.error (PlanError'NonGeneratableError spec.pull.error)
   pure
