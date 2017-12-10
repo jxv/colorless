@@ -51,6 +51,11 @@ genVersion {lowercase, version} = do
   addLine [lowercase, "'version :: C.Version"]
   addLine [lowercase, "'version = C.Version", show version.major, " ", show version.minor]
 
+genPull :: { lowercase :: String, protocol :: String, host :: String, path :: String, port :: Int } -> Lines Unit
+genPull {lowercase, protocol, host, path, port} = do
+  addLine [lowercase, "'pull :: C.Pull"]
+  addLine [lowercase, "'pull = C.Pull \"", protocol, "\" \"", host, "\" \"", path, "\" ", show port]
+
 genPragmas :: Lines Unit
 genPragmas = lines
   [ "-- Pragmas"
@@ -305,6 +310,13 @@ gen plan addonNames = linesContent do
   genVersion
     { lowercase: plan.lowercase
     , version: plan.version
+    }
+  genPull
+    { lowercase: plan.lowercase
+    , protocol: plan.protocol
+    , host: plan.host
+    , path: plan.path
+    , port: plan.port
     }
 
   line ""
