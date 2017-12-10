@@ -20,6 +20,11 @@ type Version =
   , minor :: Int
   }
 
+type Bridge =
+  { version :: Version
+  , types :: Array TypeName
+  }
+
 type TypeName = String
 
 data Param
@@ -83,6 +88,7 @@ type Pull =
   , path :: String
   , port :: Int
   , error :: Type
+  , meta :: Type
   }
 
 type Schema = StrMap TypeDecl

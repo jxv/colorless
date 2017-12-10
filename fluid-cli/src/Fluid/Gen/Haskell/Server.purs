@@ -1,13 +1,48 @@
 module Fluid.Gen.Haskell.Server where
 
-import Prelude (Unit, discard, flip, map, pure, show, unit, ($), (<>))
-import Data.Maybe (Maybe(..))
-import Data.Tuple (Tuple(..))
+import Prelude (Unit, discard, flip, map, show, ($), (<>))
+import Data.Maybe (Maybe(..), isJust)
 import Data.Array as Array
 import Data.Traversable (traverse_)
-import Fluid.Gen.Haskell.Common
-import Fluid.Gen.Lines
-import Fluid.Gen.Spec (Schema)
+import Data.Foldable (sequence_)
+import Fluid.Gen.Lines (Lines, addLine, line, lines, linesContent)
+
+import Fluid.Gen.Haskell.Spec (Plan)
+import Fluid.Gen.Haskell.Common (enumeralNameTagMember)
+
+mkExportTypes :: Plan -> Array String
+mkExportTypes plan =
+  map (\x -> x.name) plan.wraps <>
+  map (\x -> x.name) plan.structs <>
+  Array.concat (flip map plan.enumerations $ \e ->
+    [e.name] <>
+    map
+      (\enumeral -> enumeralNameTagMember plan.name enumeral.tag)
+      (Array.filter (\enumeral -> isJust enumeral.members) e.enumerals))
+
+mkImportTypes :: Plan -> Array { name :: String, major :: Int }
+mkImportTypes plan = []
+
+{-
+const mkImportTypes = (s) => {
+  const differentMajorVersion = ty => s.typeSource[ty.name] !== s.version.major;
+  return []
+    .concat(s.wrap
+      .filter(differentMajorVersion)
+      .map(ty => ({ name: ty.name, major: s.typeSource[ty.name] })))
+    .concat(s.struct
+      .filter(differentMajorVersion)
+      .map(ty => ({ name: ty.name, major: s.typeSource[ty.name] })))
+    .concat([].concat.apply([], s.enumeration
+      .filter(differentMajorVersion)
+      .map(e =>
+        [{ name: e.name, major: s.typeSource[e.name] }]
+          .concat(
+            e.enumerals
+              .filter(x => x.members)
+              .map(x => ({ name: enumeralNameTagMember(e.name, x.tag), major: s.typeSource[e.name] }))))))
+};
+-}
 
 genPragmas :: Lines Unit
 genPragmas = lines
@@ -25,7 +60,7 @@ genPragmas = lines
   , "{-# LANGUAGE NoImplicitPrelude #-}"
   ]
 
-genImports :: String -> Array { name :: String, major :: Int } -> Array String -> Lines Unit
+genImports :: String -> Array { name :: String, major :: Int } -> Array (Lines Unit) -> Lines Unit
 genImports prefix imports importing = do
   line ""
   lines
@@ -41,7 +76,7 @@ genImports prefix imports importing = do
   traverse_ addLine $ map
     (\{name, major} -> ["import ", prefix, ".V", show major, " (", name, "(..))"])
     imports
-  traverse_ line importing
+  sequence_ importing
 
 genThrower :: String -> String -> String -> Lines Unit
 genThrower name lowercase error = do
@@ -84,7 +119,7 @@ genApiParser name lowercase calls = do
     Just {head, tail} -> do
       line "  { hollow = R.fromList"
       addLine ["     [ (\"", head.label, "\", ", name, "'Api'", head.name, ")"]
-      flip traverse_ tail $ \item -> 
+      flip traverse_ tail $ \item ->
         addLine ["     , (\"", item.label, "\", ", name, "'Api'", item.name, ")"]
       line "     ]"
   -- Struct
@@ -93,7 +128,7 @@ genApiParser name lowercase calls = do
     Just {head, tail} -> do
       line "  , struct = R.fromList"
       addLine ["     [ (\"", head.label, "\", v ", name, "'Api'", head.name, ")"]
-      flip traverse_ tail $ \item -> 
+      flip traverse_ tail $ \item ->
         addLine ["     , (\"", item.label, "\", v ", name, "'Api'", item.name, ")"]
       line "     ]"
   -- Enumeration
@@ -102,7 +137,7 @@ genApiParser name lowercase calls = do
     Just {head, tail} -> do
       line "  , enumeration = R.fromList"
       addLine ["     [ (\"", head.label, "\", v ", name, "'Api'", head.name, ")"]
-      flip traverse_ tail $ \item -> 
+      flip traverse_ tail $ \item ->
         addLine ["     , (\"", item.label, "\", v ", name, "'Api'", item.name, ")"]
       line "     ]"
   -- Wrap
@@ -111,7 +146,7 @@ genApiParser name lowercase calls = do
     Just {head, tail} -> do
       line "  , wrap = R.fromList"
       addLine ["     [ (\"", head.label, "\", v ", name, "'Api'", head.name, ")"]
-      flip traverse_ tail $ \item -> 
+      flip traverse_ tail $ \item ->
         addLine ["     , (\"", item.label, "\", v ", name, "'Api'", item.name, ")"]
       line "     ]"
   line "  }"
@@ -192,3 +227,72 @@ genSpec lowercase schema = do
   addLine [lowercase, "'spec :: R.Value"]
   addLine [lowercase, "'spec = v"]
   addLine ["  where P.Just v = R.decode ", show schema]
+
+type Addon =
+  { exporting :: Array String
+  , importing :: Lines Unit
+  , gen :: Lines Unit
+  }
+
+scottyAddon :: Plan -> Addon
+scottyAddon plan =
+  { exporting: [ plan.lowercase <> "'Scotty'Post", plan.lowercase <> "'Scotty'Get" ]
+  , importing: line "import qualified Fluid.Server.Scotty as Scotty"
+  , gen: do
+      line ""
+      addLine [plan.lowercase, "'Scotty'Post"]
+      addLine [ "  :: (Scotty.ScottyError e, R.MonadIO m, ", plan.name, "'Service meta m, R.MonadCatch m)"]
+      addLine [ "   => ([(Scotty.LazyText, Scotty.LazyText)] -> C.Hooks m ", plan.meta, " meta)" ]
+      lines
+        [ "  -> C.Pull"
+        , "  -> Scotty.ScottyT e m ()"
+        ]
+  }
+
+createAddon :: Plan -> String -> Maybe Addon
+createAddon plan addon = case addon of
+  "scotty" -> Just (scottyAddon plan)
+  _ -> Nothing
+
+gen :: Plan -> String
+gen plan = linesContent do
+  let exportTypes = mkExportTypes plan
+  let importTypes = mkImportTypes plan
+  let addons = Array.catMaybes $ map (createAddon plan) plan.addons
+  let addonExporting = Array.concatMap (\x -> x.exporting) addons
+  let addonImporting = map (\x -> x.importing) addons
+  genPragmas
+  genModule plan.name plan.lowercase plan.prefix plan.version exportTypes addonExporting
+  genImports plan.prefix importTypes addonImporting
+
+  line ""
+  line "--------------------------------------------------------"
+  line "-- Configs"
+  line "--------------------------------------------------------"
+
+  line ""
+  line "--------------------------------------------------------"
+  line "-- Interfaces"
+  line "--------------------------------------------------------"
+
+  line ""
+  line "--------------------------------------------------------"
+  line "-- Types"
+  line "--------------------------------------------------------"
+
+  line ""
+  line "--------------------------------------------------------"
+  line "-- Add-ons"
+  line "--------------------------------------------------------"
+
+  line ""
+  line "--------------------------------------------------------"
+  line "-- Request handlers"
+  line "--------------------------------------------------------"
+
+  line ""
+  line "--------------------------------------------------------"
+  line "-- Type Instances"
+  line "--------------------------------------------------------"
+
+  line ""

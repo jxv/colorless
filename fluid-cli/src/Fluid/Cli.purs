@@ -14,7 +14,7 @@ import Data.Path.Pathy (FileName(..), extension)
 import Data.StrMap as StrMap
 import Data.Traversable (traverse_)
 import Fluid.Gen.Diff (Diff)
-import Fluid.Gen.Spec (parseSpecs, Spec, TypeName, Version, Schema)
+import Fluid.Gen.Spec (parseSpecs, Spec, TypeName, Version, Schema, Bridge)
 import Node.Encoding (Encoding(..))
 import Node.FS.Aff (readTextFile, writeTextFile, FS)
 import Node.Path (FilePath)
@@ -91,11 +91,6 @@ hasJsonExtension s = extension (FileName s) == "json"
 nextVersion :: Version -> Delta -> Version
 nextVersion {major,minor} Delta'Major = { major: major + 1, minor }
 nextVersion {major,minor} Delta'Minor = { major, minor: minor + 1 }
-
-type Bridge =
-  { version :: Version
-  , types :: Array TypeName
-  }
 
 initBridge :: Schema -> Version -> Bridge
 initBridge schema version = { version, types: StrMap.keys schema }

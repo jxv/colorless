@@ -13,21 +13,26 @@ import Fluid.Gen.Spec (TypeName, Version, Schema, Spec, Type(..), Param(..), Typ
 
 type Plan =
   { prefix :: String
-  , error :: Type
+  , error :: String
   , version :: Version
   , name :: String
+  , lowercase :: String
   , protocol :: String
   , host :: String
   , port :: Int
   , path :: String
+  , meta :: String
   , wraps :: Array Wrap
   , hollows :: Array Hollow
   , structs :: Array Struct
   , enumerations :: Array Enumeration
+  , addons :: Array String
   }
 
 data PlanError
   = PlanError'NonGeneratable TypeName
+  | PlanError'NonGeneratableMeta Type
+  | PlanError'NonGeneratableError Type
 
 type Func =
   { name :: String
@@ -37,14 +42,14 @@ type Func =
 type Hollow =
   { name :: String
   , label :: String
-  , lowercaseName :: String
+  , lowercase :: String
   , func :: Maybe Func
   }
 
 type Wrap =
   { name :: String
   , label :: String
-  , lowercaseName :: String
+  , lowercase :: String
   , type :: String
   , func :: Maybe Func
   , instances :: { text :: Boolean, number :: Boolean }
@@ -59,7 +64,7 @@ type Member =
 type Struct =
   { name :: String
   , label :: String
-  , lowercaseName :: String
+  , lowercase :: String
   , members :: Array Member
   , func :: Maybe Func
   }
@@ -72,7 +77,7 @@ type Enumeral =
 
 type Enumeration =
   { name :: String
-  , lowercaseName :: String
+  , lowercase :: String
   , label :: String
   , enumerals :: Array Enumeral
   , func :: Maybe Func
@@ -82,19 +87,19 @@ hollow :: Tuple TypeName HollowDecl -> Maybe Hollow
 hollow (Tuple n {o}) = do
   let name = langTypeName n
   let label = langTypeLabel n
-  let lowercaseName = lowercaseFirstLetter name
-  func <- makeFunc lowercaseName (Just o)
-  pure { name, label, lowercaseName, func }
+  let lowercase = lowercaseFirstLetter name
+  func <- makeFunc lowercase (Just o)
+  pure { name, label, lowercase, func }
 
 wrap :: Tuple TypeName WrapDecl -> Maybe Wrap
 wrap (Tuple n {w: ty@(Type w), o}) = do
   let name = langTypeName n
   let label = langTypeLabel n
-  let lowercaseName = lowercaseFirstLetter name
+  let lowercase = lowercaseFirstLetter name
   type' <- langType ty
-  func <- makeFunc lowercaseName o
+  func <- makeFunc lowercase o
   let instances = { text: isString w.n, number: isNumber w.n }
-  pure { name, label, lowercaseName: lowercaseName, type: type', func, instances }
+  pure { name, label, lowercase: lowercase, type: type', func, instances }
 
 member :: MemberDecl -> Maybe Member
 member (MemberDecl m) = do
@@ -105,10 +110,10 @@ struct :: Tuple TypeName StructDecl -> Maybe Struct
 struct (Tuple n {m,o}) = do
   let name = langTypeName n
   let label = langTypeLabel n
-  let lowercaseName = lowercaseFirstLetter name
+  let lowercase = lowercaseFirstLetter name
   members <- traverse member m
-  func <- makeFunc lowercaseName o
-  pure { name, label, lowercaseName, members, func }
+  func <- makeFunc lowercase o
+  pure { name, label, lowercase, members, func }
 
 enumeral :: EnumDecl -> Maybe Enumeral
 enumeral (EnumDecl {tag,m}) = do
@@ -125,10 +130,10 @@ enumeration :: Tuple TypeName EnumerationDecl -> Maybe Enumeration
 enumeration (Tuple n {e,o}) = do
   let name = langTypeName n
   let label = langTypeLabel n
-  let lowercaseName = lowercaseFirstLetter name
+  let lowercase = lowercaseFirstLetter name
   enumerals <- traverse enumeral e
-  func <- makeFunc lowercaseName o
-  pure { name, label, lowercaseName, enumerals, func }
+  func <- makeFunc lowercase o
+  pure { name, label, lowercase, enumerals, func }
 
 makeFunc :: TypeName -> Maybe Type -> Maybe (Maybe { name :: TypeName, output :: String })
 makeFunc name output = case map langType output of
@@ -164,25 +169,35 @@ applyLangType f t@(Tuple name _) = case f t of
   Nothing -> Left (PlanError'NonGeneratable name)
   Just b -> Right b
 
-plan :: String -> Version -> Spec -> Either PlanError Plan
-plan prefix version spec = do
+langTypeOr :: Type -> PlanError -> Either PlanError String
+langTypeOr a e = case langType a of
+  Nothing -> Left e
+  Just x -> Right x
+
+plan :: String -> Version -> Spec -> Array String -> Either PlanError Plan
+plan prefix version spec addons = do
   wraps <- traverse (applyLangType wrap) (filterWrapDecl spec.schema)
   hollows <- traverse (applyLangType hollow) (filterHollowDecl spec.schema)
   structs <- traverse (applyLangType struct) (filterStructDecl spec.schema)
   enumerations <- traverse (applyLangType enumeration) (filterEnumDecl spec.schema)
+  meta <- langTypeOr spec.pull.error (PlanError'NonGeneratableMeta spec.pull.meta)
+  error <- langTypeOr spec.pull.error (PlanError'NonGeneratableError spec.pull.error)
   pure
     { prefix
-    , error: spec.pull.error
+    , error
     , version
-    , name: spec.pull.name
+    , name: lowercaseFirstLetter spec.pull.name
+    , lowercase: spec.pull.name
     , protocol: spec.pull.protocol
     , host: spec.pull.host
     , port: spec.pull.port
     , path: spec.pull.path
+    , meta
     , wraps
     , hollows
     , structs
     , enumerations
+    , addons
     }
 
 primMap :: String -> Maybe String
