@@ -214,8 +214,16 @@ genApiParser name lowercase calls = do
   line "  where"
   line "    v x y = x P.<$> C.fromVal y"
 
-genApiLookup :: String -> String -> { hollow :: Array { name :: String }, filled :: Array { name :: String } } -> Lines Unit
-genApiLookup name lowercase calls = do
+mkApiLookupPairs :: Plan -> { hollow :: Array { name :: String }, filled :: Array { name :: String } }
+mkApiLookupPairs plan =
+  { hollow: map (\x -> { name: x.name }) plan.hollows
+  , filled: Array.concat [ nameOfFunc plan.wraps, nameOfFunc plan.structs, nameOfFunc plan.enumerations ] }
+  where
+    nameOfFunc :: forall a. Array { name :: String, func :: Maybe Func | a } ->  Array { name :: String }
+    nameOfFunc xs = map (\x -> { name: x.name }) $ Array.filter (\x -> isJust x.func) xs
+
+genApiLookup :: { name :: String, lowercase :: String, calls :: { hollow :: Array { name :: String }, filled :: Array { name :: String } } } -> Lines Unit
+genApiLookup {name,lowercase,calls} = do
   line ""
   line "-- API"
   addLine [lowercase, "'ApiCall :: (", name, "'Service meta m, C.ServiceThrower m, C.RuntimeThrower m) => meta -> C.ApiCall -> m C.Val"]
@@ -318,6 +326,7 @@ gen plan addonNames = linesContent do
   let exportTypes = mkExportTypes plan
   let importTypes = mkImportTypes plan
   let serviceCalls = mkServiceCalls plan
+  let apiLookupPairs = mkApiLookupPairs plan
   let addons = Array.catMaybes $ map (createAddon plan) addonNames
   let addonExporting = Array.concatMap (\x -> x.exporting) addons
   let addonImporting = map (\x -> x.importing) addons
@@ -389,6 +398,10 @@ gen plan addonNames = linesContent do
     { name: plan.name
     , lowercase: plan.lowercase
     , meta: plan.meta }
+  genApiLookup
+    { name: plan.name
+    , lowercase: plan.lowercase
+    , calls: apiLookupPairs }
 
   line ""
   line "--------------------------------------------------------"
