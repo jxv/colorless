@@ -3,7 +3,6 @@ module Fluid.Gen.Haskell.Server where
 import Data.Array as Array
 import Data.Foldable (sequence_)
 import Data.Maybe (Maybe(..), isJust)
-import Data.Profunctor.Strong (class Strong)
 import Data.Traversable (traverse_)
 import Fluid.Gen.Haskell.Common (enumeralNameTagMember)
 import Fluid.Gen.Haskell.Spec (Enumeral, Enumeration, Func, Plan, Struct, Wrap, lowercaseFirstLetter, uppercaseFirstLetter)
@@ -140,6 +139,42 @@ genEnumeration {name, enumerals} = do
           "  , "
           (\m -> [lowercaseFirstLetter(name <> "'" <> enumeral.tag <> m.name), " :: ", m.type])
         line "  } deriving (P.Show, P.Eq)"
+
+genEnumerationToVal :: Enumeration -> Lines Unit
+genEnumerationToVal {name,enumerals} = do
+  line ""
+  addLine ["instance C.ToVal ", name, " where"]
+  line "  toVal = \\case"
+  flip traverse_ enumerals $ \enumeral -> case enumeral.members of
+    Nothing -> addLine ["    ", name, "'", enumeral.tag, " -> C.Val\'ApiVal P.$ C.ApiVal\'Enumeral P.$ C.Enumeral \"", enumeral.label, "\" P.Nothing"]
+    Just members -> do
+      addLine ["    ", name, "'", enumeral.tag, " ", name, "'", enumeral.tag, "'Members"]
+      lineList members
+        "      { "
+        "      , "
+        (\m -> [memberName (name <> "'" <> enumeral.tag) m.name])
+      addLine ["    } -> ", name, "'", enumeral.tag, " -> C.Val\'ApiVal P.$ C.ApiVal\'Enumeral P.$ C.Enumeral \"", enumeral.label, "\" P.$ P.Just P.$ R.fromList"]
+      lineList members
+        "      [ "
+        "      , "
+        (\m -> ["(\"", m.label, "\", C.toVal ", memberName (name <> "'" <> enumeral.tag) m.name, ")"])
+      line "      ] "
+
+genEnumerationFromVal :: Enumeration -> Lines Unit
+genEnumerationFromVal {name,enumerals} = do
+  line ""
+  addLine ["instance C.FromVal ", name, " where"]
+  line "  fromVal = \\case"
+  line "    C.Val'ApiVal (C.ApiVal'Enumeral (C.Enumeral _tag _m)) -> case (_tag,_m) of"
+  flip traverse_ enumerals $ \enumeral -> case enumeral.members of
+    Nothing -> addLine ["      (\"", enumeral.label, "\", P.Nothing) -> P.Just ", name, "'", enumeral.tag]
+    Just members -> do
+      lineList members
+        "          P.<$>"
+        "          P.<*>"
+        (\m -> [" C.getMember _m' \"", m.label, "\""])
+  line "      _ -> P.Nothing"
+  line "    _ -> P.Nothing"
 
 genVersion :: { lowercase :: String, version :: Version } -> Lines Unit
 genVersion {lowercase, version} = do
@@ -520,6 +555,12 @@ gen plan addonNames = linesContent do
   flip traverse_ currentStructs $ \ty -> do
     genStructToVal ty
     genStructFromVal ty
+    genToJson ty
+    genFromJson ty
+
+  flip traverse_ currentEnumerations $ \ty -> do
+    genEnumerationToVal ty
+    genEnumerationFromVal ty
     genToJson ty
     genFromJson ty
 
