@@ -42,17 +42,22 @@ genWrap {name, type: type', label, instances: {text, number}} = do
   addLine ["newtype ", name, " = ", name, " ", type']
   addLine ["  deriving (P.Eq, P.Ord, ", if text then "P.IsString, R.ToText, " else "", if number then "P.Num, " else "", " P.Show)"]
 
+lineList :: forall a. Array a -> String -> String -> (a -> Array String) -> Lines Unit
+lineList arr headPrefix tailPrefix f = case Array.uncons arr of
+  Nothing -> pure unit
+  Just {head,tail} -> do
+    addLine $ [headPrefix] <> f head
+    flip traverse_ tail $ \item -> addLine $ [tailPrefix] <> f item
+
 genStruct :: Struct -> Lines Unit
 genStruct {name, label, members} = do
   line ""
   addLine ["-- Struct ", name]
   addLine ["data ", name, " = ", name]
-  case Array.uncons members of
-    Nothing -> line "  {"
-    Just {head,tail} -> do
-      addLine ["  { ", head.name, " :: ", head.type]
-      flip traverse_ tail $ \m ->
-        addLine ["  , ", m.name, " :: ", m.type]
+  lineList members
+    "  { "
+    "  , "
+    (\m -> [m.name, " :: ", m.type])
   line "  } deriving (P.Show, P.Eq)"
 
 genEnumeration :: Enumeration -> Lines Unit
@@ -60,27 +65,19 @@ genEnumeration {name, enumerals} = do
   line ""
   addLine ["-- Enumeration: ", name]
   addLine ["data ", name]
-  case Array.uncons enumerals of
-    Nothing -> pure unit
-    Just {head,tail} -> do
-      addLine ["  = ", name, "'", head.tag, if isJust head.members then "'Members" else ""]
-      flip traverse_ tail $ \enumeral ->
-        addLine ["  | ", name, "'", enumeral.tag, if isJust enumeral.members then "'Members" else ""]
+  lineList enumerals "  = " "  | " (\e -> [name, "'", e.tag, if isJust e.members then "'Members" else ""])
   addLine ["  deriving (P.Show, P.Eq)"]
-
   flip traverse_ enumerals $ \enumeral ->
     case enumeral.members of
       Nothing -> pure unit
       Just members -> do
         line ""
         addLine ["data ", name, "'", enumeral.tag, "'Members = ", name, "'", enumeral.tag, "'Members"]
-        case Array.uncons members of
-          Nothing -> pure unit
-          Just {head,tail} -> do
-            addLine ["  { ", lowercaseFirstLetter(name <> "'" <> enumeral.tag <> head.name), " :: ", head.type]
-            flip traverse_ tail $ \member ->
-              addLine ["  , ", lowercaseFirstLetter(name <> "'" <> enumeral.tag <> member.name), " :: ", member.type]
-            line "  } deriving (P.Show, P.Eq)"
+        lineList members
+          "  { "
+          "  , "
+          (\m -> [lowercaseFirstLetter(name <> "'" <> enumeral.tag <> m.name), " :: ", m.type])
+        line "  } deriving (P.Show, P.Eq)"
 
 genVersion :: { lowercase :: String, version :: Version } -> Lines Unit
 genVersion {lowercase, version} = do
@@ -137,14 +134,11 @@ genApi {name,calls} = do
   line ""
   line "-- Api"
   addLine ["data ", name, "'Api"]
-  case Array.uncons calls of
-    Nothing -> pure unit
-    Just {head,tail} -> do
-      addLine ["  = ", name, "'Api'", head.name, if head.filled then " " <> head.name else ""]
-      flip traverse_ tail $ \call ->
-        addLine ["  | ", name, "'Api'", call.name, if call.filled then " " <> call.name else ""]
+  lineList calls
+    "  = "
+    "  | "
+    (\call -> [name, "'Api'", call.name, if call.filled then " " <> call.name else ""])
   line "  deriving (P.Show, P.Eq)"
-
 
 genThrower :: { name :: String, lowercase :: String, error :: String } -> Lines Unit
 genThrower {name, lowercase, error} = do
