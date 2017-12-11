@@ -3,9 +3,10 @@ module Fluid.Gen.Haskell.Server where
 import Data.Array as Array
 import Data.Foldable (sequence_)
 import Data.Maybe (Maybe(..), isJust)
+import Data.Profunctor.Strong (class Strong)
 import Data.Traversable (traverse_)
 import Fluid.Gen.Haskell.Common (enumeralNameTagMember)
-import Fluid.Gen.Haskell.Spec (Enumeral, Enumeration, Func, Plan, Struct, Wrap, lowercaseFirstLetter)
+import Fluid.Gen.Haskell.Spec (Enumeral, Enumeration, Func, Plan, Struct, Wrap, lowercaseFirstLetter, uppercaseFirstLetter)
 import Fluid.Gen.Lines (Lines, addLine, line, lines, linesContent)
 import Fluid.Gen.Spec (Version)
 import Prelude (Unit, discard, flip, map, show, ($), (<>), (/=), (==), pure, unit)
@@ -30,6 +31,9 @@ mkImportTypes plan = Array.filter (\a -> a.major /= plan.version.major) $
       Array.catMaybes (map (enumeralImport e.name e.version.major) e.enumerals))
     plan.enumerations
 
+memberName :: String -> String -> String
+memberName name member = lowercaseFirstLetter name <> uppercaseFirstLetter member
+
 enumeralImport :: String -> Int -> Enumeral -> Maybe { name :: String, major :: Int }
 enumeralImport name major enumeral = case enumeral.members of
   Nothing -> Nothing
@@ -41,6 +45,23 @@ lineList arr headPrefix tailPrefix f = case Array.uncons arr of
   Just {head,tail} -> do
     addLine $ [headPrefix] <> f head
     flip traverse_ tail $ \item -> addLine $ [tailPrefix] <> f item
+
+genToJson :: forall a. { name :: String | a } -> Lines Unit
+genToJson {name} = do
+  line ""
+  addLine ["instance R.ToJSON ", name, " where"]
+  line "  toJSON = R.toJSON P.. C.toVal"
+
+genFromJson :: forall a. { name :: String | a } -> Lines Unit
+genFromJson {name} = do
+  line ""
+  addLine ["instance R.FromJSON ", name, " where"]
+  lines
+    [ "  parseJSON _v = do"
+    , "    _x <- R.parseJSON _v"
+    , "    case C.fromVal _x of"
+    , "      P.Nothing -> P.mzero"
+    , "      P.Just _y -> P.return _y" ]
 
 genWrap :: Wrap -> Lines Unit
 genWrap {name, type: type', label, instances: {text, number}} = do
@@ -61,23 +82,6 @@ genWrapFromVal {name} = do
   addLine ["instance C.FromVal ", name, " where"]
   addLine ["  fromVal _v = ", name, " P.<$> C.fromVal _v"]
 
-genToJson :: forall a. { name :: String | a } -> Lines Unit
-genToJson {name} = do
-  line ""
-  addLine ["instance R.ToJSON ", name, " where"]
-  line "  toJSON = R.toJSON P.. C.toVal"
-
-genFromJson :: forall a. { name :: String | a } -> Lines Unit
-genFromJson {name} = do
-  line ""
-  addLine ["instance R.FromJSON ", name, " where"]
-  lines
-    [ "  parseJSON _v = do"
-    , "    _x <- R.parseJSON _v"
-    , "    case C.fromVal _x of"
-    , "      P.Nothing -> P.mzero"
-    , "      P.Just _y -> P.return _y" ]
-
 genStruct :: Struct -> Lines Unit
 genStruct {name, label, members} = do
   line ""
@@ -88,6 +92,35 @@ genStruct {name, label, members} = do
     "  , "
     (\m -> [m.name, " :: ", m.type])
   line "  } deriving (P.Show, P.Eq)"
+
+genStructToVal :: Struct -> Lines Unit
+genStructToVal {name, members} = do
+  line ""
+  addLine ["instance C.ToVal ", name, " where"]
+  addLine ["  toVal ", name]
+  lineList members
+    "    { "
+    "    , "
+    (\m -> [memberName name m.name])
+  line "    } "
+  line " = C.Val'ApiVal P.$ C.ApiVal'Struct P.$ C.Struct P.$ R.fromList"
+  lineList members
+    "    [ "
+    "    , "
+    (\m -> ["(\"", m.label, "\", C.toVal ", memberName name m.name, ")"])
+  line "    ]"
+  line ""
+
+genStructFromVal :: Struct -> Lines Unit
+genStructFromVal {name,members} = do
+  addLine ["instance C.FromVal ", name, " where"]
+  line "  fromVal = \\case"
+  addLine ["  C.Val'ApiVal (C.ApiVal'Struct (C.Struct _m)) ->", name]
+  lineList members
+    "    P.<$>"
+    "    P.<*>"
+    (\m -> [" C.getMember _m \"", m.label, "\""])
+  line "    _ -> P.Nothing"
 
 genEnumeration :: Enumeration -> Lines Unit
 genEnumeration {name, enumerals} = do
@@ -481,6 +514,12 @@ gen plan addonNames = linesContent do
   flip traverse_ currentWraps $ \ty -> do
     genWrapToVal ty
     genWrapFromVal ty
+    genToJson ty
+    genFromJson ty
+
+  flip traverse_ currentStructs $ \ty -> do
+    genStructToVal ty
+    genStructFromVal ty
     genToJson ty
     genFromJson ty
 

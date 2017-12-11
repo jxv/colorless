@@ -217,6 +217,11 @@ lowercaseFirstLetter s = case Str.splitAt 1 s of
   Nothing -> s
   Just s' -> Str.toLower s'.before <> s'.after
 
+uppercaseFirstLetter :: String -> String
+uppercaseFirstLetter s = case Str.splitAt 1 s of
+  Nothing -> s
+  Just s' -> Str.toUpper s'.before <> s'.after
+
 isString :: TypeName -> Boolean
 isString name = name == "String"
 
