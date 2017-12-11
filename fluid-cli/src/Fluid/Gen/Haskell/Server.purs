@@ -160,16 +160,31 @@ genService {name, lowercase, calls} = do
   flip traverse_ calls $ \call ->
     addLine ["  ", lowercase, "'", call.name, " _meta = M.lift ", if call.hollow then " P.$ " else " P.. ", lowercase, "'", call.name, " _meta"]
 
+mkApiParserCalls
+  :: Plan
+  ->  { hollow :: Array { label :: String, name :: String }
+      , struct :: Array { label :: String, name :: String }
+      , enumeration :: Array { label :: String, name :: String }
+      , wrap :: Array { label :: String, name :: String } }
+mkApiParserCalls plan =
+  { hollow: map f plan.hollows
+  , struct: map f plan.structs
+  , enumeration: map f plan.enumerations
+  , wrap: map f plan.wraps }
+  where
+    f :: forall a. { name :: String, label :: String | a } -> { name :: String, label :: String }
+    f ty = { name: ty.name, label: ty.label }
+
 genApiParser
-  :: String
-  -> String
-  -> { hollow :: Array { label :: String, name :: String }
-     , struct :: Array { label :: String, name :: String }
-     , enumeration :: Array { label :: String, name :: String }
-     , wrap :: Array { label :: String, name :: String }
-     }
+  :: { name :: String
+     , lowercase :: String
+     , calls ::
+        { hollow :: Array { label :: String, name :: String }
+        , struct :: Array { label :: String, name :: String }
+        , enumeration :: Array { label :: String, name :: String }
+        , wrap :: Array { label :: String, name :: String } } }
   -> Lines Unit
-genApiParser name lowercase calls = do
+genApiParser {name, lowercase, calls} = do
   line ""
   line "-- API Parser"
   addLine [lowercase, "'ApiParser :: C.ApiParser ", name, "'Api"]
@@ -327,6 +342,7 @@ gen plan addonNames = linesContent do
   let importTypes = mkImportTypes plan
   let serviceCalls = mkServiceCalls plan
   let apiLookupPairs = mkApiLookupPairs plan
+  let apiParserCalls = mkApiParserCalls plan
   let addons = Array.catMaybes $ map (createAddon plan) addonNames
   let addonExporting = Array.concatMap (\x -> x.exporting) addons
   let addonImporting = map (\x -> x.importing) addons
@@ -402,6 +418,10 @@ gen plan addonNames = linesContent do
     { name: plan.name
     , lowercase: plan.lowercase
     , calls: apiLookupPairs }
+  genApiParser
+    { name: plan.name
+    , lowercase: plan.lowercase
+    , calls: apiParserCalls }
 
   line ""
   line "--------------------------------------------------------"
