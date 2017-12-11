@@ -5,10 +5,10 @@ import Data.Foldable (sequence_)
 import Data.Maybe (Maybe(..), isJust)
 import Data.Traversable (traverse_)
 import Fluid.Gen.Haskell.Common (enumeralNameTagMember)
-import Fluid.Gen.Haskell.Spec (Plan, Func, Wrap, Enumeral)
+import Fluid.Gen.Haskell.Spec (Enumeral, Enumeration, Func, Plan, Struct, Wrap, lowercaseFirstLetter)
 import Fluid.Gen.Lines (Lines, addLine, line, lines, linesContent)
 import Fluid.Gen.Spec (Version)
-import Prelude (Unit, discard, flip, map, show, ($), (<>), (/=))
+import Prelude (Unit, discard, flip, map, show, ($), (<>), (/=), (==), pure, unit)
 
 mkExportTypes :: Plan -> Array String
 mkExportTypes plan =
@@ -42,6 +42,46 @@ genWrap {name, type: type', label, instances: {text, number}} = do
   addLine ["newtype ", name, " = ", name, " ", type']
   addLine ["  deriving (P.Eq, P.Ord, ", if text then "P.IsString, R.ToText, " else "", if number then "P.Num, " else "", " P.Show)"]
 
+genStruct :: Struct -> Lines Unit
+genStruct {name, label, members} = do
+  line ""
+  addLine ["-- Struct ", name]
+  addLine ["data ", name, " = ", name]
+  case Array.uncons members of
+    Nothing -> line "  {"
+    Just {head,tail} -> do
+      addLine ["  { ", head.name, " :: ", head.type]
+      flip traverse_ tail $ \m ->
+        addLine ["  , ", m.name, " :: ", m.type]
+  line "  } deriving (P.Show, P.Eq)"
+
+genEnumeration :: Enumeration -> Lines Unit
+genEnumeration {name, enumerals} = do
+  line ""
+  addLine ["-- Enumeration: ", name]
+  addLine ["data ", name]
+  case Array.uncons enumerals of
+    Nothing -> pure unit
+    Just {head,tail} -> do
+      addLine ["  = ", name, "'", head.tag, if isJust head.members then "'Members" else ""]
+      flip traverse_ tail $ \enumeral ->
+        addLine ["  | ", name, "'", enumeral.tag, if isJust enumeral.members then "'Members" else ""]
+  addLine ["  deriving (P.Show, P.Eq)"]
+
+  flip traverse_ enumerals $ \enumeral ->
+    case enumeral.members of
+      Nothing -> pure unit
+      Just members -> do
+        line ""
+        addLine ["data ", name, "'", enumeral.tag, "'Members = ", name, "'", enumeral.tag, "'Members"]
+        case Array.uncons members of
+          Nothing -> pure unit
+          Just {head,tail} -> do
+            addLine ["  { ", lowercaseFirstLetter(name <> "'" <> enumeral.tag <> head.name), " :: ", head.type]
+            flip traverse_ tail $ \member ->
+              addLine ["  , ", lowercaseFirstLetter(name <> "'" <> enumeral.tag <> member.name), " :: ", member.type]
+            line "  } deriving (P.Show, P.Eq)"
+
 genVersion :: { lowercase :: String, version :: Version } -> Lines Unit
 genVersion {lowercase, version} = do
   line ""
@@ -67,8 +107,7 @@ genPragmas = lines
   , "{-# LANGUAGE FlexibleContexts #-}"
   , "{-# LANGUAGE FlexibleInstances #-}"
   , "{-# LANGUAGE ScopedTypeVariables #-}"
-  , "{-# LANGUAGE NoImplicitPrelude #-}"
-  ]
+  , "{-# LANGUAGE NoImplicitPrelude #-}" ]
 
 genImports :: { prefix :: String, imports :: Array { name :: String, major :: Int }, importing :: Array (Lines Unit) } -> Lines Unit
 genImports {prefix, imports, importing} = do
@@ -81,8 +120,7 @@ genImports {prefix, imports, importing} = do
     , "import qualified Data.IORef as IO"
     , "import qualified Data.String as P (IsString)"
     , "import qualified Fluid.Imports as R"
-    , "import qualified Fluid.Server as C"
-    ]
+    , "import qualified Fluid.Server as C" ]
   traverse_ addLine $ map
     (\{name, major} -> ["import ", prefix, ".V", show major, " (", name, "(..))"])
     imports
@@ -101,8 +139,7 @@ mkServiceCalls plan = Array.concat
   [ map (\x -> { name: x.func.name, output: x.func.output, hollow: true }) plan.hollows
   , mkCall plan.wraps
   , mkCall plan.structs
-  , mkCall plan.enumerations
-  ]
+  , mkCall plan.enumerations ]
   where
     mkCall :: forall a. Array { func :: Maybe Func | a } -> Array { name :: String, output :: String, hollow :: Boolean }
     mkCall types = Array.catMaybes (map extractFunc types)
@@ -219,16 +256,14 @@ genHandlerRequest name lowercase meta = do
     , "          { C.limits = _limits'"
     , "          , C.langServiceCallCount = _serviceCallCountRef"
     , "          , C.langLambdaCount = _lambdaCountRef"
-    , "          , C.langExprCount = _exprCountRef"
-    ]
+    , "          , C.langExprCount = _exprCountRef" ]
   addLine ["          , C.apiCall = ", lowercase, "'ApiCall xformMeta"]
   lines
     [ "          }"
     , "    query' <- P.maybe (C.runtimeThrow C.RuntimeError'UnparsableQuery) P.return (C.jsonToExpr query)"
     , "    vals <- C.runEval (C.forceVal P.=<< C.eval query' envRef) evalConfig"
     , "    P.return P.$ C.Response'Success (R.toJSON vals) _limits)"
-    , "  (\\(C.ThrownValue _err) -> P.return P.. P.Left P.$ C.Response'Error (C.ResponseError'Service _err))"
-    ]
+    , "  (\\(C.ThrownValue _err) -> P.return P.. P.Left P.$ C.Response'Error (C.ResponseError'Service _err))" ]
 
 genModule :: { name :: String, lowercase :: String, prefix :: String, version :: { major :: Int, minor :: Int }, types :: Array String, values :: Array String } -> Lines Unit
 genModule {name, lowercase, prefix, version, types, values} = do
@@ -255,8 +290,7 @@ genSpec lowercase schema = do
 type Addon =
   { exporting :: Array String
   , importing :: Lines Unit
-  , gen :: Lines Unit
-  }
+  , gen :: Lines Unit }
 
 scottyAddon :: Plan -> Addon
 scottyAddon plan =
@@ -269,14 +303,15 @@ scottyAddon plan =
       addLine [ "   => ([(Scotty.LazyText, Scotty.LazyText)] -> C.Hooks m ", plan.meta, " meta)" ]
       lines
         [ "  -> C.Pull"
-        , "  -> Scotty.ScottyT e m ()"
-        ]
-  }
+        , "  -> Scotty.ScottyT e m ()" ] }
 
 createAddon :: Plan -> String -> Maybe Addon
 createAddon plan addon = case addon of
   "scotty" -> Just (scottyAddon plan)
   _ -> Nothing
+
+filterVersion :: forall a. Version -> Array { version :: { major :: Int, minor :: Int } | a } -> Array { version :: { major :: Int, minor :: Int } | a }
+filterVersion version = Array.filter (\ty -> ty.version.major == version.major)
 
 gen :: Plan -> Array String -> String
 gen plan addonNames = linesContent do
@@ -307,15 +342,13 @@ gen plan addonNames = linesContent do
 
   genVersion
     { lowercase: plan.lowercase
-    , version: plan.version
-    }
+    , version: plan.version }
   genPull
     { lowercase: plan.lowercase
     , protocol: plan.protocol
     , host: plan.host
     , path: plan.path
-    , port: plan.port
-    }
+    , port: plan.port }
 
   line ""
   line "--------------------------------------------------------"
@@ -336,7 +369,9 @@ gen plan addonNames = linesContent do
   line "-- Types"
   line "--------------------------------------------------------"
 
-  traverse_ genWrap plan.wraps
+  traverse_ genWrap (filterVersion plan.version plan.wraps)
+  traverse_ genStruct (filterVersion plan.version plan.structs)
+  traverse_ genEnumeration (filterVersion plan.version plan.enumerations)
 
   line ""
   line "--------------------------------------------------------"
