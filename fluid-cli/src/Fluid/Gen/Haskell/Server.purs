@@ -35,6 +35,13 @@ enumeralImport name major enumeral = case enumeral.members of
   Nothing -> Nothing
   Just _ -> Just { name: enumeralNameTagMember name enumeral.tag, major }
 
+lineList :: forall a. Array a -> String -> String -> (a -> Array String) -> Lines Unit
+lineList arr headPrefix tailPrefix f = case Array.uncons arr of
+  Nothing -> pure unit
+  Just {head,tail} -> do
+    addLine $ [headPrefix] <> f head
+    flip traverse_ tail $ \item -> addLine $ [tailPrefix] <> f item
+
 genWrap :: Wrap -> Lines Unit
 genWrap {name, type: type', label, instances: {text, number}} = do
   line ""
@@ -42,12 +49,34 @@ genWrap {name, type: type', label, instances: {text, number}} = do
   addLine ["newtype ", name, " = ", name, " ", type']
   addLine ["  deriving (P.Eq, P.Ord, ", if text then "P.IsString, R.ToText, " else "", if number then "P.Num, " else "", " P.Show)"]
 
-lineList :: forall a. Array a -> String -> String -> (a -> Array String) -> Lines Unit
-lineList arr headPrefix tailPrefix f = case Array.uncons arr of
-  Nothing -> pure unit
-  Just {head,tail} -> do
-    addLine $ [headPrefix] <> f head
-    flip traverse_ tail $ \item -> addLine $ [tailPrefix] <> f item
+genWrapToVal :: Wrap -> Lines Unit
+genWrapToVal {name} = do
+  line ""
+  addLine ["instance C.ToVal ", name, " where"]
+  addLine ["  toVal (", name, " _w) = C.toVal _w"]
+
+genWrapFromVal :: Wrap -> Lines Unit
+genWrapFromVal {name} = do
+  line ""
+  addLine ["instance C.FromVal ", name, " where"]
+  addLine ["  fromVal _v = ", name, " P.<$> C.fromVal _v"]
+
+genToJson :: forall a. { name :: String | a } -> Lines Unit
+genToJson {name} = do
+  line ""
+  addLine ["instance R.ToJSON ", name, " where"]
+  line "  toJSON = R.toJSON P.. C.toVal"
+
+genFromJson :: forall a. { name :: String | a } -> Lines Unit
+genFromJson {name} = do
+  line ""
+  addLine ["instance R.FromJSON ", name, " where"]
+  lines
+    [ "  parseJSON _v = do"
+    , "    _x <- R.parseJSON _v"
+    , "    case C.fromVal _x of"
+    , "      P.Nothing -> P.mzero"
+    , "      P.Just _y -> P.return _y" ]
 
 genStruct :: Struct -> Lines Unit
 genStruct {name, label, members} = do
@@ -361,6 +390,9 @@ gen plan addonNames = linesContent do
   let addons = Array.catMaybes $ map (createAddon plan) addonNames
   let addonExporting = Array.concatMap (\x -> x.exporting) addons
   let addonImporting = map (\x -> x.importing) addons
+  let currentWraps = filterVersion plan.version plan.wraps
+  let currentStructs = filterVersion plan.version plan.structs
+  let currentEnumerations = filterVersion plan.version plan.enumerations
 
   genPragmas
   genModule
@@ -409,9 +441,9 @@ gen plan addonNames = linesContent do
   line "-- Types"
   line "--------------------------------------------------------"
 
-  traverse_ genWrap (filterVersion plan.version plan.wraps)
-  traverse_ genStruct (filterVersion plan.version plan.structs)
-  traverse_ genEnumeration (filterVersion plan.version plan.enumerations)
+  traverse_ genWrap currentWraps
+  traverse_ genStruct currentStructs
+  traverse_ genEnumeration currentEnumerations
 
   line ""
   line "--------------------------------------------------------"
@@ -445,5 +477,11 @@ gen plan addonNames = linesContent do
   line "--------------------------------------------------------"
   line "-- Type Instances"
   line "--------------------------------------------------------"
+
+  flip traverse_ currentWraps $ \ty -> do
+    genWrapToVal ty
+    genWrapFromVal ty
+    genToJson ty
+    genFromJson ty
 
   line ""
