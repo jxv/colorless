@@ -126,6 +126,26 @@ genImports {prefix, imports, importing} = do
     imports
   sequence_ importing
 
+mkApiCalls :: Plan -> Array { name :: String, filled :: Boolean }
+mkApiCalls plan = Array.concat [mk plan.hollows false, mk plan.wraps true, mk plan.structs true, mk plan.enumerations true]
+  where
+    mk :: forall a. Array { name :: String | a } -> Boolean -> Array { name :: String, filled :: Boolean }
+    mk xs b = map (\ty -> { name: ty.name, filled: b }) xs
+
+genApi :: { name :: String, calls :: Array { name :: String, filled :: Boolean } } -> Lines Unit
+genApi {name,calls} = do
+  line ""
+  line "-- Api"
+  addLine ["data ", name, "'Api"]
+  case Array.uncons calls of
+    Nothing -> pure unit
+    Just {head,tail} -> do
+      addLine ["  = ", name, "'Api'", head.name, if head.filled then " " <> head.name else ""]
+      flip traverse_ tail $ \call ->
+        addLine ["  | ", name, "'Api'", call.name, if call.filled then " " <> call.name else ""]
+  line "  deriving (P.Show, P.Eq)"
+
+
 genThrower :: { name :: String, lowercase :: String, error :: String } -> Lines Unit
 genThrower {name, lowercase, error} = do
   line ""
@@ -343,6 +363,7 @@ gen plan addonNames = linesContent do
   let serviceCalls = mkServiceCalls plan
   let apiLookupPairs = mkApiLookupPairs plan
   let apiParserCalls = mkApiParserCalls plan
+  let apiCalls = mkApiCalls plan
   let addons = Array.catMaybes $ map (createAddon plan) addonNames
   let addonExporting = Array.concatMap (\x -> x.exporting) addons
   let addonImporting = map (\x -> x.importing) addons
@@ -422,6 +443,9 @@ gen plan addonNames = linesContent do
     { name: plan.name
     , lowercase: plan.lowercase
     , calls: apiParserCalls }
+  genApi
+    { name: plan.name
+    , calls: apiCalls }
 
   line ""
   line "--------------------------------------------------------"
