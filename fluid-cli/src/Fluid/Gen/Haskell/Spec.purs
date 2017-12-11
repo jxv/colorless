@@ -26,6 +26,7 @@ type Plan =
   , hollows :: Array Hollow
   , structs :: Array Struct
   , enumerations :: Array Enumeration
+  , spec :: String
   }
 
 data PlanError
@@ -200,6 +201,7 @@ plan prefix version spec addons latest = do
     , hollows
     , structs
     , enumerations
+    , spec: ""
     }
 
 primMap :: String -> Maybe String

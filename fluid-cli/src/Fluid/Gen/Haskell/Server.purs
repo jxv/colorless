@@ -415,11 +415,11 @@ genModule {name, lowercase, prefix, version, types, values} = do
   line "  ) where"
 
 genSpec :: String -> String -> Lines Unit
-genSpec lowercase schema = do
+genSpec lowercase spec = do
   line ""
   addLine [lowercase, "'spec :: R.Value"]
   addLine [lowercase, "'spec = v"]
-  addLine ["  where P.Just v = R.decode ", show schema]
+  addLine ["  where P.Just v = R.decode ", show spec]
 
 type Addon =
   { exporting :: Array String
@@ -563,5 +563,7 @@ gen plan addonNames = linesContent do
     genEnumerationFromVal ty
     genToJson ty
     genFromJson ty
+
+  genSpec plan.lowercase plan.spec
 
   line ""
