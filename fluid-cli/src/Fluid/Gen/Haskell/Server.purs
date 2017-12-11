@@ -227,8 +227,8 @@ genApiLookup name lowercase calls = do
   flip traverse_ calls.filled $ \item ->
     addLine ["    ", name, "'Api'", item.name, " a' -> C.toVal P.<$> ", lowercase, "'", item.name, " meta' a'"]
 
-genHandlerRequest :: String -> String -> String -> Lines Unit
-genHandlerRequest name lowercase meta = do
+genHandlerRequest :: { name :: String, lowercase :: String, meta :: String } -> Lines Unit
+genHandlerRequest {name,lowercase,meta} = do
   line ""
   line "-- Handler"
   addLine [lowercase, "'handler"]
@@ -384,6 +384,11 @@ gen plan addonNames = linesContent do
   line "--------------------------------------------------------"
   line "-- Request handlers"
   line "--------------------------------------------------------"
+
+  genHandlerRequest
+    { name: plan.name
+    , lowercase: plan.lowercase
+    , meta: plan.meta }
 
   line ""
   line "--------------------------------------------------------"
