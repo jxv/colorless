@@ -3,6 +3,8 @@
     "set": "psc-0.11.7",
     "source": "https://github.com/purescript/package-sets.git",
     "depends": [
+        "argonaut-codecs",
+        "argonaut-core",
         "transformers",
         "pathy",
         "yargs",

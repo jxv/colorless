@@ -10,6 +10,7 @@ import Control.Monad.Eff.Exception (EXCEPTION)
 import Data.Array as Array
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
+import Data.Tuple (Tuple(..))
 import Data.Path.Pathy (FileName(..), extension)
 import Data.StrMap as StrMap
 import Data.Traversable (traverse_)
@@ -20,6 +21,9 @@ import Node.FS.Aff (readTextFile, writeTextFile, FS)
 import Node.Path (FilePath)
 import Node.Yargs.Applicative (yarg, runY)
 import Node.Yargs.Setup (example, usage)
+import Data.Argonaut.Core as A
+import Data.Argonaut.Decode as A
+import Data.Argonaut.Parser as A
 
 type Args =
   { src :: String
