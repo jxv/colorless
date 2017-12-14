@@ -5,7 +5,7 @@ import Data.Foldable (sequence_)
 import Data.Maybe (Maybe(..), isJust)
 import Data.Traversable (traverse_)
 import Fluid.Gen.Haskell.Common (enumeralNameTagMember)
-import Fluid.Gen.Haskell.Spec (Enumeral, Enumeration, Func, Plan, Struct, Wrap, lowercaseFirstLetter, uppercaseFirstLetter)
+import Fluid.Gen.Haskell.Spec (Enumeral, Enumeration, Func, Plan, Struct, Wrap, lowercaseFirstLetter, uppercaseFirstLetter, PullPlan)
 import Fluid.Gen.Lines (Lines, addLine, line, lines, linesContent)
 import Fluid.Gen.Spec (Version)
 import Prelude (Unit, discard, flip, map, show, ($), (<>), (/=), (==), pure, unit)
@@ -183,8 +183,8 @@ genVersion {lowercase, version} = do
   addLine [lowercase, "'version :: C.Version"]
   addLine [lowercase, "'version = C.Version", show version.major, " ", show version.minor]
 
-genPull :: { lowercase :: String, protocol :: String, host :: String, path :: String, port :: Int } -> Lines Unit
-genPull {lowercase, protocol, host, path, port} = do
+genPull :: { lowercase :: String, pull :: PullPlan } -> Lines Unit
+genPull {lowercase, pull: {protocol, host, path, port}} = do
   addLine [lowercase, "'pull :: C.Pull"]
   addLine [lowercase, "'pull = C.Pull \"", protocol, "\" \"", host, "\" \"", path, "\" ", show port]
 
@@ -434,7 +434,7 @@ scottyAddon plan =
       line ""
       addLine [plan.lowercase, "'Scotty'Post"]
       addLine [ "  :: (Scotty.ScottyError e, R.MonadIO m, ", plan.name, "'Service meta m, R.MonadCatch m)"]
-      addLine [ "   => ([(Scotty.LazyText, Scotty.LazyText)] -> C.Hooks m ", plan.meta, " meta)" ]
+      addLine [ "   => ([(Scotty.LazyText, Scotty.LazyText)] -> C.Hooks m ", plan.pull.meta, " meta)" ]
       lines
         [ "  -> C.Pull"
         , "  -> Scotty.ScottyT e m ()" ] }
@@ -485,10 +485,7 @@ gen plan addonNames = linesContent do
     , version: plan.version }
   genPull
     { lowercase: plan.lowercase
-    , protocol: plan.protocol
-    , host: plan.host
-    , path: plan.path
-    , port: plan.port }
+    , pull: plan.pull }
 
   line ""
   line "--------------------------------------------------------"
@@ -498,7 +495,7 @@ gen plan addonNames = linesContent do
   genThrower
     { name: plan.name
     , lowercase: plan.lowercase
-    , error: plan.error }
+    , error: plan.pull.error }
   genService
     { name: plan.name
     , lowercase: plan.lowercase
@@ -528,7 +525,7 @@ gen plan addonNames = linesContent do
   genHandlerRequest
     { name: plan.name
     , lowercase: plan.lowercase
-    , meta: plan.meta }
+    , meta: plan.pull.meta }
   genApiLookup
     { name: plan.name
     , lowercase: plan.lowercase

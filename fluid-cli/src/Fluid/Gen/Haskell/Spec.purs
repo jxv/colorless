@@ -13,20 +13,24 @@ import Fluid.Gen.Spec (TypeName, Version, Schema, Spec, Type(..), Param(..), Typ
 
 type Plan =
   { prefix :: String
-  , error :: String
   , version :: Version
   , name :: String
   , lowercase :: String
-  , protocol :: String
-  , host :: String
-  , port :: Int
-  , path :: String
-  , meta :: String
   , wraps :: Array Wrap
   , hollows :: Array Hollow
   , structs :: Array Struct
   , enumerations :: Array Enumeration
   , spec :: String
+  , pull :: PullPlan
+  }
+
+type PullPlan =
+  { protocol :: String
+  , host :: String
+  , port :: Int
+  , path :: String
+  , meta :: String
+  , error :: String
   }
 
 data PlanError
@@ -188,21 +192,21 @@ plan prefix version spec addons latest = do
   error <- langTypeOr spec.pull.error (PlanError'NonGeneratableError spec.pull.error)
   pure
     { prefix
-    , error
     , version
     , name: lowercaseFirstLetter spec.pull.name
     , lowercase: spec.pull.name
-    , protocol: spec.pull.protocol
-    , host: spec.pull.host
-    , port: spec.pull.port
-    , path: spec.pull.path
-    , meta
+    , pull:
+      { protocol: spec.pull.protocol
+      , host: spec.pull.host
+      , port: spec.pull.port
+      , path: spec.pull.path
+      , error
+      , meta }
     , wraps
     , hollows
     , structs
     , enumerations
-    , spec: ""
-    }
+    , spec: "" }
 
 primMap :: String -> Maybe String
 primMap s = case s of
