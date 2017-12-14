@@ -2,28 +2,32 @@ module Fluid.Gen.Diff where
 
 import Control.Applicative ((<$>), (<*>), map)
 import Data.Array as Array
-import Data.List (List)
-import Data.List as List
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.StrMap as StrMap
-import Fluid.Gen.Spec (Schema, Type, EnumDecl, MemberDecl, TypeDecl(..))
+import Fluid.Gen.Spec (Schema, TypeName, Type, EnumDecl, MemberDecl, TypeDecl(..))
 import Prelude ((/=), ($), not, (==), (&&))
 
-diffs :: List Schema -> List Diff
-diffs = inBetween diff
+typeChanges :: SchemaDiff -> { major :: Array TypeName, minor :: Array TypeName }
+typeChanges d =
+  { major: Array.nub $ Array.concat [d.removeType, d.modifyType]
+  , minor: d.addType
+  }
 
-inBetween :: forall a b. (a -> a -> b) -> List a -> List b
-inBetween f xs = List.zipWith f xs (List.drop 1 xs)
+schemaDiffs :: Array Schema -> Array SchemaDiff
+schemaDiffs = inBetween schemaDiff
 
-type Diff =
+inBetween :: forall a b. (a -> a -> b) -> Array a -> Array b
+inBetween f xs = Array.zipWith f xs (Array.drop 1 xs)
+
+type SchemaDiff =
   { addType :: Array String
   , removeType :: Array String
   , modifyType :: Array String -- Adding an output is not considered a breaking 'modify typed'
   , sameType :: Array String   -- Used for re-exporting instead of generating the same type
   }
 
-diff :: Schema -> Schema -> Diff
-diff prev next =
+schemaDiff :: Schema -> Schema -> SchemaDiff
+schemaDiff prev next =
   { addType: Array.difference nextKeys prevKeys
   , removeType: Array.difference prevKeys nextKeys
   , modifyType: Array.filter

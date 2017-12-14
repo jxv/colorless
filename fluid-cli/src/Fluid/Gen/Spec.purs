@@ -20,11 +20,6 @@ type Version =
   , minor :: Int
   }
 
-type Bridge =
-  { version :: Version
-  , types :: Array TypeName
-  }
-
 type TypeName = String
 
 data Param
