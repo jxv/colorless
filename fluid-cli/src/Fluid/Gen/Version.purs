@@ -21,7 +21,10 @@ import Data.Argonaut.Parser as A
 applyVersionsFromSpecs :: Array (Tuple Version String) -> Either String (Tuple String (Array String))
 applyVersionsFromSpecs pairs = do
   specs <- traverse applyVersion pairs
-  pure $ Tuple (A.stringify $ A.encodeJson specs) (map A.stringify specs)
+  pure $ Tuple (A.stringify $ A.encodeJson specs) (map asList specs)
+
+asList :: Json -> String
+asList json = A.stringify (A.encodeJson json)
 
 applyVersionsFromSpec :: Array Version -> String -> Either String (Tuple String (Array String))
 applyVersionsFromSpec versions spec = do
@@ -30,7 +33,7 @@ applyVersionsFromSpec versions spec = do
     Nothing -> Left "Not an array of specs"
     Just specs -> do
       jsons <- traverse (\(Tuple v s) -> applyVersionToJson v s) (Array.zip versions specs)
-      pure $ Tuple (A.stringify $ A.fromArray jsons) (map A.stringify jsons)
+      pure $ Tuple (A.stringify $ A.fromArray jsons) (map asList jsons)
 
 applyVersion :: Tuple Version String -> Either String Json
 applyVersion (Tuple version spec) = do

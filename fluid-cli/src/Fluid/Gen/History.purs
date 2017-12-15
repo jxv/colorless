@@ -6,14 +6,14 @@ import Data.Array as Array
 import Data.Tuple (Tuple(..), snd)
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Foldable (foldl)
+import Data.StrMap as StrMap
 import Fluid.Gen.Diff (SchemaDiff, schemaDiffs)
-import Fluid.Gen.Spec (Spec, TypeName, Version)
+import Fluid.Gen.Spec (Spec, TypeName, Version, Schema)
 
 type History =
   { version :: Version
-  , spec :: Spec
-  , stringSpec :: String
   , diff :: SchemaDiff
+  , spec :: Spec
   }
 
 data Delta
@@ -21,24 +21,37 @@ data Delta
   | Delta'Minor
   | Delta'None
 
-createHistory :: Array Spec -> Array (Tuple Version Spec)
+addSchemaDiff :: Schema -> SchemaDiff
+addSchemaDiff schema = { addType: StrMap.keys schema, removeType: [], modifyType: [], sameType: [] }
+
+createHistory :: Array Spec -> Array History
 createHistory specs = case Array.head specs of
   Nothing -> []
   Just head -> let
     diffs = schemaDiffs $ Array.toUnfoldable (map (\spec -> spec.schema) specs)
-    deltas = map versionChange diffs
+    diffs'deltas = map (\diff -> Tuple diff (versionChange diff)) diffs
     initVersion = fromMaybe { major: 0, minor: 0 } head.version
-    in snd $ foldl
-        specVersion
-        (Tuple initVersion [])
-        (Array.zip (Array.cons Delta'None deltas) specs)
+    diff'delta = Tuple (addSchemaDiff head.schema) Delta'None
+    asdf = Array.zipWith
+      (\(Tuple diff delta) spec -> {diff, delta, spec})
+      (Array.cons diff'delta diffs'deltas)
+      specs
+    in snd $ foldl specVersion (Tuple initVersion []) asdf
 
-specVersion :: Tuple Version (Array (Tuple Version Spec)) -> Tuple Delta Spec -> Tuple Version (Array (Tuple Version Spec))
-specVersion (Tuple version history) (Tuple delta spec) = case spec.version of
-  Nothing ->
-    let version' = nextVersion version delta
-    in Tuple version' (Array.cons (Tuple version' spec) history)
-  Just version' -> Tuple version' (Array.cons (Tuple version' spec) history)
+specVersion
+  :: Tuple Version (Array History)
+  -> { diff :: SchemaDiff, delta :: Delta, spec :: Spec }
+  -> Tuple Version (Array History)
+specVersion (Tuple version histories) {diff, delta, spec} = case spec.version of
+  Nothing -> let
+    version' = nextVersion version delta
+    history = { version: version', spec, diff }
+    histories' = Array.cons history histories
+    in Tuple version' histories'
+  Just version' -> let
+    history = { version: version', spec, diff }
+    histories' = Array.cons history histories
+    in Tuple version' histories'
 
 typeChanges :: SchemaDiff -> { major :: Array TypeName, minor :: Array TypeName }
 typeChanges d =
