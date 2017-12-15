@@ -22,12 +22,12 @@ mkExportTypes plan =
 
 mkImportTypes :: Plan -> Array { name :: String, major :: Int }
 mkImportTypes plan = Array.filter (\a -> a.major /= plan.version.major) $
-  map (\w -> { name: w.name, major: w.version.major }) plan.wraps <>
-  map (\s -> { name: s.name, major: s.version.major }) plan.structs <>
+  map (\w -> { name: w.name, major: w.major }) plan.wraps <>
+  map (\s -> { name: s.name, major: s.major }) plan.structs <>
   Array.concatMap
     (\e ->
-      [{ name: e.name, major: e.version.major }] <>
-      Array.catMaybes (map (enumeralImport e.name e.version.major) e.enumerals))
+      [{ name: e.name, major: e.major }] <>
+      Array.catMaybes (map (enumeralImport e.name e.major) e.enumerals))
     plan.enumerations
 
 memberName :: String -> String -> String
@@ -399,7 +399,7 @@ genHandlerRequest {name,lowercase,meta} = do
     , "    P.return P.$ C.Response'Success (R.toJSON vals) _limits)"
     , "  (\\(C.ThrownValue _err) -> P.return P.. P.Left P.$ C.Response'Error (C.ResponseError'Service _err))" ]
 
-genModule :: { name :: String, lowercase :: String, prefix :: String, version :: { major :: Int, minor :: Int }, types :: Array String, values :: Array String } -> Lines Unit
+genModule :: { name :: String, lowercase :: String, prefix :: String, version :: Version, types :: Array String, values :: Array String } -> Lines Unit
 genModule {name, lowercase, prefix, version, types, values} = do
   line ""
   line "-- Module"
@@ -444,8 +444,8 @@ createAddon plan addon = case addon of
   "scotty" -> Just (scottyAddon plan)
   _ -> Nothing
 
-filterVersion :: forall a. Version -> Array { version :: { major :: Int, minor :: Int } | a } -> Array { version :: { major :: Int, minor :: Int } | a }
-filterVersion version = Array.filter (\ty -> ty.version.major == version.major)
+filterVersion :: forall a. Version -> Array { major :: Int | a } -> Array { major :: Int | a }
+filterVersion version = Array.filter (\ty -> ty.major == version.major)
 
 gen :: Plan -> Array String -> String
 gen plan addonNames = linesContent do
