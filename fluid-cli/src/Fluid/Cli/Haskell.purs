@@ -1,9 +1,12 @@
 module Fluid.Cli.Haskell where
 
-import Prelude ((-), map, flip)
+import Prelude ((-), map, (<>), show, ($))
+
+import Data.Array as Array
 import Data.Either (Either(..))
-import Data.Foldable (elem, and)
+import Data.Foldable (elem, and, foldr)
 import Data.Traversable (traverse)
+import Data.Bifunctor (lmap)
 
 import Fluid.Gen.Blueprint (Blueprint)
 import Fluid.Gen.Haskell.Spec (Plan, PlanError, plan)
@@ -11,15 +14,27 @@ import Fluid.Gen.Haskell.Server as Server
 
 import Fluid.Cli.Args (Args)
 import Fluid.Cli.Target (Target)
+import Fluid.Cli.Generator (Generator)
 
-generateHaskellServer
-  :: Args
-  -> String -- All Specs as a stringified JSON
-  -> Array Blueprint
-  -> Either (Array String) (Array Target)
-generateHaskellServer args jsonSpec blueprints = do
-  let serverContents = traverse (\bp -> map (flip Server.gen args.addon) (planFrom args bp)) blueprints :: Either PlanError (Array String)
-  Right []
+generateHaskellServer :: Generator
+generateHaskellServer args jsonSpec blueprints = lmap (map show) $ separate $ map
+  (\bp -> map
+    (\p -> {path: buildPath ("V" <> show bp.version.major <> ".hs"), contents: Server.gen p args.addon})
+    (planFrom args bp))
+  blueprints
+  where
+    buildPath path = args.dest <> "/" <> path
+
+separate :: forall e a. Array (Either e a) -> Either (Array e) (Array a)
+separate xs = foldr go (Right []) xs
+  where
+    go e arrE = case arrE of
+      Left ls -> case e of
+        Left l -> Left (Array.cons l ls)
+        Right _ -> Left ls
+      Right rs -> case e of
+        Left l -> Left (Array.singleton l)
+        Right r -> Right (Array.cons r rs)
 
 planFrom :: Args -> Blueprint -> Either PlanError Plan
 planFrom args bp = let

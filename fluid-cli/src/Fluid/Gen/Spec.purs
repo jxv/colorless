@@ -33,10 +33,18 @@ instance eqParam :: Eq Param where
   eq (Param'Two t0 t1) (Param'Two u0 u1) = t0 == u0 && t1 == u1
   eq _ _ = false
 
+instance showParam :: Show Param where
+  show Param'None = "[]"
+  show (Param'One ty) = "[" <> show ty <> "]"
+  show (Param'Two ty0 ty1) = "[" <> show ty0 <> ", " <> show ty1 <> "]"
+
 data Type = Type
   { n :: TypeName
   , p :: Param
   }
+
+instance showType :: Show Type where
+  show (Type {n,p}) = "{ n: " <> show n <> ", p: " <> show p <> "}"
 
 instance eqType :: Eq Type where
   eq (Type a) (Type b) = a.n == b.n && a.p == b.p

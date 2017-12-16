@@ -38,6 +38,11 @@ data PlanError
   | PlanError'NonGeneratableMeta Type
   | PlanError'NonGeneratableError Type
 
+instance eqPlanError :: Show PlanError where
+  show (PlanError'NonGeneratable name) = "Not generatable type: " <> show name
+  show (PlanError'NonGeneratableMeta ty) = "Not generatable meta: " <> show ty
+  show (PlanError'NonGeneratableError ty) = "Not generatable error: " <> show ty
+
 type Func =
   { name :: String
   , output :: String
