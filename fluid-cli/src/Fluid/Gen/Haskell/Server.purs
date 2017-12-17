@@ -185,6 +185,7 @@ genVersion {lowercase, version} = do
 
 genPull :: { lowercase :: String, pull :: PullPlan } -> Lines Unit
 genPull {lowercase, pull: {protocol, host, path, port}} = do
+  line ""
   addLine [lowercase, "'pull :: C.Pull"]
   addLine [lowercase, "'pull = C.Pull \"", protocol, "\" \"", host, "\" \"", path, "\" ", show port]
 
@@ -245,31 +246,31 @@ genThrower {name, lowercase, error} = do
   addLine ["  ", lowercase, "'throw :: ", error, " -> m a"]
   addLine ["  ", lowercase, "'throw = C.serviceThrow P.. R.toJSON P.. C.toVal"]
 
-mkServiceCalls :: Plan -> Array { name :: String, output :: String, hollow :: Boolean }
+mkServiceCalls :: Plan -> Array { name :: String, lowercase :: String, output :: String, hollow :: Boolean }
 mkServiceCalls plan = Array.concat
-  [ map (\x -> { name: x.func.name, output: x.func.output, hollow: true }) plan.hollows
+  [ map (\x -> { name: x.name, lowercase: x.func.name, output: x.func.output, hollow: true }) plan.hollows
   , mkCall plan.wraps
   , mkCall plan.structs
   , mkCall plan.enumerations ]
   where
-    mkCall :: forall a. Array { func :: Maybe Func | a } -> Array { name :: String, output :: String, hollow :: Boolean }
+    mkCall :: forall a. Array { name :: String, func :: Maybe Func | a } -> Array { name :: String, lowercase :: String, output :: String, hollow :: Boolean }
     mkCall types = Array.catMaybes (map extractFunc types)
       where
         extractFunc x = case x.func of
           Nothing -> Nothing
-          Just func -> Just { name: func.name, output: func.output, hollow: false }
+          Just func -> Just { lowercase: func.name, name: x.name, output: func.output, hollow: false }
 
-genService :: { name :: String, lowercase :: String, calls :: Array { name :: String, output :: String, hollow :: Boolean } } -> Lines Unit
+genService :: { name :: String, lowercase :: String, calls :: Array { lowercase :: String, name :: String, output :: String, hollow :: Boolean } } -> Lines Unit
 genService {name, lowercase, calls} = do
   line ""
   line "-- Service"
   addLine ["class P.Monad m => ", name, "'Service meta m where"]
   flip traverse_ calls $ \call ->
-    addLine ["  ", lowercase, "'", call.name, " :: meta ->", if call.hollow then " " <> call.name <> " ->" else "", call.output]
+    addLine ["  ", lowercase, "'", call.lowercase, " :: meta ->", if call.hollow then " " <> call.name <> " -> " else "", call.output]
   line ""
   addLine ["instance ", name, "'Service meta m => ", name, "'Service meta (M.ExceptT C.Response m) where"]
   flip traverse_ calls $ \call ->
-    addLine ["  ", lowercase, "'", call.name, " _meta = M.lift ", if call.hollow then " P.$ " else " P.. ", lowercase, "'", call.name, " _meta"]
+    addLine ["  ", lowercase, "'", call.lowercase, " _meta = M.lift ", if call.hollow then " P.$ " else " P.. ", lowercase, "'", call.name, " _meta"]
 
 mkApiParserCalls
   :: Plan

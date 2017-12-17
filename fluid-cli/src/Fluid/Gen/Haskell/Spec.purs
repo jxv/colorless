@@ -205,8 +205,8 @@ plan prefix version spec addons latest jsonSpec = do
   pure
     { prefix
     , version
-    , name: lowercaseFirstLetter spec.pull.name
-    , lowercase: spec.pull.name
+    , name: spec.pull.name
+    , lowercase: lowercaseFirstLetter spec.pull.name
     , pull:
       { protocol: spec.pull.protocol
       , host: spec.pull.host
