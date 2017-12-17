@@ -65,7 +65,7 @@ genFromJson {name} = do
 genWrap :: Wrap -> Lines Unit
 genWrap {name, type: type', label, instances: {text, number}} = do
   line ""
-  addLine ["-- Wrap ", name]
+  addLine ["-- Wrap: ", name]
   addLine ["newtype ", name, " = ", name, " ", type']
   addLine ["  deriving (P.Eq, P.Ord, ", if text then "P.IsString, R.ToText, " else "", if number then "P.Num, " else "", " P.Show)"]
 
@@ -84,7 +84,7 @@ genWrapFromVal {name} = do
 genStruct :: Struct -> Lines Unit
 genStruct {name, label, members} = do
   line ""
-  addLine ["-- Struct ", name]
+  addLine ["-- Struct: ", name]
   addLine ["data ", name, " = ", name]
   lineList members
     "  { "
@@ -101,8 +101,7 @@ genStructToVal {name, members} = do
     "    { "
     "    , "
     (\m -> [memberName name m.name])
-  line "    } "
-  line " = C.Val'ApiVal P.$ C.ApiVal'Struct P.$ C.Struct P.$ R.fromList"
+  line "    } = C.Val'ApiVal P.$ C.ApiVal'Struct P.$ C.Struct P.$ R.fromList"
   lineList members
     "    [ "
     "    , "
@@ -114,10 +113,10 @@ genStructFromVal :: Struct -> Lines Unit
 genStructFromVal {name,members} = do
   addLine ["instance C.FromVal ", name, " where"]
   line "  fromVal = \\case"
-  addLine ["  C.Val'ApiVal (C.ApiVal'Struct (C.Struct _m)) ->", name]
+  addLine ["    C.Val'ApiVal (C.ApiVal'Struct (C.Struct _m)) -> ", name]
   lineList members
-    "    P.<$>"
-    "    P.<*>"
+    "      P.<$>"
+    "      P.<*>"
     (\m -> [" C.getMember _m \"", m.label, "\""])
   line "    _ -> P.Nothing"
 
@@ -181,7 +180,7 @@ genVersion {lowercase, version} = do
   line ""
   line "-- Version"
   addLine [lowercase, "'version :: C.Version"]
-  addLine [lowercase, "'version = C.Version", show version.major, " ", show version.minor]
+  addLine [lowercase, "'version = C.Version ", show version.major, " ", show version.minor]
 
 genPull :: { lowercase :: String, pull :: PullPlan } -> Lines Unit
 genPull {lowercase, pull: {protocol, host, path, port}} = do
@@ -266,11 +265,11 @@ genService {name, lowercase, calls} = do
   line "-- Service"
   addLine ["class P.Monad m => ", name, "'Service meta m where"]
   flip traverse_ calls $ \call ->
-    addLine ["  ", lowercase, "'", call.lowercase, " :: meta ->", if call.hollow then " " <> call.name <> " -> " else "", call.output]
+    addLine ["  ", lowercase, "'", call.name, " :: meta ->", if call.hollow then " " <> call.name <> " -> " else " ", call.output]
   line ""
   addLine ["instance ", name, "'Service meta m => ", name, "'Service meta (M.ExceptT C.Response m) where"]
   flip traverse_ calls $ \call ->
-    addLine ["  ", lowercase, "'", call.lowercase, " _meta = M.lift ", if call.hollow then " P.$ " else " P.. ", lowercase, "'", call.name, " _meta"]
+    addLine ["  ", lowercase, "'", call.name, " _meta = M.lift", if call.hollow then " P.$ " else " P.. ", lowercase, "'", call.name, " _meta"]
 
 mkApiParserCalls
   :: Plan
@@ -435,7 +434,7 @@ scottyAddon plan =
       line ""
       addLine [plan.lowercase, "'Scotty'Post"]
       addLine [ "  :: (Scotty.ScottyError e, R.MonadIO m, ", plan.name, "'Service meta m, R.MonadCatch m)"]
-      addLine [ "   => ([(Scotty.LazyText, Scotty.LazyText)] -> C.Hooks m ", plan.pull.meta, " meta)" ]
+      addLine [ "  => ([(Scotty.LazyText, Scotty.LazyText)] -> C.Hooks m ", plan.pull.meta, " meta)" ]
       lines
         [ "  -> C.Pull"
         , "  -> Scotty.ScottyT e m ()" ]
@@ -524,7 +523,7 @@ gen plan addonNames = linesContent do
 
   line ""
   line "--------------------------------------------------------"
-  line "-- Request handlers"
+  line "-- Request handling"
   line "--------------------------------------------------------"
 
   genHandlerRequest
