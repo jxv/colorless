@@ -4,7 +4,7 @@ import Prelude ((-), map, (<>), show, ($))
 
 import Data.Array as Array
 import Data.Either (Either(..))
-import Data.Foldable (elem, and, foldr)
+import Data.Foldable (elem, or, foldr)
 import Data.Traversable (traverse)
 import Data.Bifunctor (lmap)
 
@@ -41,7 +41,7 @@ planFrom args bp = let
   major = bp.version.major
   prevMajor = major - 1
   typeVersionMapper typeName =
-    if and [elem typeName bp.diff.addType, elem typeName bp.diff.removeType, elem typeName bp.diff.modifyType]
+    if or [elem typeName bp.diff.addType, elem typeName bp.diff.removeType, elem typeName bp.diff.modifyType]
       then major
       else prevMajor
   in plan args.prefix bp.version bp.spec args.addon typeVersionMapper bp.stringSpec

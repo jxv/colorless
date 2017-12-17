@@ -126,10 +126,10 @@ instance eqTypeDecl :: Eq TypeDecl where
 
 readTypeDecl :: Foreign -> F TypeDecl
 readTypeDecl value =
-  readTypeDeclHollow value <|>
-  readTypeDeclWrap value <|>
   readTypeDeclEnum value <|>
-  readTypeDeclStruct value
+  readTypeDeclStruct value <|>
+  readTypeDeclWrap value <|>
+  readTypeDeclHollow value
 
 readTypeDeclHollow :: Foreign -> F TypeDecl
 readTypeDeclHollow value = do

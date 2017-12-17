@@ -89,7 +89,7 @@ genStruct {name, label, members} = do
   lineList members
     "  { "
     "  , "
-    (\m -> [m.name, " :: ", m.type])
+    (\m -> [lowercaseFirstLetter name <> uppercaseFirstLetter m.name, " :: ", m.type])
   line "  } deriving (P.Show, P.Eq)"
 
 genStructToVal :: Struct -> Lines Unit
@@ -438,7 +438,11 @@ scottyAddon plan =
       addLine [ "   => ([(Scotty.LazyText, Scotty.LazyText)] -> C.Hooks m ", plan.pull.meta, " meta)" ]
       lines
         [ "  -> C.Pull"
-        , "  -> Scotty.ScottyT e m ()" ] }
+        , "  -> Scotty.ScottyT e m ()" ]
+      addLine [ plan.lowercase, "'Scotty'Post _hooks _pull = Scotty.respondSingleton _pull ", plan.lowercase, "'version (\\_xtra -> ", plan.lowercase, "'handler _hooks _xtra)" ]
+      line ""
+      addLine [ plan.lowercase, "'Scotty'Get :: (Scotty.ScottyError e, R.MonadIO m) => C.Pull -> Scotty.ScottyT e m ()" ]
+      addLine [ plan.lowercase, "'Scotty'Get = Scotty.getSpec P.$ R.toJSON [", plan.lowercase, "'spec]" ] }
 
 createAddon :: Plan -> String -> Maybe Addon
 createAddon plan addon = case addon of
@@ -561,6 +565,11 @@ gen plan addonNames = linesContent do
     genEnumerationFromVal ty
     genToJson ty
     genFromJson ty
+
+  line ""
+  line "--------------------------------------------------------"
+  line "-- Spec"
+  line "--------------------------------------------------------"
 
   genSpec plan.lowercase plan.spec
 
