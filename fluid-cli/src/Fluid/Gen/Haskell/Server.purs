@@ -6,7 +6,7 @@ import Data.Maybe (Maybe(..), isJust)
 import Data.Traversable (traverse_)
 import Fluid.Gen.Haskell.Common (enumeralNameTagMember)
 import Fluid.Gen.Haskell.Spec (Enumeral, Enumeration, Func, Plan, Struct, Wrap, lowercaseFirstLetter, uppercaseFirstLetter, PullPlan)
-import Fluid.Gen.Lines (Lines, addLine, line, lines, linesContent)
+import Fluid.Gen.Lines (Lines, addLine, line, lines, linesContent, lineList)
 import Fluid.Gen.Spec (Version)
 import Prelude (Unit, discard, flip, map, show, ($), (<>), (/=), (==), pure, unit)
 
@@ -37,13 +37,6 @@ enumeralImport :: String -> Int -> Enumeral -> Maybe { name :: String, major :: 
 enumeralImport name major enumeral = case enumeral.members of
   Nothing -> Nothing
   Just _ -> Just { name: enumeralNameTagMember name enumeral.tag, major }
-
-lineList :: forall a. Array a -> String -> String -> (a -> Array String) -> Lines Unit
-lineList arr headPrefix tailPrefix f = case Array.uncons arr of
-  Nothing -> pure unit
-  Just {head,tail} -> do
-    addLine $ [headPrefix] <> f head
-    flip traverse_ tail $ \item -> addLine $ [tailPrefix] <> f item
 
 genToJson :: forall a. { name :: String | a } -> Lines Unit
 genToJson {name} = do
