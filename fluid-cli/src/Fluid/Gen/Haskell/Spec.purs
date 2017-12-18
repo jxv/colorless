@@ -261,7 +261,7 @@ langTypeNameVersion major name = case primMap name of
 
 langTypeGeneric :: (TypeName -> String) -> Type -> Maybe String
 langTypeGeneric typeName (Type {n, p}) = case p of
-  Param'None -> Just n
+  Param'None -> Just (typeName n)
   Param'One p0 -> case langTypeGeneric typeName p0 of
     Nothing -> Nothing
     Just p0' -> case n of

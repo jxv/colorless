@@ -1,6 +1,5 @@
 -- Pragmas
 {-# OPTIONS_GHC -fno-warn-unused-imports #-}
-{-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
@@ -29,15 +28,10 @@ module HelloWorld.V0
 import qualified Prelude as P
 import qualified Control.Monad as P
 import qualified Control.Monad.Except as M
-import qualified Data.Word as I
-import qualified Data.Int as I
 import qualified Data.IORef as IO
 import qualified Data.String as P (IsString)
-
 import qualified Fluid.Imports as R
 import qualified Fluid.Server as C
-
-
 import qualified Fluid.Server.Scotty as Scotty
 
 --------------------------------------------------------
@@ -65,7 +59,7 @@ class P.Monad m => HelloWorld'Service meta m where
   helloWorld'Hello :: meta -> Hello -> m R.Text
 
 instance HelloWorld'Service meta m => HelloWorld'Service meta (M.ExceptT C.Response m) where
-  helloWorld'Hello _meta = M.lift  P.. helloWorld'Hello _meta
+  helloWorld'Hello _meta = M.lift P.. helloWorld'Hello _meta
 
 --------------------------------------------------------
 -- Types
@@ -101,7 +95,7 @@ helloWorld'handler
   -> xtra
   -> C.Request
   -> m (P.Either C.Response C.Response)
-helloWorld'handler _hooksBuilder xtra C.Request{meta,query} = R.catch
+helloWorld'handler _hooksBuilder xtra C.Request{C.meta=meta,C.query=query} = R.catch
   (M.runExceptT P.$ do
     meta' <- P.maybe (C.runtimeThrow C.RuntimeError'UnparsableMeta) P.return (C.fromValFromJson meta)
     let _hooks = _hooksBuilder xtra
@@ -130,19 +124,19 @@ helloWorld'handler _hooksBuilder xtra C.Request{meta,query} = R.catch
 -- API
 helloWorld'ApiCall :: (HelloWorld'Service meta m, C.ServiceThrower m, C.RuntimeThrower m) => meta -> C.ApiCall -> m C.Val
 helloWorld'ApiCall meta' apiCall' = case C.parseApiCall helloWorld'ApiParser apiCall' of
-  P.Nothing -> C.runtimeThrow C.RuntimeError'UnrecognizedCall
+  P.Nothing -> C.runtimeThrow (C.RuntimeError'UnrecognizedCall P.$ C.apiCallName apiCall')
   P.Just x' -> case x' of
     HelloWorld'Api'Hello a' -> C.toVal P.<$> helloWorld'Hello meta' a'
 
 -- API Parser
 helloWorld'ApiParser :: C.ApiParser HelloWorld'Api
 helloWorld'ApiParser = C.ApiParser
-  { hollow = R.empty
-  , struct = R.fromList
+  { C.hollow = R.empty
+  , C.struct = R.fromList
      [ ("Hello", v HelloWorld'Api'Hello)
      ]
-  , enumeration = R.empty
-  , wrap = R.empty
+  , C.enumeration = R.empty
+  , C.wrap = R.empty
   }
   where
     v x y = x P.<$> C.fromVal y
@@ -179,7 +173,10 @@ instance R.FromJSON Hello where
       P.Nothing -> P.mzero
       P.Just _y -> P.return _y
 
+--------------------------------------------------------
+-- Spec
+--------------------------------------------------------
+
 helloWorld'spec :: R.Value
 helloWorld'spec = v
   where P.Just v = R.decode "{\"fluid\":{\"major\":0,\"minor\":0},\"version\":{\"major\":0,\"minor\":0},\"schema\":{\"Hello\":{\"m\":[{\"target\":\"String\"}],\"o\":\"String\"}},\"pull\":{\"protocol\":\"http\",\"name\":\"HelloWorld\",\"host\":\"127.0.0.1\",\"meta\":\"Unit\",\"path\":\"/\",\"port\":8080,\"error\":\"Unit\"}}"
-

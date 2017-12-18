@@ -265,7 +265,7 @@ genService {name, lowercase, calls} = do
   line "-- Service"
   addLine ["class P.Monad m => ", name, "'Service meta m where"]
   flip traverse_ calls $ \call ->
-    addLine ["  ", lowercase, "'", call.name, " :: meta ->", if call.hollow then " " <> call.name <> " -> " else " ", call.output]
+    addLine ["  ", lowercase, "'", call.name, " :: meta ->", if call.hollow then  " " else " " <> call.name <> " -> ", "m ", call.output]
   line ""
   addLine ["instance ", name, "'Service meta m => ", name, "'Service meta (M.ExceptT C.Response m) where"]
   flip traverse_ calls $ \call ->
@@ -304,34 +304,34 @@ genApiParser {name, lowercase, calls} = do
   case Array.uncons calls.hollow of
     Nothing -> line "  { hollow = R.empty"
     Just {head, tail} -> do
-      line "  { hollow = R.fromList"
+      line "  { C.hollow = R.fromList"
       addLine ["     [ (\"", head.label, "\", ", name, "'Api'", head.name, ")"]
       flip traverse_ tail $ \item ->
         addLine ["     , (\"", item.label, "\", ", name, "'Api'", item.name, ")"]
       line "     ]"
   -- Struct
   case Array.uncons calls.struct of
-    Nothing -> line "  , struct = R.empty"
+    Nothing -> line "  , C.struct = R.empty"
     Just {head, tail} -> do
-      line "  , struct = R.fromList"
+      line "  , C.struct = R.fromList"
       addLine ["     [ (\"", head.label, "\", v ", name, "'Api'", head.name, ")"]
       flip traverse_ tail $ \item ->
         addLine ["     , (\"", item.label, "\", v ", name, "'Api'", item.name, ")"]
       line "     ]"
   -- Enumeration
   case Array.uncons calls.enumeration of
-    Nothing -> line "  , enumeration = R.empty"
+    Nothing -> line "  , C.enumeration = R.empty"
     Just {head, tail} -> do
-      line "  , enumeration = R.fromList"
+      line "  , C.enumeration = R.fromList"
       addLine ["     [ (\"", head.label, "\", v ", name, "'Api'", head.name, ")"]
       flip traverse_ tail $ \item ->
         addLine ["     , (\"", item.label, "\", v ", name, "'Api'", item.name, ")"]
       line "     ]"
   -- Wrap
   case Array.uncons calls.wrap of
-    Nothing -> line "  , wrap = R.empty"
+    Nothing -> line "  , C.wrap = R.empty"
     Just {head, tail} -> do
-      line "  , wrap = R.fromList"
+      line "  , C.wrap = R.fromList"
       addLine ["     [ (\"", head.label, "\", v ", name, "'Api'", head.name, ")"]
       flip traverse_ tail $ \item ->
         addLine ["     , (\"", item.label, "\", v ", name, "'Api'", item.name, ")"]
@@ -371,7 +371,7 @@ genHandlerRequest {name,lowercase,meta} = do
   line "  -> xtra"
   line "  -> C.Request"
   line "  -> m (P.Either C.Response C.Response)"
-  addLine [lowercase, "'handler _hooksBuilder xtra C.Request{meta,query} = R.catch"]
+  addLine [lowercase, "'handler _hooksBuilder xtra C.Request{C.meta=meta, C.query=query} = R.catch"]
   lines
     [ "  (M.runExceptT P.$ do"
     , "    meta' <- P.maybe (C.runtimeThrow C.RuntimeError'UnparsableMeta) P.return (C.fromValFromJson meta)"
