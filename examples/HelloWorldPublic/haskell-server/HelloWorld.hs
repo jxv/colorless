@@ -1,5 +1,15 @@
 -- Pragmas
 {-# OPTIONS_GHC -fno-warn-unused-imports #-}
+{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE TupleSections #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE NoImplicitPrelude #-}
 
 -- Module
 module HelloWorld
@@ -7,17 +17,16 @@ module HelloWorld
   , helloWorld'spec
   , helloWorld'Scotty'Post
   , helloWorld'Scotty'Get
+  , V0.Hello(..)
   , V0.HelloWorld'Service(..)
   , V0.HelloWorld'Thrower(..)
   , V0.helloWorld'pull
-  , V0.Hello(..)
   ) where
 
 import qualified Prelude as P
 import qualified Fluid.Server as C (RuntimeThrower, Hooks, Request, Response, Major, Minor, Pull)
 import qualified Fluid.Imports as R
 import qualified Fluid.Server.Scotty as Scotty
-
 import qualified HelloWorld.V0 as V0
   ( HelloWorld'Service(..)
   , HelloWorld'Thrower(..)
@@ -60,4 +69,3 @@ helloWorld'Scotty'Post pull hooks0 = Scotty.respond pull (helloWorld'handlerMap 
 
 helloWorld'Scotty'Get :: (Scotty.ScottyError e, R.MonadIO m) => C.Pull -> Scotty.ScottyT e m ()
 helloWorld'Scotty'Get = Scotty.getSpec helloWorld'spec
-

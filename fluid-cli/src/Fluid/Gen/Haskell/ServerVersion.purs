@@ -1,24 +1,14 @@
-module Fluid.Gen.Haskell.Server where
+module Fluid.Gen.Haskell.ServerVersion where
 
 import Data.Array as Array
 import Data.Foldable (sequence_)
 import Data.Maybe (Maybe(..), isJust)
 import Data.Traversable (traverse_)
-import Fluid.Gen.Haskell.Common (enumeralNameTagMember)
+import Fluid.Gen.Haskell.Common (enumeralNameTagMember, genPragmas, mkExportTypes)
 import Fluid.Gen.Haskell.Spec (Enumeral, Enumeration, Func, Plan, Struct, Wrap, lowercaseFirstLetter, uppercaseFirstLetter, PullPlan)
 import Fluid.Gen.Lines (Lines, addLine, line, lines, linesContent, lineList)
 import Fluid.Gen.Spec (Version)
 import Prelude (Unit, discard, flip, map, show, ($), (<>), (/=), (==), pure, unit)
-
-mkExportTypes :: Plan -> Array String
-mkExportTypes plan =
-  map (\x -> x.name) plan.wraps <>
-  map (\x -> x.name) plan.structs <>
-  Array.concat (flip map plan.enumerations $ \e ->
-    [e.name] <>
-    map
-      (\enumeral -> enumeralNameTagMember plan.name enumeral.tag)
-      (Array.filter (\enumeral -> isJust enumeral.members) e.enumerals))
 
 mkImportTypes :: Plan -> Array { name :: String, major :: Int }
 mkImportTypes plan = Array.filter (\a -> a.major /= plan.version.major) $
@@ -181,20 +171,6 @@ genPull {lowercase, pull: {protocol, host, path, port}} = do
   addLine [lowercase, "'pull :: C.Pull"]
   addLine [lowercase, "'pull = C.Pull \"", protocol, "\" \"", host, "\" \"", path, "\" ", show port]
 
-genPragmas :: Lines Unit
-genPragmas = lines
-  [ "-- Pragmas"
-  , "{-# OPTIONS_GHC -fno-warn-unused-imports #-}"
-  , "{-# LANGUAGE LambdaCase #-}"
-  , "{-# LANGUAGE OverloadedStrings #-}"
-  , "{-# LANGUAGE GeneralizedNewtypeDeriving #-}"
-  , "{-# LANGUAGE MultiParamTypeClasses #-}"
-  , "{-# LANGUAGE NamedFieldPuns #-}"
-  , "{-# LANGUAGE TupleSections #-}"
-  , "{-# LANGUAGE FlexibleContexts #-}"
-  , "{-# LANGUAGE FlexibleInstances #-}"
-  , "{-# LANGUAGE ScopedTypeVariables #-}"
-  , "{-# LANGUAGE NoImplicitPrelude #-}" ]
 
 genImports :: { prefix :: String, imports :: Array { name :: String, major :: Int }, importing :: Array (Lines Unit) } -> Lines Unit
 genImports {prefix, imports, importing} = do
@@ -295,7 +271,7 @@ genApiParser {name, lowercase, calls} = do
   addLine [lowercase, "'ApiParser = C.ApiParser"]
   -- Hollow
   case Array.uncons calls.hollow of
-    Nothing -> line "  { hollow = R.empty"
+    Nothing -> line "  { C.hollow = R.empty"
     Just {head, tail} -> do
       line "  { C.hollow = R.fromList"
       addLine ["     [ (\"", head.label, "\", ", name, "'Api'", head.name, ")"]

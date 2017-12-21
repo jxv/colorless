@@ -95,7 +95,7 @@ helloWorld'handler
   -> xtra
   -> C.Request
   -> m (P.Either C.Response C.Response)
-helloWorld'handler _hooksBuilder xtra C.Request{C.meta=meta,C.query=query} = R.catch
+helloWorld'handler _hooksBuilder xtra C.Request{C.meta=meta, C.query=query} = R.catch
   (M.runExceptT P.$ do
     meta' <- P.maybe (C.runtimeThrow C.RuntimeError'UnparsableMeta) P.return (C.fromValFromJson meta)
     let _hooks = _hooksBuilder xtra

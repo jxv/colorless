@@ -1,29 +1,36 @@
 module Fluid.Cli.Haskell where
 
-import Prelude ((-), map, (<>), show, ($))
+import Prelude ((-), map, (<>), show, ($), bind, pure)
 
 import Data.Array as Array
 import Data.Either (Either(..))
 import Data.Foldable (elem, or, foldr)
 import Data.Traversable (traverse)
+import Data.Tuple (Tuple(..), fst, snd)
 import Data.Bifunctor (lmap)
 
 import Fluid.Gen.Blueprint (Blueprint)
 import Fluid.Gen.Haskell.Spec (Plan, PlanError, plan)
-import Fluid.Gen.Haskell.Server as Server
+import Fluid.Gen.Haskell.ServerVersion as Server
+import Fluid.Gen.Haskell.ServerLatest as ServerLatest
 
 import Fluid.Cli.Args (Args)
 import Fluid.Cli.Target (Target)
 import Fluid.Cli.Generator (Generator)
 
 generateHaskellServer :: Generator
-generateHaskellServer args jsonSpec blueprints = lmap (map show) $ separate $ map
-  (\bp -> map
-    (\p -> {path: buildPath ("V" <> show bp.version.major <> ".hs"), contents: Server.gen p args.addon})
-    (planFrom args bp))
-  blueprints
+generateHaskellServer args jsonSpec blueprints = lmap (map show) $ do
+  planTargets <- separate $ map
+    (\bp -> map
+      (\p -> Tuple p {path: buildPath ("V" <> show bp.version.major <> ".hs"), contents: Server.gen p args.addon})
+      (planFrom args bp))
+    blueprints
+  let plans = map fst planTargets  :: Array Plan
+  let versionTargets = map snd planTargets :: Array Target
+  let latestTarget = { path: args.dest <> "/" <> args.name <> ".hs", contents: ServerLatest.gen plans args.addon }
+  pure $ Array.cons latestTarget versionTargets
   where
-    buildPath path = args.dest <> "/" <> path
+    buildPath path = args.dest <> "/" <> args.name <> "/" <> path
 
 separate :: forall e a. Array (Either e a) -> Either (Array e) (Array a)
 separate xs = foldr go (Right []) xs
