@@ -5,7 +5,6 @@ import Prelude ((-), map, (<>), show, ($), bind, pure)
 import Data.Array as Array
 import Data.Either (Either(..))
 import Data.Foldable (elem, or, foldr)
-import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..), fst, snd)
 import Data.Bifunctor (lmap)
 
