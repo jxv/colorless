@@ -133,7 +133,7 @@ enumeral (EnumDecl {tag,m}) = do
   let tag' = langTypeName tag
   let label = langTypeLabel tag
   members <- case m of
-    Nothing ->  Nothing
+    Nothing -> pure Nothing
     Just m' -> do
       members' <- traverse member m'
       pure (Just members')
@@ -266,7 +266,7 @@ langTypeGeneric typeName (Type {n, p}) = case p of
     Nothing -> Nothing
     Just p0' -> case n of
       "List" -> Just $ "[" <> p0' <> "]"
-      "Option" -> Just $ "(P.Maybe" <> p0' <> ")"
+      "Option" -> Just $ "(P.Maybe " <> p0' <> ")"
       _ -> Nothing
   Param'Two p0 p1 -> case Tuple (langTypeGeneric typeName p0) (langTypeGeneric typeName p1) of
     Tuple (Just p0') (Just p1') -> case n of

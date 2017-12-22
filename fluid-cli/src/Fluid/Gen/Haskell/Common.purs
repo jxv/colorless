@@ -31,5 +31,5 @@ mkExportTypes plan =
   Array.concat (flip map plan.enumerations $ \e ->
     [e.name] <>
     map
-      (\enumeral -> enumeralNameTagMember plan.name enumeral.tag)
+      (\enumeral -> enumeralNameTagMember e.name enumeral.tag)
       (Array.filter (\enumeral -> isJust enumeral.members) e.enumerals))

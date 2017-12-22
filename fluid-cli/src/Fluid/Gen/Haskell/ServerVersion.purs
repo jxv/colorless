@@ -108,7 +108,7 @@ genEnumeration {name, enumerals} = do
   line ""
   addLine ["-- Enumeration: ", name]
   addLine ["data ", name]
-  lineList enumerals "  = " "  | " (\e -> [name, "'", e.tag, if isJust e.members then "'Members" else ""])
+  lineList enumerals "  = " "  | " (\e -> [name, "'", e.tag, if isJust e.members then " " <> name <> "'" <> e.tag <> "'Members" else ""])
   addLine ["  deriving (P.Show, P.Eq)"]
   flip traverse_ enumerals $ \enumeral ->
     case enumeral.members of
@@ -119,7 +119,7 @@ genEnumeration {name, enumerals} = do
         lineList members
           "  { "
           "  , "
-          (\m -> [lowercaseFirstLetter(name <> "'" <> enumeral.tag <> m.name), " :: ", m.type])
+          (\m -> [lowercaseFirstLetter(name <> "'" <> enumeral.tag <> uppercaseFirstLetter m.name), " :: ", m.type])
         line "  } deriving (P.Show, P.Eq)"
 
 genEnumerationToVal :: Enumeration -> Lines Unit
@@ -135,12 +135,12 @@ genEnumerationToVal {name,enumerals} = do
         "      { "
         "      , "
         (\m -> [memberName (name <> "'" <> enumeral.tag) m.name])
-      addLine ["    } -> ", name, "'", enumeral.tag, " -> C.Val\'ApiVal P.$ C.ApiVal\'Enumeral P.$ C.Enumeral \"", enumeral.label, "\" P.$ P.Just P.$ R.fromList"]
+      addLine ["      } -> C.Val\'ApiVal P.$ C.ApiVal\'Enumeral P.$ C.Enumeral \"", enumeral.label, "\" P.$ P.Just P.$ R.fromList"]
       lineList members
         "      [ "
         "      , "
         (\m -> ["(\"", m.label, "\", C.toVal ", memberName (name <> "'" <> enumeral.tag) m.name, ")"])
-      line "      ] "
+      line "      ]"
 
 genEnumerationFromVal :: Enumeration -> Lines Unit
 genEnumerationFromVal {name,enumerals} = do
@@ -151,10 +151,12 @@ genEnumerationFromVal {name,enumerals} = do
   flip traverse_ enumerals $ \enumeral -> case enumeral.members of
     Nothing -> addLine ["      (\"", enumeral.label, "\", P.Nothing) -> P.Just ", name, "'", enumeral.tag]
     Just members -> do
+      addLine ["      (\"", enumeral.label, "\", P.Just _m') -> ", name, "'", enumeral.tag, " P.<$> (", name, "'", enumeral.tag, "'Members"]
       lineList members
         "          P.<$>"
         "          P.<*>"
         (\m -> [" C.getMember _m' \"", m.label, "\""])
+      line "        )"
   line "      _ -> P.Nothing"
   line "    _ -> P.Nothing"
 
@@ -190,7 +192,12 @@ genImports {prefix, imports, importing} = do
   sequence_ importing
 
 mkApiCalls :: Plan -> Array { name :: String, filled :: Boolean }
-mkApiCalls plan = Array.concat [mk plan.hollows false, mk plan.wraps true, mk plan.structs true, mk plan.enumerations true]
+mkApiCalls plan = Array.concat
+  [ mk plan.hollows false
+  , mk (filterFunc plan.wraps) true
+  , mk (filterFunc plan.structs) true
+  , mk (filterFunc plan.enumerations) true
+  ]
   where
     mk :: forall a. Array { name :: String | a } -> Boolean -> Array { name :: String, filled :: Boolean }
     mk xs b = map (\ty -> { name: ty.name, filled: b }) xs
@@ -248,12 +255,15 @@ mkApiParserCalls
       , wrap :: Array { label :: String, name :: String } }
 mkApiParserCalls plan =
   { hollow: map f plan.hollows
-  , struct: map f plan.structs
-  , enumeration: map f plan.enumerations
-  , wrap: map f plan.wraps }
+  , struct: map f $ filterFunc plan.structs
+  , enumeration: map f $ filterFunc plan.enumerations
+  , wrap: map f $ filterFunc plan.wraps }
   where
     f :: forall a. { name :: String, label :: String | a } -> { name :: String, label :: String }
     f ty = { name: ty.name, label: ty.label }
+
+filterFunc :: forall a. Array { func :: Maybe Func | a } -> Array { func :: Maybe Func | a}
+filterFunc = Array.filter (\{func} -> isJust func)
 
 genApiParser
   :: { name :: String

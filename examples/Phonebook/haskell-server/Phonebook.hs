@@ -1,5 +1,15 @@
 -- Pragmas
 {-# OPTIONS_GHC -fno-warn-unused-imports #-}
+{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE TupleSections #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE NoImplicitPrelude #-}
 
 -- Module
 module Phonebook
@@ -7,9 +17,6 @@ module Phonebook
   , phonebook'spec
   , phonebook'Scotty'Post
   , phonebook'Scotty'Get
-  , V0.Phonebook'Service(..)
-  , V0.Phonebook'Thrower(..)
-  , V0.phonebook'pull
   , V0.PersonId(..)
   , V0.Name(..)
   , V0.Phone(..)
@@ -23,13 +30,15 @@ module Phonebook
   , V0.InsertPerson(..)
   , V0.State(..)
   , V0.State'Other'Members(..)
+  , V0.Phonebook'Service(..)
+  , V0.Phonebook'Thrower(..)
+  , V0.phonebook'pull
   ) where
 
 import qualified Prelude as P
 import qualified Fluid.Server as C (RuntimeThrower, Hooks, Request, Response, Major, Minor, Pull)
 import qualified Fluid.Imports as R
 import qualified Fluid.Server.Scotty as Scotty
-
 import qualified Phonebook.V0 as V0
   ( Phonebook'Service(..)
   , Phonebook'Thrower(..)
@@ -84,4 +93,3 @@ phonebook'Scotty'Post pull hooks0 = Scotty.respond pull (phonebook'handlerMap ho
 
 phonebook'Scotty'Get :: (Scotty.ScottyError e, R.MonadIO m) => C.Pull -> Scotty.ScottyT e m ()
 phonebook'Scotty'Get = Scotty.getSpec phonebook'spec
-

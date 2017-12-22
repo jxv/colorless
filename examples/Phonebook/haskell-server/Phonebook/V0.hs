@@ -1,6 +1,5 @@
 -- Pragmas
 {-# OPTIONS_GHC -fno-warn-unused-imports #-}
-{-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
@@ -41,15 +40,10 @@ module Phonebook.V0
 import qualified Prelude as P
 import qualified Control.Monad as P
 import qualified Control.Monad.Except as M
-import qualified Data.Word as I
-import qualified Data.Int as I
 import qualified Data.IORef as IO
 import qualified Data.String as P (IsString)
-
 import qualified Fluid.Imports as R
 import qualified Fluid.Server as C
-
-
 import qualified Fluid.Server.Scotty as Scotty
 
 --------------------------------------------------------
@@ -79,9 +73,9 @@ class P.Monad m => Phonebook'Service meta m where
   phonebook'InsertPerson :: meta -> InsertPerson -> m PersonId
 
 instance Phonebook'Service meta m => Phonebook'Service meta (M.ExceptT C.Response m) where
-  phonebook'LookupPerson _meta = M.lift  P.. phonebook'LookupPerson _meta
-  phonebook'LookupPersonByName _meta = M.lift  P.. phonebook'LookupPersonByName _meta
-  phonebook'InsertPerson _meta = M.lift  P.. phonebook'InsertPerson _meta
+  phonebook'LookupPerson _meta = M.lift P.. phonebook'LookupPerson _meta
+  phonebook'LookupPersonByName _meta = M.lift P.. phonebook'LookupPersonByName _meta
+  phonebook'InsertPerson _meta = M.lift P.. phonebook'InsertPerson _meta
 
 --------------------------------------------------------
 -- Types
@@ -144,7 +138,7 @@ data InsertPerson = InsertPerson
 
 -- Enumeration: State
 data State
-  = State'CA 
+  = State'CA
   | State'NY
   | State'TX
   | State'Other State'Other'Members
@@ -179,7 +173,7 @@ phonebook'handler
   -> xtra
   -> C.Request
   -> m (P.Either C.Response C.Response)
-phonebook'handler _hooksBuilder xtra C.Request{meta,query} = R.catch
+phonebook'handler _hooksBuilder xtra C.Request{C.meta=meta, C.query=query} = R.catch
   (M.runExceptT P.$ do
     meta' <- P.maybe (C.runtimeThrow C.RuntimeError'UnparsableMeta) P.return (C.fromValFromJson meta)
     let _hooks = _hooksBuilder xtra
@@ -208,7 +202,7 @@ phonebook'handler _hooksBuilder xtra C.Request{meta,query} = R.catch
 -- API
 phonebook'ApiCall :: (Phonebook'Service meta m, C.ServiceThrower m, C.RuntimeThrower m) => meta -> C.ApiCall -> m C.Val
 phonebook'ApiCall meta' apiCall' = case C.parseApiCall phonebook'ApiParser apiCall' of
-  P.Nothing -> C.runtimeThrow C.RuntimeError'UnrecognizedCall
+  P.Nothing -> C.runtimeThrow (C.RuntimeError'UnrecognizedCall P.$ C.apiCallName apiCall')
   P.Just x' -> case x' of
     Phonebook'Api'LookupPerson a' -> C.toVal P.<$> phonebook'LookupPerson meta' a'
     Phonebook'Api'LookupPersonByName a' -> C.toVal P.<$> phonebook'LookupPersonByName meta' a'
@@ -217,14 +211,14 @@ phonebook'ApiCall meta' apiCall' = case C.parseApiCall phonebook'ApiParser apiCa
 -- API Parser
 phonebook'ApiParser :: C.ApiParser Phonebook'Api
 phonebook'ApiParser = C.ApiParser
-  { hollow = R.empty
-  , struct = R.fromList
+  { C.hollow = R.empty
+  , C.struct = R.fromList
      [ ("LookupPerson", v Phonebook'Api'LookupPerson)
      , ("LookupPersonByName", v Phonebook'Api'LookupPersonByName)
      , ("InsertPerson", v Phonebook'Api'InsertPerson)
      ]
-  , enumeration = R.empty
-  , wrap = R.empty
+  , C.enumeration = R.empty
+  , C.wrap = R.empty
   }
   where
     v x y = x P.<$> C.fromVal y
@@ -502,7 +496,10 @@ instance R.FromJSON State where
       P.Nothing -> P.mzero
       P.Just _y -> P.return _y
 
+--------------------------------------------------------
+-- Spec
+--------------------------------------------------------
+
 phonebook'spec :: R.Value
 phonebook'spec = v
   where P.Just v = R.decode "{\"fluid\":{\"major\":0,\"minor\":0},\"schema\":{\"PersonId\":\"String\",\"Name\":\"String\",\"Phone\":\"String\",\"Street\":\"String\",\"City\":\"String\",\"State\":[\"CA\",\"NY\",\"TX\",{\"tag\":\"Other\",\"m\":[{\"name\":\"String\"}]}],\"Zipcode\":\"String\",\"Address\":{\"m\":[{\"street\":\"Street\"},{\"city\":\"City\"},{\"zipcode\":\"Zipcode\"},{\"state\":\"State\"}]},\"Person\":{\"m\":[{\"name\":\"Name\"},{\"phone\":\"Phone\"},{\"address\":{\"n\":\"Option\",\"p\":\"Address\"}},{\"friends\":{\"n\":\"List\",\"p\":\"PersonId\"}}]},\"LookupPerson\":{\"m\":[{\"id\":\"PersonId\"}],\"o\":{\"n\":\"Option\",\"p\":\"Person\"}},\"LookupPersonByName\":{\"m\":[{\"name\":\"Name\"}],\"o\":{\"n\":\"List\",\"p\":\"Person\"}},\"InsertPerson\":{\"m\":[{\"person\":\"Person\"}],\"o\":\"PersonId\"}},\"pull\":{\"protocol\":\"http\",\"name\":\"Phonebook\",\"host\":\"127.0.0.1\",\"path\":\"/\",\"port\":8000,\"error\":\"Unit\",\"meta\":\"Unit\"},\"version\":{\"major\":0,\"minor\":0}}"
-
