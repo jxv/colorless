@@ -10,6 +10,35 @@ import Fluid.Gen.Haskell.Common
 import Fluid.Gen.Haskell.Spec
 import Fluid.Gen.Spec (Version)
 
+mkExportValues :: Plan -> Array String
+mkExportValues p =
+  map (\{name} -> p.lowercase <> "'" <> name) p.hollows <>
+  map (\{name} -> p.lowercase <> "'" <> name) (filterFunc p.wraps) <>
+  map (\{name} -> p.lowercase <> "'" <> name) (filterFunc p.structs) <>
+  map (\{name} -> p.lowercase <> "'" <> name) (filterFunc p.enumerations) <>
+
+  map (\{lowercase} -> lowercase <> "'Mk") p.structs <>
+  map (\{lowercase} -> lowercase <> "'Mk") p.wraps <>
+  Array.concatMap
+    (\{lowercase, enumerals} -> map (\{tag} -> lowercase <> "'" <> tag <> "'Mk") enumerals)
+    p.enumerations <>
+
+  Array.concatMap
+    (\{lowercase, members} -> map (\{name} -> lowercase <> "'" <> name) members)
+    p.structs <>
+
+  Array.concatMap
+    (\{lowercase, enumerals} -> flip Array.concatMap enumerals $ \enumeral -> case enumeral.members of
+      Nothing -> []
+      Just members -> map (\{name} -> lowercase <> "'" <> enumeral.tag <> "'" <> name) members)
+    p.enumerations <>
+
+  map (\{name} -> p.lowercase <> "'") p.structs <>
+  map (\{name} -> p.lowercase <> "'") p.wraps <>
+  map (\{name} -> p.lowercase <> "'") p.enumerations <>
+
+  map (\{lowercase} -> lowercase <> "'Match") p.enumerations
+
 genModule :: { name :: String, lowercase :: String, prefix :: String, version :: Version, types :: Array String, values :: Array String } -> Lines Unit
 genModule {name, lowercase, prefix, version, types, values} = do
   line ""
@@ -237,6 +266,7 @@ genHasType {name,label} = do
 gen :: Plan -> Array String -> String
 gen plan addonNames = linesContent do
   let exportTypes = mkExportTypes plan
+  let exportValues = mkExportValues plan
   let addons = Array.catMaybes $ map (createAddon plan) addonNames
   let addonExporting = Array.concatMap (\x -> x.exporting) addons
   let addonImporting = map (\x -> x.importing) addons
@@ -248,7 +278,7 @@ gen plan addonNames = linesContent do
     , prefix: plan.prefix
     , version: plan.version
     , types: exportTypes
-    , values: addonExporting } -- FIXME: addonExporting needs more concat'ed
+    , values: addonExporting <> exportValues }
   genImports { importing: addonImporting }
 
   line ""
