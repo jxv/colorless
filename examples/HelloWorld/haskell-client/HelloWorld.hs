@@ -1,6 +1,5 @@
 -- Pragmas
 {-# OPTIONS_GHC -fno-warn-unused-imports #-}
-{-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
@@ -18,19 +17,16 @@ module HelloWorld
   , helloWorld'pull
   , helloWorld'request
   , Hello(..)
+  , helloWorld'HttpClient'Post
   , helloWorld'Hello
   , hello'Mk
   , hello'
   , hello'target
-  , helloWorld'HttpClient'Post
   ) where
-
 -- Imports
 import qualified Prelude as P
 import qualified Control.Monad as P
 import qualified Data.String as P (IsString)
-import qualified Data.Word as I
-import qualified Data.Int as I
 import qualified Data.IORef as IO
 import qualified Fluid.Client as C
 import qualified Fluid.Client.Expr as C
@@ -128,4 +124,3 @@ instance Ast.ToAst Hello where
     } = Ast.Ast'Struct P.. Ast.Struct P.$ R.fromList
     [ ("target", Ast.toAst helloTarget)
     ]
-

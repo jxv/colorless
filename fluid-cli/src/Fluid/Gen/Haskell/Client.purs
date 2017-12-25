@@ -23,6 +23,10 @@ mkExportValues p =
     (\{lowercase, enumerals} -> map (\{tag} -> lowercase <> "'" <> tag <> "'Mk") enumerals)
     p.enumerations <>
 
+  map (\{lowercase} -> lowercase <> "'") p.structs <>
+  map (\{lowercase} -> lowercase <> "'") p.wraps <>
+  map (\{lowercase} -> lowercase <> "'") p.enumerations <>
+
   Array.concatMap
     (\{lowercase, members} -> map (\{name} -> lowercase <> "'" <> name) members)
     p.structs <>
@@ -32,10 +36,6 @@ mkExportValues p =
       Nothing -> []
       Just members -> map (\{name} -> lowercase <> "'" <> enumeral.tag <> "'" <> name) members)
     p.enumerations <>
-
-  map (\{name} -> p.lowercase <> "'") p.structs <>
-  map (\{name} -> p.lowercase <> "'") p.wraps <>
-  map (\{name} -> p.lowercase <> "'") p.enumerations <>
 
   map (\{lowercase} -> lowercase <> "'Match") p.enumerations
 
@@ -51,7 +51,7 @@ genModule {name, lowercase, prefix, version, types, values} = do
     addLine ["  , ", ty, "(..)"]
   flip traverse_ values $ \val ->
     addLine ["  , ", val]
-  line "   ) where"
+  line "  ) where"
 
 genRequest :: Plan -> Lines Unit
 genRequest p = do
@@ -69,19 +69,19 @@ genService p = do
     Nothing -> pure unit
     Just func -> do
       line ""
-      addLine [p.lowercase, "'", call.name, " :: C.Expr ", func.name, " -> C.Expr ", func.output]
+      addLine [p.lowercase, "'", call.name, " :: C.Expr ", call.name, " -> C.Expr ", func.output]
       addLine [p.lowercase, "'", call.name, " = C.unsafeExpr P.. Ast.Ast'WrapCall P.. Ast.WrapCall \"", call.label, "\" P.. Ast.toAst"]
   flip traverse_ p.structs $ \call -> case call.func of
     Nothing -> pure unit
     Just func -> do
       line ""
-      addLine [p.lowercase, "'", call.name, " :: C.Expr ", func.name, " -> C.Expr ", func.output]
+      addLine [p.lowercase, "'", call.name, " :: C.Expr ", call.name, " -> C.Expr ", func.output]
       addLine [p.lowercase, "'", call.name, " = C.unsafeExpr P.. Ast.Ast'StructCall P.. Ast.StructCall \"", call.label, "\" P.. Ast.toAst"]
   flip traverse_ p.enumerations $ \call -> case call.func of
     Nothing -> pure unit
     Just func -> do
       line ""
-      addLine [p.lowercase, "'", call.name, " :: C.Expr ", func.name, " -> C.Expr ", func.output]
+      addLine [p.lowercase, "'", call.name, " :: C.Expr ", call.name, " -> C.Expr ", func.output]
       addLine [p.lowercase, "'", call.name, " = C.unsafeExpr P.. Ast.Ast'EnumerationCall P.. Ast.EnumerationCall \"", call.label, "\" P.. Ast.toAst"]
 
 genWrapExpr :: Wrap -> Lines Unit
@@ -99,7 +99,7 @@ genWrapToAst {name} = do
 genStructPath :: Struct -> Lines Unit
 genStructPath {name,lowercase,members} = flip traverse_ members $ \member -> do
   line ""
-  addLine [lowercase, "'", member.name, " :: C.Path (", name, " -> ", member.type]
+  addLine [lowercase, "'", member.name, " :: C.Path (", name, " -> ", member.type, ")"]
   addLine [lowercase, "'", member.name, " = C.unsafePath [\"", member.label, "\"]"]
 
 genStructToAst :: Struct -> Lines Unit
@@ -111,8 +111,7 @@ genStructToAst {name,label,members} = do
     "    { "
     "    , "
     (\member -> [lowercaseFirstLetter name, uppercaseFirstLetter member.name])
-  line "    } "
-  line " = Ast.Ast'Struct P.. Ast.Struct P.$ R.fromList"
+  line "    } = Ast.Ast'Struct P.. Ast.Struct P.$ R.fromList"
   lineList members
     "    [ "
     "    , "
@@ -130,12 +129,12 @@ genStructExpr {name,lowercase,members} = do
         map (\member -> " -> " <> member.type) tail <>
         [" -> ", name, ")"]
       addLine $
-        [lowercase, "'Mk = C.unsafeStructExpr [\"", head.type, "\""] <>
+        [lowercase, "'Mk = C.unsafeStructExpr [\"", head.label, "\""] <>
         map (\member -> ", \"" <> member.label <> "\"") tail <>
         ["]"]
   line ""
   addLine [lowercase, "' :: ", name, " -> C.Expr ", name]
-  addLine [lowercase, "' = C.unsafeExpr P.. Ast.toAst "]
+  addLine [lowercase, "' = C.unsafeExpr P.. Ast.toAst"]
 
 genEnumerationPath :: Enumeration -> Lines Unit
 genEnumerationPath {name, lowercase, enumerals} = flip traverse_ enumerals $ \{tag, members} -> case members of
@@ -261,7 +260,7 @@ genHasType :: forall a. { name :: String, label :: String | a } -> Lines Unit
 genHasType {name,label} = do
   line ""
   addLine ["instance C.HasType ", name, " where"]
-  addLine ["  getType _ = ", label]
+  addLine ["  getType _ = \"", label, "\""]
 
 gen :: Plan -> Array String -> String
 gen plan addonNames = linesContent do
