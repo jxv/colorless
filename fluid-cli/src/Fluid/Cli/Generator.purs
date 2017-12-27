@@ -1,10 +1,11 @@
 module Fluid.Cli.Generator where
 
-import Prelude (Unit, bind, map, (==), (<>))
+import Prelude (Unit, bind, map, (==), (<>), (-))
 
 import Control.Monad.Aff (Aff)
 import Control.Monad.Aff.Console (log, CONSOLE)
 import Data.Array as Array
+import Data.Foldable (elem, or, foldr)
 import Data.Tuple (Tuple(..))
 import Data.Either (Either(..))
 import Data.Path.Pathy (FileName(..), extension)
@@ -14,6 +15,7 @@ import Node.FS.Aff (readTextFile, readdir, FS)
 
 import Fluid.Gen.Version (applyVersionsFromSpec, applyVersionsFromSpecs)
 import Fluid.Gen.Spec (parseSpecs, parseSpec)
+import Fluid.Gen.Plan (Plan, PlanError, plan)
 import Fluid.Gen.History (createHistory)
 import Fluid.Gen.Blueprint (mkBlueprint, Blueprint)
 
@@ -63,3 +65,24 @@ generate args generator =
 
 hasJsonExtension :: String -> Boolean
 hasJsonExtension s = extension (FileName s) == "json"
+
+separate :: forall e a. Array (Either e a) -> Either (Array e) (Array a)
+separate xs = foldr go (Right []) xs
+  where
+    go e arrE = case arrE of
+      Left ls -> case e of
+        Left l -> Left (Array.cons l ls)
+        Right _ -> Left ls
+      Right rs -> case e of
+        Left l -> Left (Array.singleton l)
+        Right r -> Right (Array.cons r rs)
+
+planFrom :: Args -> Blueprint -> Either PlanError Plan
+planFrom args bp = let
+  major = bp.version.major
+  prevMajor = major - 1
+  typeVersionMapper typeName =
+    if or [elem typeName bp.diff.addType, elem typeName bp.diff.removeType, elem typeName bp.diff.modifyType]
+      then major
+      else prevMajor
+  in plan args.prefix bp.version bp.spec args.addon typeVersionMapper bp.stringSpec
