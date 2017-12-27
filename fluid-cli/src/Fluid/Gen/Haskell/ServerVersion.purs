@@ -5,7 +5,7 @@ import Data.Foldable (sequence_)
 import Data.Maybe (Maybe(..), isJust)
 import Data.Traversable (traverse_)
 import Fluid.Gen.Haskell.Common
-import Fluid.Gen.Haskell.Spec (Enumeral, Enumeration, Func, Plan, Struct, Wrap, lowercaseFirstLetter, uppercaseFirstLetter, PullPlan)
+import Fluid.Gen.Plan (Enumeral, Enumeration, Func, Plan, Struct, Wrap, lowercaseFirstLetter, uppercaseFirstLetter, PullPlan)
 import Fluid.Gen.Lines (Lines, addLine, line, lines, linesContent, lineList)
 import Fluid.Gen.Spec (Version)
 import Prelude (Unit, discard, flip, map, show, ($), (<>), (/=), (==), pure, unit)

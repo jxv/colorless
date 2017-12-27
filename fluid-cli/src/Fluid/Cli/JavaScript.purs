@@ -12,7 +12,7 @@ import Fluid.Cli.Target (Target)
 import Fluid.Cli.Generator (Generator)
 
 import Fluid.Gen.Blueprint (Blueprint)
-import Fluid.Gen.Haskell.Spec (Plan, PlanError, plan)
+import Fluid.Gen.Plan (Plan, PlanError, plan)
 import Fluid.Gen.JavaScript.Client as Client
 
 generateJavaScriptClient :: Generator

@@ -2,7 +2,7 @@ module Fluid.Gen.Haskell.ServerLatest where
 
 import Data.Foldable
 import Fluid.Gen.Haskell.Common
-import Fluid.Gen.Haskell.Spec
+import Fluid.Gen.Plan
 import Fluid.Gen.Lines
 
 import Data.Array as Array

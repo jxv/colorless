@@ -6,7 +6,7 @@ import Data.Maybe (Maybe(..), isJust)
 import Data.Traversable (traverse_)
 import Fluid.Gen.Spec (Version)
 import Fluid.Gen.Lines
-import Fluid.Gen.Haskell.Spec
+import Fluid.Gen.Plan
 
 enumeralNameTagMember :: String -> String -> String
 enumeralNameTagMember name enumeral = name <> "'" <> enumeral <> "'Members"

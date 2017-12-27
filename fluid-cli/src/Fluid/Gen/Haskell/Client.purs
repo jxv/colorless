@@ -7,7 +7,7 @@ import Data.Foldable (sequence_)
 import Data.Traversable (traverse_)
 import Fluid.Gen.Lines
 import Fluid.Gen.Haskell.Common
-import Fluid.Gen.Haskell.Spec
+import Fluid.Gen.Plan
 import Fluid.Gen.Spec (Version)
 
 mkExportValues :: Plan -> Array String

@@ -10,7 +10,7 @@ import Data.Bifunctor (lmap)
 import Data.Maybe (Maybe(..))
 
 import Fluid.Gen.Blueprint (Blueprint)
-import Fluid.Gen.Haskell.Spec (Plan, PlanError, plan)
+import Fluid.Gen.Plan (Plan, PlanError, plan)
 import Fluid.Gen.Haskell.ServerVersion as Server
 import Fluid.Gen.Haskell.ServerLatest as ServerLatest
 import Fluid.Gen.Haskell.Client as Client

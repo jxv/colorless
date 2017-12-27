@@ -1,4 +1,4 @@
-module Fluid.Gen.Haskell.Spec where
+module Fluid.Gen.Plan where
 
 import Prelude
 

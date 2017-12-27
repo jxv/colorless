@@ -5,7 +5,7 @@ import Data.Maybe (isJust, Maybe(..))
 import Data.Traversable (traverse_)
 
 import Fluid.Gen.Lines
-import Fluid.Gen.Haskell.Spec
+import Fluid.Gen.Plan
 
 gen :: Plan -> Array String -> String
 gen p _ = linesContent do
