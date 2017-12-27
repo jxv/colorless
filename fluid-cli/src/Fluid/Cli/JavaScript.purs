@@ -21,7 +21,7 @@ generateJavaScriptClient args jsonSpec blueprints = lmap (map show) $ do
   case Array.head plans of
     Nothing -> pure []
     Just p -> do
-      let target = { path: args.dest <> "/" <> args.name <> ".hs", contents: Client.gen p args.addon }
+      let target = { path: args.dest <> "/" <> args.name <> ".js", contents: Client.gen p args.addon }
       pure [target]
 
 separate :: forall e a. Array (Either e a) -> Either (Array e) (Array a)

@@ -27,6 +27,7 @@ gen p _ = linesContent do
       line ""
       addLine ["export const ", name, " = (w) => {"]
       addLine ["  assert(w !== undefined, \"`", name, "` missing value\");"]
+      line "  return {"
       addLine ["    n: '", label, "',"]
       addLine ["    w: w,"]
       addLine ["  };"]
@@ -40,6 +41,7 @@ gen p _ = linesContent do
       addLine ["  assert(m !== undefined, \"`", name, "` missing members\");"]
       flip traverse_ members $ \member ->
         addLine ["  assert(m.", member.name, " !== undefined, \"`", name, "` missing member `", member.name, "`\");"]
+      line "  return {"
       addLine ["    n: '", label, "',"]
       addLine ["    m: {"]
       flip traverse_ members $ \member ->
@@ -72,3 +74,4 @@ gen p _ = linesContent do
       addLine ["    e: e,"]
       line "};"
     else pure unit
+  line ""
