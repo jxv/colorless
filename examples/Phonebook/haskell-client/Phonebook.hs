@@ -1,6 +1,5 @@
 -- Pragmas
 {-# OPTIONS_GHC -fno-warn-unused-imports #-}
-{-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
@@ -30,6 +29,7 @@ module Phonebook
   , InsertPerson(..)
   , State(..)
   , State'Other'Members(..)
+  , phonebook'HttpClient'Post
   , phonebook'LookupPerson
   , phonebook'LookupPersonByName
   , phonebook'InsertPerson
@@ -73,15 +73,12 @@ module Phonebook
   , insertPerson'person
   , state'Other'name
   , state'Match
-  , phonebook'HttpClient'Post
   ) where
 
 -- Imports
 import qualified Prelude as P
 import qualified Control.Monad as P
 import qualified Data.String as P (IsString)
-import qualified Data.Word as I
-import qualified Data.Int as I
 import qualified Data.IORef as IO
 import qualified Fluid.Client as C
 import qualified Fluid.Client.Expr as C
@@ -161,7 +158,7 @@ data InsertPerson = InsertPerson
 
 -- Enumeration: State
 data State
-  = State'CA 
+  = State'CA
   | State'NY
   | State'TX
   | State'Other State'Other'Members

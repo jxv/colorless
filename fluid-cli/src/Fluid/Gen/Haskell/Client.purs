@@ -52,6 +52,7 @@ genModule {name, lowercase, prefix, version, types, values} = do
   flip traverse_ values $ \val ->
     addLine ["  , ", val]
   line "  ) where"
+  line ""
 
 genRequest :: Plan -> Lines Unit
 genRequest p = do
@@ -89,6 +90,9 @@ genWrapExpr w = do
   line ""
   addLine [w.lowercase, "'Mk :: C.Expr (", w.type, " -> ", w.name, ")"]
   addLine [w.lowercase, "'Mk = C.unsafeWrapExpr"]
+  line ""
+  addLine [w.lowercase, "' :: ", w.name, " -> C.Expr ", w.name, ""]
+  addLine [w.lowercase, "' = C.unsafeExpr P.. Ast.toAst"]
 
 genWrapToAst :: Wrap -> Lines Unit
 genWrapToAst {name} = do
@@ -103,7 +107,7 @@ genStructPath {name,lowercase,members} = flip traverse_ members $ \member -> do
   addLine [lowercase, "'", member.name, " = C.unsafePath [\"", member.label, "\"]"]
 
 genStructToAst :: Struct -> Lines Unit
-genStructToAst {name,label,members} = do
+genStructToAst {name,lowercase,label,members} = do
   line ""
   addLine ["instance Ast.ToAst ", name, " where"]
   addLine ["  toAst ", name]
@@ -152,12 +156,13 @@ genEnumerationMatch e = do
   addLine ["  => C.Expr ", e.name]
   flip traverse_ e.enumerals $ \enumeral -> do
     case enumeral.members of
-      Nothing -> addLine ["  -> C.Exprt a -- ", enumeral.tag]
+      Nothing -> addLine ["  -> C.Expr a -- ", enumeral.tag]
       Just _ -> addLine ["  -> (C.Symbol, C.Expr ", e.name, "'", enumeral.tag, "'Members -> C.Expr a) -- | ", enumeral.tag]
   line "  -> C.Expr a"
-  addLine [e.lowercase, "'Match _enumeral"]
-  addLine $ map (\{tag} -> " _" <> tag) e.enumerals
-  line " = C.unsafeExpr P.$ Ast.Ast'Match P.$ Ast.Match (Ast.toAst _enumeral)"
+  addLine $
+    [e.lowercase, "'Match _enumeral"] <>
+    map (\{tag} -> " _" <> tag) e.enumerals <>
+    [" = C.unsafeExpr P.$ Ast.Ast'Match P.$ Ast.Match (Ast.toAst _enumeral)"]
   lineList e.enumerals
     "  [ "
     "  , "
@@ -165,9 +170,10 @@ genEnumerationMatch e = do
         Nothing -> ["Ast.MatchCase'Tag \"", label, "\" (Ast.toAst _", tag, ")"]
         Just members' -> let
           sym = "(P.fst _" <> tag <> ")"
-          ref = "(C.unsafeExpr P.$ Ast.toAst'Ref P.$ Ast.Ref " <> sym <> ")"
+          ref = "(C.unsafeExpr P.$ Ast.Ast'Ref P.$ Ast.Ref " <> sym <> ")"
           in ["Ast.MatchCase'Members \"", label, "\" ", sym, " (Ast.toAst P.$ P.snd _", tag, " ", ref, ")"])
-  line "  ] "
+  line "  ]"
+  line ""
 
 genEnumerationToAst :: Enumeration -> Lines Unit
 genEnumerationToAst e = do
@@ -182,12 +188,12 @@ genEnumerationToAst e = do
       lineList members
         "      { "
         "      , "
-        (\member -> [e.name, "'", enumeral.tag, uppercaseFirstLetter member.name])
+        (\member -> [e.lowercase, "'", enumeral.tag, uppercaseFirstLetter member.name])
       addLine ["      } -> Ast.Ast'Enumeral P.$ Ast.Enumeral \"", enumeral.label, "\" P.$ P.Just P.$ R.fromList" ]
       lineList members
         "      [ "
         "      , "
-        (\member -> ["(\"", member.label, "\", Ast.toAst ", e.name, "'", enumeral.tag, uppercaseFirstLetter member.name, ")"])
+        (\member -> ["(\"", member.label, "\", Ast.toAst ", e.lowercase, "'", enumeral.tag, uppercaseFirstLetter member.name, ")"])
       line "      ]"
 
 
@@ -196,19 +202,20 @@ genEnumeralExpr {name,lowercase,enumerals} = do
   line ""
   flip traverse_ enumerals $ \enumeral -> case bind enumeral.members Array.uncons of
     Nothing -> do
-      addLine [lowercase, "'", enumeral.tag, "'Mk :: C.Expr '", name]
+      addLine [lowercase, "'", enumeral.tag, "'Mk :: C.Expr ", name]
       addLine [lowercase, "'", enumeral.tag, "'Mk = C.unsafeExpr P.. Ast.toAst P.$ ", name, "'", enumeral.tag]
+      line ""
     Just {head,tail} -> do
       let members = [head] <> tail
       addLine $
         [lowercase, "'", enumeral.tag, "'Mk :: C.Expr (", head.type] <>
         map (\member -> " -> " <> member.type) tail <>
-        [")"]
+        [" -> ", name, ")"]
       addLine $
         [lowercase, "'", enumeral.tag, "'Mk = C.unsafeEnumeralExpr \"", enumeral.label, "\" [\"", head.label, "\""] <>
         map (\member -> ", \"" <> member.label <> "\"") tail <>
         ["]"]
-  line ""
+      line ""
   addLine [lowercase, "' :: ", name, " -> C.Expr ", name]
   addLine [lowercase, "' = C.unsafeExpr P.. Ast.toAst"]
 
@@ -336,6 +343,7 @@ gen plan addonNames = linesContent do
     genHasType ty
     genWrapToVal ty
     genWrapFromVal ty
+    genToExpr ty
     genToJson ty
     genFromJson ty
     genWrapToAst ty

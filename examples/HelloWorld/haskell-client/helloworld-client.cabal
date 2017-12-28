@@ -1,4 +1,4 @@
--- This file has been generated from package.yaml by hpack version 0.17.0.
+-- This file has been generated from package.yaml by hpack version 0.17.1.
 --
 -- see: https://github.com/sol/hpack
 
@@ -20,8 +20,8 @@ executable helloworld-client
       aeson
     , base >= 4.9 && < 5
     , bytestring
-    , fluid
-    , fluid-http-client
+    , fluid-idl
+    , fluid-idl-http-client
     , mtl
     , text
     , http-client-tls
