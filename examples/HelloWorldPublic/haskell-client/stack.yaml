@@ -2,7 +2,7 @@ resolver: lts-9.6
 packages:
 - '.'
 extra-deps:
-- 'fluid-idl-0.0.1'
+- 'fluid-idl-0.0.5'
 - 'fluid-idl-http-client-0.0.0'
 flags: {}
 extra-package-dbs: []
