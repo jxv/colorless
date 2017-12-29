@@ -117,7 +117,6 @@ scottyAddon head plans =
       line ""
       addLine [head.lowercase, "'Scotty'Get :: (Scotty.ScottyError e, R.MonadIO m) => C.Pull -> Scotty.ScottyT e m ()"]
       addLine [head.lowercase, "'Scotty'Get = Scotty.getSpec ", head.lowercase, "'spec"]
-      line ""
   }
 
 createAddon :: {head :: Plan, all :: Array Plan} -> String -> Maybe Addon
@@ -153,3 +152,4 @@ gen plans addons = case Array.head plans of
     genHandlerMap p.lowercase plans
     genPublicSpec { lowercase: p.lowercase, plans }
     sequence_ addonGen
+    line ""
