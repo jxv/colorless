@@ -39,7 +39,7 @@ helloWorld'pull = C.Pull "http" "127.0.0.1" "/" 8080
 -- Struct: Hello
 data Hello = Hello
   { helloTarget :: R.Text
-  } deriving (P.Show, P.Eq)
+  }
 
 --------------------------------------------------------
 -- API

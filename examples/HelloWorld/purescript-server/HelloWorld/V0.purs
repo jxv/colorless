@@ -1,4 +1,3 @@
-
 -- Module
 module HelloWorld.V0
   ( helloWorld'version
@@ -35,12 +34,12 @@ helloWorld'pull = C.Pull "http" "127.0.0.1" "/" 8080
 --------------------------------------------------------
 
 -- Thrower
-class C.ServiceThrower m => HelloWorld'Thrower m where
+class C.ServiceThrower m <= HelloWorld'Thrower m where
   helloWorld'throw :: () -> m a
   helloWorld'throw = C.serviceThrow P.. R.toJSON P.. C.toVal
 
 -- Service
-class P.Monad m => HelloWorld'Service meta m where
+class P.Monad m <= HelloWorld'Service meta m where
   helloWorld'Hello :: meta -> Hello -> m R.Text
 
 instance HelloWorld'Service meta m => HelloWorld'Service meta (M.ExceptT C.Response m) where
@@ -53,7 +52,7 @@ instance HelloWorld'Service meta m => HelloWorld'Service meta (M.ExceptT C.Respo
 -- Struct: Hello
 data Hello = Hello
   { helloTarget :: R.Text
-  } deriving (P.Show, P.Eq)
+  }
 
 --------------------------------------------------------
 -- Add-ons
@@ -119,7 +118,6 @@ helloWorld'ApiParser = C.ApiParser
 -- Api
 data HelloWorld'Api
   = HelloWorld'Api'Hello Hello
-  deriving (P.Show, P.Eq)
 
 --------------------------------------------------------
 -- Type Instances

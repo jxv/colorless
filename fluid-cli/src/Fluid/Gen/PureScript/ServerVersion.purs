@@ -62,13 +62,12 @@ genApi {name,calls} = do
     "  = "
     "  | "
     (\call -> [name, "'Api'", call.name, if call.filled then " " <> call.name else ""])
-  line "  deriving (P.Show, P.Eq)"
 
 genThrower :: { name :: String, lowercase :: String, error :: String } -> Lines Unit
 genThrower {name, lowercase, error} = do
   line ""
   line "-- Thrower"
-  addLine ["class C.ServiceThrower m => ", name, "'Thrower m where"]
+  addLine ["class C.ServiceThrower m <= ", name, "'Thrower m where"]
   addLine ["  ", lowercase, "'throw :: ", error, " -> m a"]
   addLine ["  ", lowercase, "'throw = C.serviceThrow P.. R.toJSON P.. C.toVal"]
 
@@ -90,7 +89,7 @@ genService :: { name :: String, lowercase :: String, calls :: Array { lowercase 
 genService {name, lowercase, calls} = do
   line ""
   line "-- Service"
-  addLine ["class P.Monad m => ", name, "'Service meta m where"]
+  addLine ["class P.Monad m <= ", name, "'Service meta m where"]
   flip traverse_ calls $ \call ->
     addLine ["  ", lowercase, "'", call.name, " :: meta ->", if call.hollow then  " " else " " <> call.name <> " -> ", "m ", call.output]
   line ""
@@ -228,7 +227,6 @@ genHandlerRequest {name,lowercase,meta} = do
 
 genModule :: { name :: String, lowercase :: String, prefix :: String, version :: Version, types :: Array String, values :: Array String } -> Lines Unit
 genModule {name, lowercase, prefix, version, types, values} = do
-  line ""
   line "-- Module"
   addLine ["module ", prefix , ".V", show version.major]
   addLine ["  ( ", lowercase, "'version"]

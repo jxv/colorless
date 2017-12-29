@@ -62,7 +62,6 @@ genWrap {name, type: type', label, instances: {text, number}} = do
   line ""
   addLine ["-- Wrap: ", name]
   addLine ["newtype ", name, " = ", name, " ", type']
-  addLine ["  deriving (P.Eq, P.Ord, ", if text then "P.IsString, R.ToText, " else "", if number then "P.Num, " else "", " P.Show)"]
 
 genWrapToVal :: Wrap -> Lines Unit
 genWrapToVal {name} = do
@@ -85,7 +84,7 @@ genStruct {name, label, members} = do
     "  { "
     "  , "
     (\m -> [lowercaseFirstLetter name <> uppercaseFirstLetter m.name, " :: ", m.type])
-  line "  } deriving (P.Show, P.Eq)"
+  line "  }"
 
 genStructToVal :: Struct -> Lines Unit
 genStructToVal {name, members} = do
@@ -121,7 +120,6 @@ genEnumeration {name, enumerals} = do
   addLine ["-- Enumeration: ", name]
   addLine ["data ", name]
   lineList enumerals "  = " "  | " (\e -> [name, "'", e.tag, if isJust e.members then " " <> name <> "'" <> e.tag <> "'Members" else ""])
-  addLine ["  deriving (P.Show, P.Eq)"]
   flip traverse_ enumerals $ \enumeral ->
     case enumeral.members of
       Nothing -> pure unit
@@ -132,7 +130,7 @@ genEnumeration {name, enumerals} = do
           "  { "
           "  , "
           (\m -> [lowercaseFirstLetter(name <> "'" <> enumeral.tag <> uppercaseFirstLetter m.name), " :: ", m.type])
-        line "  } deriving (P.Show, P.Eq)"
+        line "  }"
 
 genEnumerationToVal :: Enumeration -> Lines Unit
 genEnumerationToVal {name,enumerals} = do
