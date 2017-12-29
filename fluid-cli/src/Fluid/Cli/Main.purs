@@ -8,6 +8,7 @@ import Node.FS.Aff (FS)
 
 import Fluid.Cli.Args
 import Fluid.Cli.Haskell (generateHaskellServer, generateHaskellClient)
+import Fluid.Cli.PureScript (generatePureScriptServer, generatePureScriptClient)
 import Fluid.Cli.JavaScript (generateJavaScriptClient)
 import Fluid.Cli.Generator (generate)
 
@@ -18,5 +19,9 @@ main = launchAff do
     then generate args generateHaskellServer else pure unit
   if args.lang == "haskell" && args.side == "client"
     then generate args generateHaskellClient else pure unit
+  if args.lang == "purescript" && args.side == "server"
+    then generate args generatePureScriptServer else pure unit
+  if args.lang == "purescript" && args.side == "client"
+    then generate args generatePureScriptClient else pure unit
   if args.lang == "javascript" && args.side == "client"
     then generate args generateJavaScriptClient else pure unit

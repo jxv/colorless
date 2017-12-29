@@ -29,13 +29,7 @@
 * [Haskell](https://github.com/jxv/fluid-haskell)
 * Node
 * Python
+* [PureScript](https://github.com/jxv/fluid-purescript)
 * Ruby
 * Scala
 * Swift
-
-
-### In development
-
-```shell
-pulp -w build --to bin/fluid.js
-```
