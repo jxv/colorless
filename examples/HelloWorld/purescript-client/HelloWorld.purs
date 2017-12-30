@@ -38,7 +38,7 @@ helloWorld'pull = C.Pull "http" "127.0.0.1" "/" 8080
 
 -- Struct: Hello
 data Hello = Hello
-  { helloTarget :: R.Text
+  { target :: R.Text
   }
 
 --------------------------------------------------------
@@ -73,9 +73,9 @@ instance C.HasType Hello where
 
 instance C.ToVal Hello where
   toVal Hello
-    { helloTarget
+    { target
     } = C.Val'ApiVal P.$ C.ApiVal'Struct P.$ C.Struct P.$ R.fromList
-    [ ("target", C.toVal helloTarget)
+    [ ("target", C.toVal target)
     ]
 
 instance C.FromVal Hello where

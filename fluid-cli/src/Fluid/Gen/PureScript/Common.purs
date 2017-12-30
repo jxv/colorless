@@ -83,7 +83,7 @@ genStruct {name, label, members} = do
   lineList members
     "  { "
     "  , "
-    (\m -> [lowercaseFirstLetter name <> uppercaseFirstLetter m.name, " :: ", m.type])
+    (\m -> [m.name, " :: ", m.type])
   line "  }"
 
 genStructToVal :: Struct -> Lines Unit
@@ -94,12 +94,12 @@ genStructToVal {name, members} = do
   lineList members
     "    { "
     "    , "
-    (\m -> [memberName name m.name])
+    (\m -> [m.name])
   line "    } = C.Val'ApiVal P.$ C.ApiVal'Struct P.$ C.Struct P.$ R.fromList"
   lineList members
     "    [ "
     "    , "
-    (\m -> ["(\"", m.label, "\", C.toVal ", memberName name m.name, ")"])
+    (\m -> ["(\"", m.label, "\", C.toVal ", m.name, ")"])
   line "    ]"
   line ""
 
