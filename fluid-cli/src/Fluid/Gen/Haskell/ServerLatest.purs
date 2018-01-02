@@ -39,7 +39,7 @@ genImporting {importing} = do
 
 genVersionImports:: { plan :: Plan, values :: Array String } -> Lines Unit
 genVersionImports {plan: p, values} = do
-  addLine ["import qualified ", p.prefix, ".V", show p.version.major, " as V", show p.version.major]
+  addLine ["import qualified ", p.prefix, ".Major", show p.version.major, " as V", show p.version.major]
   addLine ["  ( ", p.name, "'Service(..)"]
   addLine ["  , ", p.name, "'Thrower(..)"]
   addLine ["  , ", p.lowercase, "'handler"]

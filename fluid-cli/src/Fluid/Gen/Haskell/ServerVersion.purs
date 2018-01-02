@@ -38,7 +38,7 @@ genImports {prefix, imports, importing} = do
     , "import qualified Fluid.Imports as R"
     , "import qualified Fluid.Server as C" ]
   traverse_ addLine $ map
-    (\{name, major} -> ["import ", prefix, ".V", show major, " (", name, "(..))"])
+    (\{name, major} -> ["import ", prefix, ".Major", show major, " (", name, "(..))"])
     imports
   sequence_ importing
 

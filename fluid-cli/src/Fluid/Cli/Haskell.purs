@@ -22,12 +22,12 @@ generateHaskellServer :: Generator
 generateHaskellServer args jsonSpec blueprints = lmap (map show) $ do
   planTargets <- separate $ map
     (\bp -> map
-      (\p -> Tuple p {path: buildPath ("V" <> show bp.version.major <> ".hs"), contents: Server.gen p args.addon})
+      (\p -> Tuple p {path: buildPath ("Major" <> show bp.version.major <> ".hs"), contents: Server.gen p args.addon})
       (planFrom args bp))
     blueprints
   let plans = map fst planTargets  :: Array Plan
   let versionTargets = map snd planTargets :: Array Target
-  let latestTarget = { path: args.dest <> "/" <> args.name <> ".hs", contents: ServerLatest.gen plans args.addon }
+  let latestTarget = { path: buildPath "Server.hs", contents: ServerLatest.gen plans args.addon }
   pure $ Array.cons latestTarget versionTargets
   where
     buildPath path = args.dest <> "/" <> args.name <> "/" <> path
@@ -38,5 +38,5 @@ generateHaskellClient args jsonSpec blueprints = lmap (map show) $ do
   case Array.head plans of
     Nothing -> pure []
     Just p -> do
-      let target = { path: args.dest <> "/" <> args.name <> ".hs", contents: Client.gen p args.addon }
+      let target = { path: args.dest <> "/" <> args.name <> "/Client.hs", contents: Client.gen p args.addon }
       pure [target]
