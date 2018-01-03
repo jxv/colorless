@@ -7,14 +7,14 @@ import Fluid.Gen.Conversion
 conversion :: Conversion
 conversion =
   { unit: "()"
-  , bool: "P.Bool"
-  , int: "P.Int"
-  , float: "P.Double"
-  , char: "P.Char"
-  , string: "R.Text"
-  , list: \x -> "[" <> x <> "]"
-  , option: \x -> "(P.Maybe " <> x <> ")"
-  , either: \x y -> "(P.Either (" <> x <> ") (" <> y <> "))"
+  , bool: "bool"
+  , int: "int"
+  , float: "double"
+  , char: "char"
+  , string: "str"
+  , list: \x -> "std::collections::LinkedList<" <> x <> ">"
+  , option: \x -> "std::Option<" <> x <> ">"
+  , either: \x y -> "std::Result<" <> x <> "," <> y <> ">"
   , label: \x -> if x == "tag" then "_tag" else x
-  , version: \major x -> "V" <> show major <> "." <> x
+  , version: \major x -> "major" <> show major <> "::" <> x
   }
