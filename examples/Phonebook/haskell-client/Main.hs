@@ -5,7 +5,7 @@ import Network.HTTP.Client.TLS
 import Data.Aeson (encode, ToJSON(..))
 import Fluid.Client
 
-import Phonebook
+import Phonebook.Client
 
 main :: IO ()
 main = do

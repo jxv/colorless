@@ -12,7 +12,7 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 
 -- Module
-module HelloWorld
+module HelloWorld.Client
   ( helloWorld'version
   , helloWorld'pull
   , helloWorld'request

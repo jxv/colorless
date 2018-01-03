@@ -228,7 +228,7 @@ genHandlerRequest {name,lowercase,meta} = do
 genModule :: { name :: String, lowercase :: String, prefix :: String, version :: Version, types :: Array String, values :: Array String } -> Lines Unit
 genModule {name, lowercase, prefix, version, types, values} = do
   line "-- Module"
-  addLine ["module ", prefix , ".Major", show version.major]
+  addLine ["module ", prefix, ".Major", show version.major]
   addLine ["  ( ", lowercase, "'version"]
   addLine ["  , ", lowercase, "'pull"]
   addLine ["  , ", lowercase, "'handler"]

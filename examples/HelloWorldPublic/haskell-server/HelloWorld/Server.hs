@@ -12,7 +12,7 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 
 -- Module
-module HelloWorld
+module HelloWorld.Server
   ( helloWorld'handlerMap
   , helloWorld'spec
   , helloWorld'Scotty'Post
@@ -27,7 +27,7 @@ import qualified Prelude as P
 import qualified Fluid.Server as C (RuntimeThrower, Hooks, Request, Response, Major, Minor, Pull)
 import qualified Fluid.Imports as R
 import qualified Fluid.Server.Scotty as Scotty
-import qualified HelloWorld.V0 as V0
+import qualified HelloWorld.Major0 as V0
   ( HelloWorld'Service(..)
   , HelloWorld'Thrower(..)
   , helloWorld'handler

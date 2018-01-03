@@ -12,7 +12,7 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 
 -- Module
-module HelloWorld.V0
+module HelloWorld.Major0
   ( helloWorld'version
   , helloWorld'pull
   , helloWorld'handler

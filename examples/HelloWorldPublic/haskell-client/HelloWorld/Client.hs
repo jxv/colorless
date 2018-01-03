@@ -1,10 +1,23 @@
+-- Pragmas
+{-# OPTIONS_GHC -fno-warn-unused-imports #-}
+{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE TupleSections #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE NoImplicitPrelude #-}
 
 -- Module
-module HelloWorld
+module HelloWorld.Client
   ( helloWorld'version
   , helloWorld'pull
   , helloWorld'request
   , Hello(..)
+  , helloWorld'HttpClient'Post
   , helloWorld'Hello
   , hello'Mk
   , hello'
@@ -20,6 +33,7 @@ import qualified Fluid.Client as C
 import qualified Fluid.Client.Expr as C
 import qualified Fluid.Ast as Ast
 import qualified Fluid.Imports as R
+import qualified Fluid.Client.HttpClient as HttpClient
 
 --------------------------------------------------------
 -- Configs
@@ -38,8 +52,8 @@ helloWorld'pull = C.Pull "http" "127.0.0.1" "/" 8080
 
 -- Struct: Hello
 data Hello = Hello
-  { target :: R.Text
-  }
+  { helloTarget :: R.Text
+  } deriving (P.Show, P.Eq)
 
 --------------------------------------------------------
 -- API
@@ -64,6 +78,15 @@ hello'target = C.unsafePath ["target"]
 -- Add-ons
 --------------------------------------------------------
 
+helloWorld'HttpClient'Post
+  :: (C.HasType a, Ast.ToAst a, C.FromVal a)
+  => HttpClient.Manager
+  -> C.Pull
+  -> HttpClient.RequestHeaders
+  -> C.Request () a
+  -> P.IO (HttpClient.HttpClientResponse R.ByteString, P.Maybe (C.Response () a))
+helloWorld'HttpClient'Post = HttpClient.sendRequest
+
 --------------------------------------------------------
 -- Type Instances
 --------------------------------------------------------
@@ -73,9 +96,9 @@ instance C.HasType Hello where
 
 instance C.ToVal Hello where
   toVal Hello
-    { target
+    { helloTarget
     } = C.Val'ApiVal P.$ C.ApiVal'Struct P.$ C.Struct P.$ R.fromList
-    [ ("target", C.toVal target)
+    [ ("target", C.toVal helloTarget)
     ]
 
 instance C.FromVal Hello where

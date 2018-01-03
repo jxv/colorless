@@ -12,7 +12,7 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 
 -- Module
-module Phonebook
+module Phonebook.Server
   ( phonebook'handlerMap
   , phonebook'spec
   , phonebook'Scotty'Post
@@ -39,7 +39,7 @@ import qualified Prelude as P
 import qualified Fluid.Server as C (RuntimeThrower, Hooks, Request, Response, Major, Minor, Pull)
 import qualified Fluid.Imports as R
 import qualified Fluid.Server.Scotty as Scotty
-import qualified Phonebook.V0 as V0
+import qualified Phonebook.Major0 as V0
   ( Phonebook'Service(..)
   , Phonebook'Thrower(..)
   , phonebook'handler

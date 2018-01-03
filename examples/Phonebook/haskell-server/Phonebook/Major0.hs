@@ -12,10 +12,13 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 
 -- Module
-module Phonebook
+module Phonebook.Major0
   ( phonebook'version
   , phonebook'pull
-  , phonebook'request
+  , phonebook'handler
+  , phonebook'spec
+  , Phonebook'Thrower(..)
+  , Phonebook'Service(..)
   , PersonId(..)
   , Name(..)
   , Phone(..)
@@ -29,62 +32,19 @@ module Phonebook
   , InsertPerson(..)
   , State(..)
   , State'Other'Members(..)
-  , phonebook'HttpClient'Post
-  , phonebook'LookupPerson
-  , phonebook'LookupPersonByName
-  , phonebook'InsertPerson
-  , address'Mk
-  , person'Mk
-  , lookupPerson'Mk
-  , lookupPersonByName'Mk
-  , insertPerson'Mk
-  , personId'Mk
-  , name'Mk
-  , phone'Mk
-  , street'Mk
-  , city'Mk
-  , zipcode'Mk
-  , state'CA'Mk
-  , state'NY'Mk
-  , state'TX'Mk
-  , state'Other'Mk
-  , address'
-  , person'
-  , lookupPerson'
-  , lookupPersonByName'
-  , insertPerson'
-  , personId'
-  , name'
-  , phone'
-  , street'
-  , city'
-  , zipcode'
-  , state'
-  , address'street
-  , address'city
-  , address'zipcode
-  , address'state
-  , person'name
-  , person'phone
-  , person'address
-  , person'friends
-  , lookupPerson'id
-  , lookupPersonByName'name
-  , insertPerson'person
-  , state'Other'name
-  , state'Match
+  , phonebook'Scotty'Post
+  , phonebook'Scotty'Get
   ) where
 
 -- Imports
 import qualified Prelude as P
 import qualified Control.Monad as P
-import qualified Data.String as P (IsString)
+import qualified Control.Monad.Except as M
 import qualified Data.IORef as IO
-import qualified Fluid.Client as C
-import qualified Fluid.Client.Expr as C
-import qualified Fluid.Ast as Ast
+import qualified Data.String as P (IsString)
 import qualified Fluid.Imports as R
-import qualified Fluid.Client.HttpClient as HttpClient
+import qualified Fluid.Server as C
+import qualified Fluid.Server.Scotty as Scotty
 
 --------------------------------------------------------
 -- Configs
@@ -96,6 +56,26 @@ phonebook'version = C.Version 0 0
 
 phonebook'pull :: C.Pull
 phonebook'pull = C.Pull "http" "127.0.0.1" "/" 8000
+
+--------------------------------------------------------
+-- Interfaces
+--------------------------------------------------------
+
+-- Thrower
+class C.ServiceThrower m => Phonebook'Thrower m where
+  phonebook'throw :: () -> m a
+  phonebook'throw = C.serviceThrow P.. R.toJSON P.. C.toVal
+
+-- Service
+class P.Monad m => Phonebook'Service meta m where
+  phonebook'LookupPerson :: meta -> LookupPerson -> m (P.Maybe Person)
+  phonebook'LookupPersonByName :: meta -> LookupPersonByName -> m [Person]
+  phonebook'InsertPerson :: meta -> InsertPerson -> m PersonId
+
+instance Phonebook'Service meta m => Phonebook'Service meta (M.ExceptT C.Response m) where
+  phonebook'LookupPerson _meta = M.lift P.. phonebook'LookupPerson _meta
+  phonebook'LookupPersonByName _meta = M.lift P.. phonebook'LookupPersonByName _meta
+  phonebook'InsertPerson _meta = M.lift P.. phonebook'InsertPerson _meta
 
 --------------------------------------------------------
 -- Types
@@ -169,165 +149,96 @@ data State'Other'Members = State'Other'Members
   } deriving (P.Show, P.Eq)
 
 --------------------------------------------------------
--- API
---------------------------------------------------------
-
-phonebook'request :: (Ast.ToAst a, C.HasType a, R.FromJSON a) => () -> C.Expr a -> C.Request () a
-phonebook'request _meta _query = C.Request (C.Version 0 0) phonebook'version _meta _query
-
-phonebook'LookupPerson :: C.Expr LookupPerson -> C.Expr (P.Maybe Person)
-phonebook'LookupPerson = C.unsafeExpr P.. Ast.Ast'StructCall P.. Ast.StructCall "LookupPerson" P.. Ast.toAst
-
-phonebook'LookupPersonByName :: C.Expr LookupPersonByName -> C.Expr [Person]
-phonebook'LookupPersonByName = C.unsafeExpr P.. Ast.Ast'StructCall P.. Ast.StructCall "LookupPersonByName" P.. Ast.toAst
-
-phonebook'InsertPerson :: C.Expr InsertPerson -> C.Expr PersonId
-phonebook'InsertPerson = C.unsafeExpr P.. Ast.Ast'StructCall P.. Ast.StructCall "InsertPerson" P.. Ast.toAst
-
-personId'Mk :: C.Expr (R.Text -> PersonId)
-personId'Mk = C.unsafeWrapExpr
-
-personId' :: PersonId -> C.Expr PersonId
-personId' = C.unsafeExpr P.. Ast.toAst
-
-name'Mk :: C.Expr (R.Text -> Name)
-name'Mk = C.unsafeWrapExpr
-
-name' :: Name -> C.Expr Name
-name' = C.unsafeExpr P.. Ast.toAst
-
-phone'Mk :: C.Expr (R.Text -> Phone)
-phone'Mk = C.unsafeWrapExpr
-
-phone' :: Phone -> C.Expr Phone
-phone' = C.unsafeExpr P.. Ast.toAst
-
-street'Mk :: C.Expr (R.Text -> Street)
-street'Mk = C.unsafeWrapExpr
-
-street' :: Street -> C.Expr Street
-street' = C.unsafeExpr P.. Ast.toAst
-
-city'Mk :: C.Expr (R.Text -> City)
-city'Mk = C.unsafeWrapExpr
-
-city' :: City -> C.Expr City
-city' = C.unsafeExpr P.. Ast.toAst
-
-zipcode'Mk :: C.Expr (R.Text -> Zipcode)
-zipcode'Mk = C.unsafeWrapExpr
-
-zipcode' :: Zipcode -> C.Expr Zipcode
-zipcode' = C.unsafeExpr P.. Ast.toAst
-
-address'Mk :: C.Expr (Street -> City -> Zipcode -> State -> Address)
-address'Mk = C.unsafeStructExpr ["street", "city", "zipcode", "state"]
-
-address' :: Address -> C.Expr Address
-address' = C.unsafeExpr P.. Ast.toAst
-
-address'street :: C.Path (Address -> Street)
-address'street = C.unsafePath ["street"]
-
-address'city :: C.Path (Address -> City)
-address'city = C.unsafePath ["city"]
-
-address'zipcode :: C.Path (Address -> Zipcode)
-address'zipcode = C.unsafePath ["zipcode"]
-
-address'state :: C.Path (Address -> State)
-address'state = C.unsafePath ["state"]
-
-person'Mk :: C.Expr (Name -> Phone -> (P.Maybe Address) -> [PersonId] -> Person)
-person'Mk = C.unsafeStructExpr ["name", "phone", "address", "friends"]
-
-person' :: Person -> C.Expr Person
-person' = C.unsafeExpr P.. Ast.toAst
-
-person'name :: C.Path (Person -> Name)
-person'name = C.unsafePath ["name"]
-
-person'phone :: C.Path (Person -> Phone)
-person'phone = C.unsafePath ["phone"]
-
-person'address :: C.Path (Person -> (P.Maybe Address))
-person'address = C.unsafePath ["address"]
-
-person'friends :: C.Path (Person -> [PersonId])
-person'friends = C.unsafePath ["friends"]
-
-lookupPerson'Mk :: C.Expr (PersonId -> LookupPerson)
-lookupPerson'Mk = C.unsafeStructExpr ["id"]
-
-lookupPerson' :: LookupPerson -> C.Expr LookupPerson
-lookupPerson' = C.unsafeExpr P.. Ast.toAst
-
-lookupPerson'id :: C.Path (LookupPerson -> PersonId)
-lookupPerson'id = C.unsafePath ["id"]
-
-lookupPersonByName'Mk :: C.Expr (Name -> LookupPersonByName)
-lookupPersonByName'Mk = C.unsafeStructExpr ["name"]
-
-lookupPersonByName' :: LookupPersonByName -> C.Expr LookupPersonByName
-lookupPersonByName' = C.unsafeExpr P.. Ast.toAst
-
-lookupPersonByName'name :: C.Path (LookupPersonByName -> Name)
-lookupPersonByName'name = C.unsafePath ["name"]
-
-insertPerson'Mk :: C.Expr (Person -> InsertPerson)
-insertPerson'Mk = C.unsafeStructExpr ["person"]
-
-insertPerson' :: InsertPerson -> C.Expr InsertPerson
-insertPerson' = C.unsafeExpr P.. Ast.toAst
-
-insertPerson'person :: C.Path (InsertPerson -> Person)
-insertPerson'person = C.unsafePath ["person"]
-
-state'CA'Mk :: C.Expr State
-state'CA'Mk = C.unsafeExpr P.. Ast.toAst P.$ State'CA
-
-state'NY'Mk :: C.Expr State
-state'NY'Mk = C.unsafeExpr P.. Ast.toAst P.$ State'NY
-
-state'TX'Mk :: C.Expr State
-state'TX'Mk = C.unsafeExpr P.. Ast.toAst P.$ State'TX
-
-state'Other'Mk :: C.Expr (R.Text -> State)
-state'Other'Mk = C.unsafeEnumeralExpr "Other" ["name"]
-
-state' :: State -> C.Expr State
-state' = C.unsafeExpr P.. Ast.toAst
-
-state'Other'name :: C.Path (State'Other'Members -> R.Text)
-state'Other'name = C.unsafePath ["name"]
-
---------------------------------------------------------
 -- Add-ons
 --------------------------------------------------------
 
-phonebook'HttpClient'Post
-  :: (C.HasType a, Ast.ToAst a, C.FromVal a)
-  => HttpClient.Manager
+phonebook'Scotty'Post
+  :: (Scotty.ScottyError e, R.MonadIO m, Phonebook'Service meta m, R.MonadCatch m)
+  => ([(Scotty.LazyText, Scotty.LazyText)] -> C.Hooks m () meta)
   -> C.Pull
-  -> HttpClient.RequestHeaders
-  -> C.Request () a
-  -> P.IO (HttpClient.HttpClientResponse R.ByteString, P.Maybe (C.Response () a))
-phonebook'HttpClient'Post = HttpClient.sendRequest
+  -> Scotty.ScottyT e m ()
+phonebook'Scotty'Post _hooks _pull = Scotty.respondSingleton _pull phonebook'version (\_xtra -> phonebook'handler _hooks _xtra)
+
+phonebook'Scotty'Get :: (Scotty.ScottyError e, R.MonadIO m) => C.Pull -> Scotty.ScottyT e m ()
+phonebook'Scotty'Get = Scotty.getSpec P.$ R.toJSON [phonebook'spec]
+
+--------------------------------------------------------
+-- Request handling
+--------------------------------------------------------
+
+-- Handler
+phonebook'handler
+  :: (Phonebook'Service meta m, R.MonadIO m, R.MonadCatch m)
+  => (xtra -> C.Hooks m () meta)
+  -> xtra
+  -> C.Request
+  -> m (P.Either C.Response C.Response)
+phonebook'handler _hooksBuilder xtra C.Request{C.meta=meta, C.query=query} = R.catch
+  (M.runExceptT P.$ do
+    meta' <- P.maybe (C.runtimeThrow C.RuntimeError'UnparsableMeta) P.return (C.fromValFromJson meta)
+    let _hooks = _hooksBuilder xtra
+    xformMeta <- M.lift P.$ C.metaMiddleware _hooks meta'
+    envRef <- R.liftIO C.emptyEnv
+    variableBaseCount <- R.liftIO (R.size P.<$> IO.readIORef envRef)
+    _limits <- M.lift P.$ C.sandboxLimits _hooks xformMeta
+    let _limits' = _limits
+          { C.variables = P.fmap (P.+ variableBaseCount) (C.variables _limits)
+          }
+    _serviceCallCountRef <- R.liftIO (IO.newIORef 0)
+    _lambdaCountRef <- R.liftIO (IO.newIORef 0)
+    _exprCountRef <- R.liftIO (IO.newIORef 0)
+    let evalConfig = C.EvalConfig
+          { C.limits = _limits'
+          , C.langServiceCallCount = _serviceCallCountRef
+          , C.langLambdaCount = _lambdaCountRef
+          , C.langExprCount = _exprCountRef
+          , C.apiCall = phonebook'ApiCall xformMeta
+          }
+    query' <- P.maybe (C.runtimeThrow C.RuntimeError'UnparsableQuery) P.return (C.jsonToExpr query)
+    vals <- C.runEval (C.forceVal P.=<< C.eval query' envRef) evalConfig
+    P.return P.$ C.Response'Success (R.toJSON vals) _limits)
+  (\(C.ThrownValue _err) -> P.return P.. P.Left P.$ C.Response'Error (C.ResponseError'Service _err))
+
+-- API
+phonebook'ApiCall :: (Phonebook'Service meta m, C.ServiceThrower m, C.RuntimeThrower m) => meta -> C.ApiCall -> m C.Val
+phonebook'ApiCall meta' apiCall' = case C.parseApiCall phonebook'ApiParser apiCall' of
+  P.Nothing -> C.runtimeThrow (C.RuntimeError'UnrecognizedCall P.$ C.apiCallName apiCall')
+  P.Just x' -> case x' of
+    Phonebook'Api'LookupPerson a' -> C.toVal P.<$> phonebook'LookupPerson meta' a'
+    Phonebook'Api'LookupPersonByName a' -> C.toVal P.<$> phonebook'LookupPersonByName meta' a'
+    Phonebook'Api'InsertPerson a' -> C.toVal P.<$> phonebook'InsertPerson meta' a'
+
+-- API Parser
+phonebook'ApiParser :: C.ApiParser Phonebook'Api
+phonebook'ApiParser = C.ApiParser
+  { C.hollow = R.empty
+  , C.struct = R.fromList
+     [ ("LookupPerson", v Phonebook'Api'LookupPerson)
+     , ("LookupPersonByName", v Phonebook'Api'LookupPersonByName)
+     , ("InsertPerson", v Phonebook'Api'InsertPerson)
+     ]
+  , C.enumeration = R.empty
+  , C.wrap = R.empty
+  }
+  where
+    v x y = x P.<$> C.fromVal y
+
+-- Api
+data Phonebook'Api
+  = Phonebook'Api'LookupPerson LookupPerson
+  | Phonebook'Api'LookupPersonByName LookupPersonByName
+  | Phonebook'Api'InsertPerson InsertPerson
+  deriving (P.Show, P.Eq)
 
 --------------------------------------------------------
 -- Type Instances
 --------------------------------------------------------
-
-instance C.HasType PersonId where
-  getType _ = "PersonId"
 
 instance C.ToVal PersonId where
   toVal (PersonId _w) = C.toVal _w
 
 instance C.FromVal PersonId where
   fromVal _v = PersonId P.<$> C.fromVal _v
-
-instance C.ToExpr PersonId
 
 instance R.ToJSON PersonId where
   toJSON = R.toJSON P.. C.toVal
@@ -339,19 +250,11 @@ instance R.FromJSON PersonId where
       P.Nothing -> P.mzero
       P.Just _y -> P.return _y
 
-instance Ast.ToAst PersonId where
-  toAst (PersonId _w) = Ast.toAst _w
-
-instance C.HasType Name where
-  getType _ = "Name"
-
 instance C.ToVal Name where
   toVal (Name _w) = C.toVal _w
 
 instance C.FromVal Name where
   fromVal _v = Name P.<$> C.fromVal _v
-
-instance C.ToExpr Name
 
 instance R.ToJSON Name where
   toJSON = R.toJSON P.. C.toVal
@@ -363,19 +266,11 @@ instance R.FromJSON Name where
       P.Nothing -> P.mzero
       P.Just _y -> P.return _y
 
-instance Ast.ToAst Name where
-  toAst (Name _w) = Ast.toAst _w
-
-instance C.HasType Phone where
-  getType _ = "Phone"
-
 instance C.ToVal Phone where
   toVal (Phone _w) = C.toVal _w
 
 instance C.FromVal Phone where
   fromVal _v = Phone P.<$> C.fromVal _v
-
-instance C.ToExpr Phone
 
 instance R.ToJSON Phone where
   toJSON = R.toJSON P.. C.toVal
@@ -387,19 +282,11 @@ instance R.FromJSON Phone where
       P.Nothing -> P.mzero
       P.Just _y -> P.return _y
 
-instance Ast.ToAst Phone where
-  toAst (Phone _w) = Ast.toAst _w
-
-instance C.HasType Street where
-  getType _ = "Street"
-
 instance C.ToVal Street where
   toVal (Street _w) = C.toVal _w
 
 instance C.FromVal Street where
   fromVal _v = Street P.<$> C.fromVal _v
-
-instance C.ToExpr Street
 
 instance R.ToJSON Street where
   toJSON = R.toJSON P.. C.toVal
@@ -411,19 +298,11 @@ instance R.FromJSON Street where
       P.Nothing -> P.mzero
       P.Just _y -> P.return _y
 
-instance Ast.ToAst Street where
-  toAst (Street _w) = Ast.toAst _w
-
-instance C.HasType City where
-  getType _ = "City"
-
 instance C.ToVal City where
   toVal (City _w) = C.toVal _w
 
 instance C.FromVal City where
   fromVal _v = City P.<$> C.fromVal _v
-
-instance C.ToExpr City
 
 instance R.ToJSON City where
   toJSON = R.toJSON P.. C.toVal
@@ -435,19 +314,11 @@ instance R.FromJSON City where
       P.Nothing -> P.mzero
       P.Just _y -> P.return _y
 
-instance Ast.ToAst City where
-  toAst (City _w) = Ast.toAst _w
-
-instance C.HasType Zipcode where
-  getType _ = "Zipcode"
-
 instance C.ToVal Zipcode where
   toVal (Zipcode _w) = C.toVal _w
 
 instance C.FromVal Zipcode where
   fromVal _v = Zipcode P.<$> C.fromVal _v
-
-instance C.ToExpr Zipcode
 
 instance R.ToJSON Zipcode where
   toJSON = R.toJSON P.. C.toVal
@@ -458,12 +329,6 @@ instance R.FromJSON Zipcode where
     case C.fromVal _x of
       P.Nothing -> P.mzero
       P.Just _y -> P.return _y
-
-instance Ast.ToAst Zipcode where
-  toAst (Zipcode _w) = Ast.toAst _w
-
-instance C.HasType Address where
-  getType _ = "Address"
 
 instance C.ToVal Address where
   toVal Address
@@ -487,8 +352,6 @@ instance C.FromVal Address where
       P.<*> C.getMember _m "state"
     _ -> P.Nothing
 
-instance C.ToExpr Address
-
 instance R.ToJSON Address where
   toJSON = R.toJSON P.. C.toVal
 
@@ -498,22 +361,6 @@ instance R.FromJSON Address where
     case C.fromVal _x of
       P.Nothing -> P.mzero
       P.Just _y -> P.return _y
-
-instance Ast.ToAst Address where
-  toAst Address
-    { addressStreet
-    , addressCity
-    , addressZipcode
-    , addressState
-    } = Ast.Ast'Struct P.. Ast.Struct P.$ R.fromList
-    [ ("street", Ast.toAst addressStreet)
-    , ("city", Ast.toAst addressCity)
-    , ("zipcode", Ast.toAst addressZipcode)
-    , ("state", Ast.toAst addressState)
-    ]
-
-instance C.HasType Person where
-  getType _ = "Person"
 
 instance C.ToVal Person where
   toVal Person
@@ -537,8 +384,6 @@ instance C.FromVal Person where
       P.<*> C.getMember _m "friends"
     _ -> P.Nothing
 
-instance C.ToExpr Person
-
 instance R.ToJSON Person where
   toJSON = R.toJSON P.. C.toVal
 
@@ -548,22 +393,6 @@ instance R.FromJSON Person where
     case C.fromVal _x of
       P.Nothing -> P.mzero
       P.Just _y -> P.return _y
-
-instance Ast.ToAst Person where
-  toAst Person
-    { personName
-    , personPhone
-    , personAddress
-    , personFriends
-    } = Ast.Ast'Struct P.. Ast.Struct P.$ R.fromList
-    [ ("name", Ast.toAst personName)
-    , ("phone", Ast.toAst personPhone)
-    , ("address", Ast.toAst personAddress)
-    , ("friends", Ast.toAst personFriends)
-    ]
-
-instance C.HasType LookupPerson where
-  getType _ = "LookupPerson"
 
 instance C.ToVal LookupPerson where
   toVal LookupPerson
@@ -578,8 +407,6 @@ instance C.FromVal LookupPerson where
       P.<$> C.getMember _m "id"
     _ -> P.Nothing
 
-instance C.ToExpr LookupPerson
-
 instance R.ToJSON LookupPerson where
   toJSON = R.toJSON P.. C.toVal
 
@@ -589,16 +416,6 @@ instance R.FromJSON LookupPerson where
     case C.fromVal _x of
       P.Nothing -> P.mzero
       P.Just _y -> P.return _y
-
-instance Ast.ToAst LookupPerson where
-  toAst LookupPerson
-    { lookupPersonId
-    } = Ast.Ast'Struct P.. Ast.Struct P.$ R.fromList
-    [ ("id", Ast.toAst lookupPersonId)
-    ]
-
-instance C.HasType LookupPersonByName where
-  getType _ = "LookupPersonByName"
 
 instance C.ToVal LookupPersonByName where
   toVal LookupPersonByName
@@ -613,8 +430,6 @@ instance C.FromVal LookupPersonByName where
       P.<$> C.getMember _m "name"
     _ -> P.Nothing
 
-instance C.ToExpr LookupPersonByName
-
 instance R.ToJSON LookupPersonByName where
   toJSON = R.toJSON P.. C.toVal
 
@@ -624,16 +439,6 @@ instance R.FromJSON LookupPersonByName where
     case C.fromVal _x of
       P.Nothing -> P.mzero
       P.Just _y -> P.return _y
-
-instance Ast.ToAst LookupPersonByName where
-  toAst LookupPersonByName
-    { lookupPersonByNameName
-    } = Ast.Ast'Struct P.. Ast.Struct P.$ R.fromList
-    [ ("name", Ast.toAst lookupPersonByNameName)
-    ]
-
-instance C.HasType InsertPerson where
-  getType _ = "InsertPerson"
 
 instance C.ToVal InsertPerson where
   toVal InsertPerson
@@ -648,8 +453,6 @@ instance C.FromVal InsertPerson where
       P.<$> C.getMember _m "person"
     _ -> P.Nothing
 
-instance C.ToExpr InsertPerson
-
 instance R.ToJSON InsertPerson where
   toJSON = R.toJSON P.. C.toVal
 
@@ -659,19 +462,6 @@ instance R.FromJSON InsertPerson where
     case C.fromVal _x of
       P.Nothing -> P.mzero
       P.Just _y -> P.return _y
-
-instance Ast.ToAst InsertPerson where
-  toAst InsertPerson
-    { insertPersonPerson
-    } = Ast.Ast'Struct P.. Ast.Struct P.$ R.fromList
-    [ ("person", Ast.toAst insertPersonPerson)
-    ]
-
-instance C.HasType State where
-  getType _ = "State"
-
-instance C.HasType State'Other'Members where
-  getType _ = "State"
 
 instance C.ToVal State where
   toVal = \case
@@ -696,8 +486,6 @@ instance C.FromVal State where
       _ -> P.Nothing
     _ -> P.Nothing
 
-instance C.ToExpr State
-
 instance R.ToJSON State where
   toJSON = R.toJSON P.. C.toVal
 
@@ -708,29 +496,10 @@ instance R.FromJSON State where
       P.Nothing -> P.mzero
       P.Just _y -> P.return _y
 
-instance Ast.ToAst State where
-  toAst = \case
-    State'CA -> Ast.Ast'Enumeral P.$ Ast.Enumeral "CA" P.Nothing
-    State'NY -> Ast.Ast'Enumeral P.$ Ast.Enumeral "NY" P.Nothing
-    State'TX -> Ast.Ast'Enumeral P.$ Ast.Enumeral "TX" P.Nothing
-    State'Other State'Other'Members
-      { state'OtherName
-      } -> Ast.Ast'Enumeral P.$ Ast.Enumeral "Other" P.$ P.Just P.$ R.fromList
-      [ ("name", Ast.toAst state'OtherName)
-      ]
+--------------------------------------------------------
+-- Spec
+--------------------------------------------------------
 
-state'Match
-  :: (C.HasType a, Ast.ToAst a)
-  => C.Expr State
-  -> C.Expr a -- CA
-  -> C.Expr a -- NY
-  -> C.Expr a -- TX
-  -> (C.Symbol, C.Expr State'Other'Members -> C.Expr a) -- | Other
-  -> C.Expr a
-state'Match _enumeral _CA _NY _TX _Other = C.unsafeExpr P.$ Ast.Ast'Match P.$ Ast.Match (Ast.toAst _enumeral)
-  [ Ast.MatchCase'Tag "CA" (Ast.toAst _CA)
-  , Ast.MatchCase'Tag "NY" (Ast.toAst _NY)
-  , Ast.MatchCase'Tag "TX" (Ast.toAst _TX)
-  , Ast.MatchCase'Members "Other" (P.fst _Other) (Ast.toAst P.$ P.snd _Other (C.unsafeExpr P.$ Ast.Ast'Ref P.$ Ast.Ref (P.fst _Other)))
-  ]
-
+phonebook'spec :: R.Value
+phonebook'spec = v
+  where P.Just v = R.decode "{\"fluid\":{\"major\":0,\"minor\":0},\"schema\":{\"PersonId\":\"String\",\"Name\":\"String\",\"Phone\":\"String\",\"Street\":\"String\",\"City\":\"String\",\"State\":[\"CA\",\"NY\",\"TX\",{\"tag\":\"Other\",\"m\":[{\"name\":\"String\"}]}],\"Zipcode\":\"String\",\"Address\":{\"m\":[{\"street\":\"Street\"},{\"city\":\"City\"},{\"zipcode\":\"Zipcode\"},{\"state\":\"State\"}]},\"Person\":{\"m\":[{\"name\":\"Name\"},{\"phone\":\"Phone\"},{\"address\":{\"n\":\"Option\",\"p\":\"Address\"}},{\"friends\":{\"n\":\"List\",\"p\":\"PersonId\"}}]},\"LookupPerson\":{\"m\":[{\"id\":\"PersonId\"}],\"o\":{\"n\":\"Option\",\"p\":\"Person\"}},\"LookupPersonByName\":{\"m\":[{\"name\":\"Name\"}],\"o\":{\"n\":\"List\",\"p\":\"Person\"}},\"InsertPerson\":{\"m\":[{\"person\":\"Person\"}],\"o\":\"PersonId\"}},\"pull\":{\"protocol\":\"http\",\"name\":\"Phonebook\",\"host\":\"127.0.0.1\",\"path\":\"/\",\"port\":8000,\"error\":\"Unit\",\"meta\":\"Unit\"},\"version\":{\"major\":0,\"minor\":0}}"

@@ -6,7 +6,7 @@ import Network.HTTP.Client.TLS
 import Data.Aeson (encode, ToJSON(..))
 import Fluid.Client
 
-import HelloWorld
+import HelloWorld.Client
 
 main :: IO ()
 main = do

@@ -43,7 +43,7 @@ genModule :: { name :: String, lowercase :: String, prefix :: String, version ::
 genModule {name, lowercase, prefix, version, types, values} = do
   line ""
   line "-- Module"
-  addLine ["module ", prefix]
+  addLine ["module ", prefix, ".Client"]
   addLine ["  ( ", lowercase, "'version"]
   addLine ["  , ", lowercase, "'pull"]
   addLine ["  , ", lowercase, "'request"]

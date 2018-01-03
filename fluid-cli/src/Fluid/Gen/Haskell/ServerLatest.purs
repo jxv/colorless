@@ -17,7 +17,7 @@ genModule :: { prefix :: String, name :: String, lowercase :: String, major :: I
 genModule { prefix, name, lowercase, major, exportTypes, values } = do
   line ""
   line "-- Module"
-  addLine ["module ", prefix]
+  addLine ["module ", prefix, ".Server"]
   addLine ["  ( ", lowercase, "'handlerMap"]
   addLine ["  , ", lowercase, "'spec"]
   flip traverse_ values $ \value -> do

@@ -6,8 +6,8 @@ import Fluid.Server.Scotty
 import Fluid.Server
 import Data.Text.Lazy
 
-import HelloWorld ()
-import HelloWorld.V0
+import HelloWorld.Server ()
+import HelloWorld.Major0
 
 newtype App a = App { unApp :: IO a }
   deriving (Functor, Applicative, Monad, MonadIO, MonadCatch, MonadThrow)

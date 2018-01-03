@@ -21,7 +21,7 @@ generateServer :: Generator
 generateServer conv args jsonSpec blueprints = lmap (map show) $ do
   planTargets <- separate $ map
     (\bp -> map
-      (\p -> Tuple p {path: buildPath ("major" <> show bp.version.major <> ".rs"), contents: Server.gen p args.addon})
+      (\p -> Tuple p {path: buildPath ("major_" <> show bp.version.major <> ".rs"), contents: Server.gen p args.addon})
       (planFrom conv args bp))
     blueprints
   let plans = map fst planTargets  :: Array Plan

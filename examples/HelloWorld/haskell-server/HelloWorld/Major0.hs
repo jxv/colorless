@@ -1,5 +1,18 @@
+-- Pragmas
+{-# OPTIONS_GHC -fno-warn-unused-imports #-}
+{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE TupleSections #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE NoImplicitPrelude #-}
+
 -- Module
-module HelloWorld.V0
+module HelloWorld.Major0
   ( helloWorld'version
   , helloWorld'pull
   , helloWorld'handler
@@ -7,16 +20,19 @@ module HelloWorld.V0
   , HelloWorld'Thrower(..)
   , HelloWorld'Service(..)
   , Hello(..)
+  , helloWorld'Scotty'Post
+  , helloWorld'Scotty'Get
   ) where
 
 -- Imports
-import Prelude as P
-import Control.Monad as P
-import Control.Monad.Except as M
-import Data.IORef as IO
-import Data.String as P (IsString)
-import Fluid.Imports as R
-import Fluid.Server as C
+import qualified Prelude as P
+import qualified Control.Monad as P
+import qualified Control.Monad.Except as M
+import qualified Data.IORef as IO
+import qualified Data.String as P (IsString)
+import qualified Fluid.Imports as R
+import qualified Fluid.Server as C
+import qualified Fluid.Server.Scotty as Scotty
 
 --------------------------------------------------------
 -- Configs
@@ -34,12 +50,12 @@ helloWorld'pull = C.Pull "http" "127.0.0.1" "/" 8080
 --------------------------------------------------------
 
 -- Thrower
-class C.ServiceThrower m <= HelloWorld'Thrower m where
+class C.ServiceThrower m => HelloWorld'Thrower m where
   helloWorld'throw :: () -> m a
   helloWorld'throw = C.serviceThrow P.. R.toJSON P.. C.toVal
 
 -- Service
-class P.Monad m <= HelloWorld'Service meta m where
+class P.Monad m => HelloWorld'Service meta m where
   helloWorld'Hello :: meta -> Hello -> m R.Text
 
 instance HelloWorld'Service meta m => HelloWorld'Service meta (M.ExceptT C.Response m) where
@@ -51,12 +67,22 @@ instance HelloWorld'Service meta m => HelloWorld'Service meta (M.ExceptT C.Respo
 
 -- Struct: Hello
 data Hello = Hello
-  { target :: R.Text
-  }
+  { helloTarget :: R.Text
+  } deriving (P.Show, P.Eq)
 
 --------------------------------------------------------
 -- Add-ons
 --------------------------------------------------------
+
+helloWorld'Scotty'Post
+  :: (Scotty.ScottyError e, R.MonadIO m, HelloWorld'Service meta m, R.MonadCatch m)
+  => ([(Scotty.LazyText, Scotty.LazyText)] -> C.Hooks m () meta)
+  -> C.Pull
+  -> Scotty.ScottyT e m ()
+helloWorld'Scotty'Post _hooks _pull = Scotty.respondSingleton _pull helloWorld'version (\_xtra -> helloWorld'handler _hooks _xtra)
+
+helloWorld'Scotty'Get :: (Scotty.ScottyError e, R.MonadIO m) => C.Pull -> Scotty.ScottyT e m ()
+helloWorld'Scotty'Get = Scotty.getSpec P.$ R.toJSON [helloWorld'spec]
 
 --------------------------------------------------------
 -- Request handling
@@ -118,6 +144,7 @@ helloWorld'ApiParser = C.ApiParser
 -- Api
 data HelloWorld'Api
   = HelloWorld'Api'Hello Hello
+  deriving (P.Show, P.Eq)
 
 --------------------------------------------------------
 -- Type Instances
@@ -125,9 +152,9 @@ data HelloWorld'Api
 
 instance C.ToVal Hello where
   toVal Hello
-    { target
+    { helloTarget
     } = C.Val'ApiVal P.$ C.ApiVal'Struct P.$ C.Struct P.$ R.fromList
-    [ ("target", C.toVal target)
+    [ ("target", C.toVal helloTarget)
     ]
 
 instance C.FromVal Hello where

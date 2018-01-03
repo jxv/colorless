@@ -1,6 +1,6 @@
 
 -- Module
-module HelloWorld
+module HelloWorld.Server
   ( helloWorld'handlerMap
   , helloWorld'spec
   , V0.Hello(..)
@@ -12,7 +12,7 @@ module HelloWorld
 import Prelude as P
 import Fluid.Server as C (RuntimeThrower, Hooks, Request, Response, Major, Minor, Pull)
 import Fluid.Imports as R
-import HelloWorld.V0 as V0
+import HelloWorld.Major0 as V0
   ( HelloWorld'Service(..)
   , HelloWorld'Thrower(..)
   , helloWorld'handler

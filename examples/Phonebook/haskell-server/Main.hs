@@ -13,8 +13,8 @@ import Fluid.Server.Scotty
 import Data.Map (Map)
 import System.Random
 
-import Phonebook ()
-import Phonebook.V0
+import Phonebook.Server ()
+import Phonebook.Major0
 
 type DB = Map PersonId Person
 
