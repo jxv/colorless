@@ -28,8 +28,10 @@
 * JavaScript
 * [Haskell](https://github.com/jxv/fluid-haskell)
 * Node
-* Python
 * [PureScript](https://github.com/jxv/fluid-purescript)
+* Python
 * Ruby
+* Rust
 * Scala
 * Swift
+* [And more to come!](https://github.com/jxv/fluid/blob/master/targets.txt)
