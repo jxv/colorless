@@ -17,12 +17,12 @@ import Fluid.Cli.Args (Args)
 import Fluid.Cli.Target (Target)
 import Fluid.Cli.Generator (Generator, planFrom, separate)
 
-generateClojureServer :: Generator
-generateClojureServer args jsonSpec blueprints = lmap (map show) $ do
+generateServer :: Generator
+generateServer conv args jsonSpec blueprints = lmap (map show) $ do
   planTargets <- separate $ map
     (\bp -> map
-      (\p -> Tuple p {path: buildPath ("major" <> show bp.version.major <> ".clj"), contents: Server.gen p args.addon})
-      (planFrom args bp))
+      (\p -> Tuple p {path: buildPath ("major-" <> show bp.version.major <> ".clj"), contents: Server.gen p args.addon})
+      (planFrom conv args bp))
     blueprints
   let plans = map fst planTargets  :: Array Plan
   let versionTargets = map snd planTargets :: Array Target

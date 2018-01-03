@@ -7,46 +7,58 @@ import Control.Monad.Eff (Eff)
 import Node.FS.Aff (FS)
 
 import Fluid.Cli.Args
-import Fluid.Cli.Clojure (generateClojureServer)
-import Fluid.Cli.Java (generateJavaServer)
-import Fluid.Cli.JavaScript (generateJavaScriptClient)
-import Fluid.Cli.Haskell (generateHaskellServer, generateHaskellClient)
-import Fluid.Cli.Node (generateNodeServer)
-import Fluid.Cli.PureScript (generatePureScriptServer, generatePureScriptClient)
-import Fluid.Cli.Python (generatePythonServer)
-import Fluid.Cli.Ruby (generateRubyServer)
-import Fluid.Cli.Rust (generateRustServer)
-import Fluid.Cli.Scala (generateScalaServer)
-import Fluid.Cli.Swift (generateSwiftServer)
+import Fluid.Cli.Clojure (generateServer) as Clojure
+import Fluid.Cli.Java (generateServer) as Java
+import Fluid.Cli.JavaScript (generateClient) as JavaScript
+import Fluid.Cli.Haskell (generateServer, generateClient) as Haskell
+import Fluid.Cli.Node (generateServer) as Node
+import Fluid.Cli.PureScript (generateServer, generateClient) as PureScript
+import Fluid.Cli.Python (generateServer) as Python
+import Fluid.Cli.Ruby (generateServer) as Ruby
+import Fluid.Cli.Rust (generateServer) as Rust
+import Fluid.Cli.Scala (generateServer) as Scala
+import Fluid.Cli.Swift (generateServer) as Swift
 import Fluid.Cli.Generator (generate)
+
+import Fluid.Gen.Clojure.Conversion (conversion) as Clojure
+import Fluid.Gen.Java.Conversion (conversion) as Java
+import Fluid.Gen.JavaScript.Conversion (conversion) as JavaScript
+import Fluid.Gen.Haskell.Conversion (conversion) as Haskell
+import Fluid.Gen.Node.Conversion (conversion) as Node
+import Fluid.Gen.PureScript.Conversion (conversion) as PureScript
+import Fluid.Gen.Python.Conversion (conversion) as Python
+import Fluid.Gen.Ruby.Conversion (conversion) as Ruby
+import Fluid.Gen.Rust.Conversion (conversion) as Rust
+import Fluid.Gen.Scala.Conversion (conversion) as Scala
+import Fluid.Gen.Swift.Conversion (conversion) as Swift
 
 main :: forall eff. Eff (fs :: FS, console :: CONSOLE | eff) (Fiber (fs :: FS, console :: CONSOLE | eff) Unit)
 main = launchAff do
   args <- liftEff' getArgs
 
   if args.lang == "clojure" && args.side == "server"
-    then generate args generateClojureServer else pure unit
+    then generate Clojure.conversion args Clojure.generateServer else pure unit
   if args.lang == "java" && args.side == "server"
-    then generate args generateJavaServer else pure unit
+    then generate Java.conversion args Java.generateServer else pure unit
   if args.lang == "javascript" && args.side == "client"
-    then generate args generateJavaScriptClient else pure unit
+    then generate JavaScript.conversion args JavaScript.generateClient else pure unit
   if args.lang == "haskell" && args.side == "server"
-    then generate args generateHaskellServer else pure unit
+    then generate Haskell.conversion args Haskell.generateServer else pure unit
   if args.lang == "haskell" && args.side == "client"
-    then generate args generateHaskellClient else pure unit
+    then generate Haskell.conversion args Haskell.generateClient else pure unit
   if args.lang == "node" && args.side == "server"
-    then generate args generateNodeServer else pure unit
+    then generate Node.conversion args Node.generateServer else pure unit
   if args.lang == "python" && args.side == "server"
-    then generate args generatePythonServer else pure unit
+    then generate Python.conversion args Python.generateServer else pure unit
   if args.lang == "ruby" && args.side == "server"
-    then generate args generateRubyServer else pure unit
+    then generate Ruby.conversion args Ruby.generateServer else pure unit
   if args.lang == "rust" && args.side == "server"
-    then generate args generateRustServer else pure unit
+    then generate Rust.conversion args Rust.generateServer else pure unit
   if args.lang == "purescript" && args.side == "server"
-    then generate args generatePureScriptServer else pure unit
+    then generate PureScript.conversion args PureScript.generateServer else pure unit
   if args.lang == "purescript" && args.side == "client"
-    then generate args generatePureScriptClient else pure unit
+    then generate PureScript.conversion args PureScript.generateClient else pure unit
   if args.lang == "scala" && args.side == "server"
-    then generate args generateScalaServer else pure unit
+    then generate Scala.conversion args Scala.generateServer else pure unit
   if args.lang == "swift" && args.side == "server"
-    then generate args generateSwiftServer else pure unit
+    then generate Swift.conversion args Swift.generateServer else pure unit

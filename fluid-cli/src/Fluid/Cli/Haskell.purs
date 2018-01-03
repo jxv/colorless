@@ -18,12 +18,12 @@ import Fluid.Cli.Args (Args)
 import Fluid.Cli.Target (Target)
 import Fluid.Cli.Generator (Generator, planFrom, separate)
 
-generateHaskellServer :: Generator
-generateHaskellServer args jsonSpec blueprints = lmap (map show) $ do
+generateServer :: Generator
+generateServer conv args jsonSpec blueprints = lmap (map show) $ do
   planTargets <- separate $ map
     (\bp -> map
       (\p -> Tuple p {path: buildPath ("Major" <> show bp.version.major <> ".hs"), contents: Server.gen p args.addon})
-      (planFrom args bp))
+      (planFrom conv args bp))
     blueprints
   let plans = map fst planTargets  :: Array Plan
   let versionTargets = map snd planTargets :: Array Target
@@ -32,9 +32,9 @@ generateHaskellServer args jsonSpec blueprints = lmap (map show) $ do
   where
     buildPath path = args.dest <> "/" <> args.name <> "/" <> path
 
-generateHaskellClient :: Generator
-generateHaskellClient args jsonSpec blueprints = lmap (map show) $ do
-  plans <- separate $ map (\bp -> planFrom args bp) blueprints
+generateClient :: Generator
+generateClient conv args jsonSpec blueprints = lmap (map show) $ do
+  plans <- separate $ map (\bp -> planFrom conv args bp) blueprints
   case Array.head plans of
     Nothing -> pure []
     Just p -> do

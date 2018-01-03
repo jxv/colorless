@@ -9,6 +9,7 @@ import Data.StrMap as StrMap
 import Data.String as Str
 import Data.Tuple (Tuple(..))
 import Data.Traversable (traverse)
+import Fluid.Gen.Conversion
 import Fluid.Gen.Spec (TypeName, Version, Schema, Spec, Type(..), Param(..), TypeDecl(..), HollowDecl, WrapDecl, EnumerationDecl, StructDecl, EnumDecl(..), MemberDecl(..))
 
 type Plan =
@@ -95,61 +96,61 @@ type Enumeration =
   , major :: Int
   }
 
-hollow :: Int -> Tuple TypeName HollowDecl -> Maybe Hollow
-hollow _ (Tuple n {o}) = do
-  let name = langTypeName n
-  let label = langTypeLabel n
+hollow :: Conversion -> Int -> Tuple TypeName HollowDecl -> Maybe Hollow
+hollow conv _ (Tuple n {o}) = do
+  let name = langTypeName conv n
+  let label = conv.label n
   let lowercase = lowercaseFirstLetter name
-  output <- langType o
+  output <- langType conv o
   let func = { name: lowercase, output }
   pure { name, label, lowercase, func }
 
-wrap :: Int -> Tuple TypeName WrapDecl -> Maybe Wrap
-wrap major (Tuple n {w: ty@(Type w), o}) = do
-  let name = langTypeName n
-  let label = langTypeLabel n
+wrap :: Conversion -> Int -> Tuple TypeName WrapDecl -> Maybe Wrap
+wrap conv major (Tuple n {w: ty@(Type w), o}) = do
+  let name = langTypeName conv n
+  let label = conv.label n
   let lowercase = lowercaseFirstLetter name
-  type' <- langType ty
-  func <- makeFunc lowercase o
+  type' <- langType conv ty
+  func <- makeFunc conv lowercase o
   let instances = { text: isString w.n, number: isNumber w.n }
   pure { name, label, lowercase: lowercase, type: type', func, instances, major }
 
-member :: MemberDecl -> Maybe Member
-member (MemberDecl m) = do
-  ty <- langType m.ty
-  pure { name: langTypeName m.name, label: langTypeLabel m.name, "type": ty }
+member :: Conversion -> MemberDecl -> Maybe Member
+member conv (MemberDecl m) = do
+  ty <- langType conv m.ty
+  pure { name: langTypeName conv m.name, label: conv.label m.name, "type": ty }
 
-struct :: Int -> Tuple TypeName StructDecl -> Maybe Struct
-struct major (Tuple n {m,o}) = do
-  let name = langTypeName n
-  let label = langTypeLabel n
+struct :: Conversion -> Int -> Tuple TypeName StructDecl -> Maybe Struct
+struct conv major (Tuple n {m,o}) = do
+  let name = langTypeName conv n
+  let label = conv.label n
   let lowercase = lowercaseFirstLetter name
-  members <- traverse member m
-  func <- makeFunc lowercase o
+  members <- traverse (member conv) m
+  func <- makeFunc conv lowercase o
   pure { name, label, lowercase, members, func, major }
 
-enumeral :: EnumDecl -> Maybe Enumeral
-enumeral (EnumDecl {tag,m}) = do
-  let tag' = langTypeName tag
-  let label = langTypeLabel tag
+enumeral :: Conversion -> EnumDecl -> Maybe Enumeral
+enumeral conv (EnumDecl {tag,m}) = do
+  let tag' = langTypeName conv tag
+  let label = conv.label tag
   members <- case m of
     Nothing -> pure Nothing
     Just m' -> do
-      members' <- traverse member m'
+      members' <- traverse (member conv) m'
       pure (Just members')
   pure { tag: tag', label, members }
 
-enumeration :: Int -> Tuple TypeName EnumerationDecl -> Maybe Enumeration
-enumeration major (Tuple n {e,o}) = do
-  let name = langTypeName n
-  let label = langTypeLabel n
+enumeration :: Conversion -> Int -> Tuple TypeName EnumerationDecl -> Maybe Enumeration
+enumeration conv major (Tuple n {e,o}) = do
+  let name = langTypeName conv n
+  let label = conv.label n
   let lowercase = lowercaseFirstLetter name
-  enumerals <- traverse enumeral e
-  func <- makeFunc lowercase o
+  enumerals <- traverse (enumeral conv) e
+  func <- makeFunc conv lowercase o
   pure { name, label, lowercase, enumerals, func, major }
 
-makeFunc :: TypeName -> Maybe Type -> Maybe (Maybe { name :: TypeName, output :: String })
-makeFunc name output = case map langType output of
+makeFunc :: Conversion -> TypeName -> Maybe Type -> Maybe (Maybe { name :: TypeName, output :: String })
+makeFunc conv name output = case map (langType conv) output of
   Nothing -> Just Nothing
   Just Nothing -> Nothing
   Just (Just o) -> Just (Just { name: name, output: o })
@@ -182,26 +183,27 @@ applyLangType v f t@(Tuple name _) = case f (v name) t of
   Nothing -> Left (PlanError'NonGeneratable name)
   Just b -> Right b
 
-langTypeOr :: Type -> PlanError -> Either PlanError String
-langTypeOr a e = case langType a of
+langTypeOr :: Conversion -> Type -> PlanError -> Either PlanError String
+langTypeOr conv a e = case langType conv a of
   Nothing -> Left e
   Just x -> Right x
 
 plan
-  :: String -- Prefix
+  :: Conversion
+  -> String -- Prefix
   -> Version
   -> Spec
   -> Array String -- Addons
   -> (TypeName -> Int) -- Mapping type to major version
   -> String -- JSON Spec
   -> Either PlanError Plan
-plan prefix version spec addons latest jsonSpec = do
-  wraps <- traverse (applyLangType latest wrap) (filterWrapDecl spec.schema)
-  hollows <- traverse (applyLangType latest hollow) (filterHollowDecl spec.schema)
-  structs <- traverse (applyLangType latest struct) (filterStructDecl spec.schema)
-  enumerations <- traverse (applyLangType latest enumeration) (filterEnumDecl spec.schema)
-  meta <- langTypeOr spec.pull.error (PlanError'NonGeneratableMeta spec.pull.meta)
-  error <- langTypeOr spec.pull.error (PlanError'NonGeneratableError spec.pull.error)
+plan conv prefix version spec addons latest jsonSpec = do
+  wraps <- traverse (applyLangType latest (wrap conv)) (filterWrapDecl spec.schema)
+  hollows <- traverse (applyLangType latest (hollow conv)) (filterHollowDecl spec.schema)
+  structs <- traverse (applyLangType latest (struct conv)) (filterStructDecl spec.schema)
+  enumerations <- traverse (applyLangType latest (enumeration conv)) (filterEnumDecl spec.schema)
+  meta <- langTypeOr conv spec.pull.error (PlanError'NonGeneratableMeta spec.pull.meta)
+  error <- langTypeOr conv spec.pull.error (PlanError'NonGeneratableError spec.pull.error)
   pure
     { prefix
     , version
@@ -220,14 +222,14 @@ plan prefix version spec addons latest jsonSpec = do
     , enumerations
     , spec: jsonSpec }
 
-primMap :: String -> Maybe String
-primMap s = case s of
-  "Unit" -> Just "()"
-  "Bool" -> Just "P.Bool"
-  "Int" -> Just "P.Int"
-  "Float" -> Just "P.Double"
-  "Char" -> Just "P.Char"
-  "String" -> Just "R.Text"
+primMap :: Conversion -> String -> Maybe String
+primMap {unit,bool,int,float,char,string} s = case s of
+  "Unit" -> Just unit
+  "Bool" -> Just bool
+  "Int" -> Just int
+  "Float" -> Just float
+  "Char" -> Just char
+  "String" -> Just string
   _ -> Nothing
 
 lowercaseFirstLetter :: String -> String
@@ -246,36 +248,33 @@ isString name = name == "String"
 isNumber :: TypeName -> Boolean
 isNumber name = name == "Int" || name == "Float"
 
-langTypeLabel :: String -> String
-langTypeLabel n = if n == "tag" then "_tag" else n
-
-langTypeName :: TypeName -> String
-langTypeName name = case primMap name of
+langTypeName :: Conversion -> TypeName -> String
+langTypeName conv name = case primMap conv name of
   Nothing -> name
   Just name' -> name'
 
-langTypeNameVersion :: Int -> TypeName -> String
-langTypeNameVersion major name = case primMap name of
-  Nothing -> "V" <> show major <> "." <> name
+langTypeNameVersion :: Conversion -> Int -> TypeName -> String
+langTypeNameVersion conv@{version} major name = case primMap conv name of
+  Nothing -> version major name
   Just name' -> name'
 
-langTypeGeneric :: (TypeName -> String) -> Type -> Maybe String
-langTypeGeneric typeName (Type {n, p}) = case p of
+langTypeGeneric :: Conversion -> (TypeName -> String) -> Type -> Maybe String
+langTypeGeneric conv@{list,option,either} typeName (Type {n, p}) = case p of
   Param'None -> Just (typeName n)
-  Param'One p0 -> case langTypeGeneric typeName p0 of
+  Param'One p0 -> case langTypeGeneric conv typeName p0 of
     Nothing -> Nothing
     Just p0' -> case n of
-      "List" -> Just $ "[" <> p0' <> "]"
-      "Option" -> Just $ "(P.Maybe " <> p0' <> ")"
+      "List" -> Just $ list p0'
+      "Option" -> Just $ option p0'
       _ -> Nothing
-  Param'Two p0 p1 -> case Tuple (langTypeGeneric typeName p0) (langTypeGeneric typeName p1) of
+  Param'Two p0 p1 -> case Tuple (langTypeGeneric conv typeName p0) (langTypeGeneric conv typeName p1) of
     Tuple (Just p0') (Just p1') -> case n of
-      "Either" -> Just $ "(P.Either (" <> p0' <> ") (" <> p1' <> "))"
+      "Either" -> Just $ either p0' p1'
       _ -> Nothing
     _ -> Nothing
 
-langType :: Type -> Maybe String
-langType = langTypeGeneric langTypeName
+langType :: Conversion -> Type -> Maybe String
+langType conv = langTypeGeneric conv (langTypeName conv)
 
-langTypeVersion :: Int -> Type -> Maybe String
-langTypeVersion major = langTypeGeneric (langTypeNameVersion major)
+langTypeVersion :: Conversion -> Int -> Type -> Maybe String
+langTypeVersion conv major = langTypeGeneric conv (langTypeNameVersion conv major)
