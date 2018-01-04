@@ -1,1 +1,1 @@
-module Fuid.Gen.Ruby.Common where
+module Fluid.Gen.Ruby.Common where

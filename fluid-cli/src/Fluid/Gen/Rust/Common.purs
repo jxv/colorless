@@ -43,3 +43,4 @@ genEnumeration {name, enumerals} = do
           [" }"]
           ) <>
       [","]
+  line "}"

@@ -1,1 +1,1 @@
-module Fuid.Gen.Scala.Common where
+module Fluid.Gen.Scala.Common where

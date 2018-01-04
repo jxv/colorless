@@ -1,1 +1,1 @@
-module Fuid.Gen.Node.Common where
+module Fluid.Gen.Node.Common where

@@ -1,1 +1,1 @@
-module Fuid.Gen.Clojure.Common where
+module Fluid.Gen.Clojure.Common where

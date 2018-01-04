@@ -1,1 +1,1 @@
-module Fuid.Gen.Java.Common where
+module Fluid.Gen.Java.Common where

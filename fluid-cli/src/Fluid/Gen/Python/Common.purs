@@ -1,1 +1,1 @@
-module Fuid.Gen.Python.Common where
+module Fluid.Gen.Python.Common where
