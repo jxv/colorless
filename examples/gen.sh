@@ -12,8 +12,10 @@ fluid -l rust -s HelloWorld/specs -m hello_world -n hello_world -d ./HelloWorld/
 fluid -l javascript -s HelloWorldPublic/specs.json -m HelloWorld -n helloWorld -d ./HelloWorldPublic/javascript-client -e client
 fluid -l haskell -s HelloWorldPublic/specs.json -m HelloWorld -n HelloWorld -d ./HelloWorldPublic/haskell-server -e server -a scotty
 fluid -l haskell -s HelloWorldPublic/specs.json -m HelloWorld -n HelloWorld -d ./HelloWorldPublic/haskell-client -e client -a http-client
+fluid -l rust -s HelloWorldPublic/specs.json -m hello_world -n hello_world -d ./HelloWorldPublic/rust-server -e server
 
 # Phonebook
 fluid -l javascript -s Phonebook/specs -m Phonebook -n phonebook -d ./Phonebook/javascript-client -e client
 fluid -l haskell -s Phonebook/specs -m Phonebook -n Phonebook -d ./Phonebook/haskell-server -e server -a scotty
 fluid -l haskell -s Phonebook/specs -m Phonebook -n Phonebook -d ./Phonebook/haskell-client -e client -a http-client
+fluid -l rust -s Phonebook/specs -m hello_world -n hello_world -d ./Phonebook/rust-server -e server
