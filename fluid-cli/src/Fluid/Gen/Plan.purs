@@ -6,6 +6,7 @@ import Data.Array as Array
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
 import Data.StrMap as StrMap
+import Data.StrMap (StrMap)
 import Data.String as Str
 import Data.Tuple (Tuple(..))
 import Data.Traversable (traverse)
