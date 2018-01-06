@@ -18,11 +18,11 @@ import Fluid.Cli.Target (Target)
 import Fluid.Cli.Generator (Generator, planFrom, separate)
 
 generateServer :: Generator
-generateServer conv args jsonSpec blueprints = lmap (map show) $ do
+generateServer conv args depFilter jsonSpec blueprints = lmap (map show) $ do
   planTargets <- separate $ map
     (\bp -> map
       (\p -> Tuple p {path: buildPath ("Major" <> show bp.version.major <> ".swift"), contents: Server.gen p args.addon})
-      (planFrom conv args bp))
+      (planFrom conv args depFilter bp))
     blueprints
   let plans = map fst planTargets  :: Array Plan
   let versionTargets = map snd planTargets :: Array Target

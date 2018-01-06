@@ -9,7 +9,10 @@ import Data.StrMap as StrMap
 import Data.StrMap (StrMap)
 import Data.String as Str
 import Data.Tuple (Tuple(..))
+import Data.Set (Set)
 import Data.Traversable (traverse)
+
+import Fluid.Gen.Dependency (requiresRecursiveIndirection, Dep, DepTag)
 import Fluid.Gen.Conversion
 import Fluid.Gen.Spec (TypeName, Version, Schema, Spec, Type(..), Param(..), TypeDecl(..), HollowDecl, WrapDecl, EnumerationDecl, StructDecl, EnumDecl(..), MemberDecl(..))
 
@@ -80,6 +83,7 @@ type Struct =
   , members :: Array Member
   , func :: Maybe Func
   , major :: Int
+  , indirection :: Boolean
   }
 
 type Enumeral =
@@ -95,6 +99,7 @@ type Enumeration =
   , enumerals :: Array Enumeral
   , func :: Maybe Func
   , major :: Int
+  , indirection :: Boolean
   }
 
 hollow :: Conversion -> Int -> Tuple TypeName HollowDecl -> Maybe Hollow
@@ -121,14 +126,15 @@ member conv (MemberDecl m) = do
   ty <- langType conv m.ty
   pure { name: langTypeName conv m.name, label: conv.label m.name, "type": ty }
 
-struct :: Conversion -> Int -> Tuple TypeName StructDecl -> Maybe Struct
-struct conv major (Tuple n {m,o}) = do
+struct :: Conversion -> StrMap (Set Dep) -> Set DepTag -> Int -> Tuple TypeName StructDecl -> Maybe Struct
+struct conv depGraph depFilter major (Tuple n {m,o}) = do
   let name = langTypeName conv n
   let label = conv.label n
   let lowercase = lowercaseFirstLetter name
   members <- traverse (member conv) m
   func <- makeFunc conv lowercase o
-  pure { name, label, lowercase, members, func, major }
+  let indirection = requiresRecursiveIndirection depGraph depFilter n
+  pure { name, label, lowercase, members, func, major, indirection }
 
 enumeral :: Conversion -> EnumDecl -> Maybe Enumeral
 enumeral conv (EnumDecl {tag,m}) = do
@@ -141,14 +147,15 @@ enumeral conv (EnumDecl {tag,m}) = do
       pure (Just members')
   pure { tag: tag', label, members }
 
-enumeration :: Conversion -> Int -> Tuple TypeName EnumerationDecl -> Maybe Enumeration
-enumeration conv major (Tuple n {e,o}) = do
+enumeration :: Conversion -> StrMap (Set Dep) -> Set DepTag -> Int -> Tuple TypeName EnumerationDecl -> Maybe Enumeration
+enumeration conv depGraph depFilter major (Tuple n {e,o}) = do
   let name = langTypeName conv n
   let label = conv.label n
   let lowercase = lowercaseFirstLetter name
   enumerals <- traverse (enumeral conv) e
   func <- makeFunc conv lowercase o
-  pure { name, label, lowercase, enumerals, func, major }
+  let indirection = requiresRecursiveIndirection depGraph depFilter n
+  pure { name, label, lowercase, enumerals, func, major, indirection }
 
 makeFunc :: Conversion -> TypeName -> Maybe Type -> Maybe (Maybe { name :: TypeName, output :: String })
 makeFunc conv name output = case map (langType conv) output of
@@ -191,6 +198,8 @@ langTypeOr conv a e = case langType conv a of
 
 plan
   :: Conversion
+  -> StrMap (Set Dep)
+  -> Set DepTag
   -> String -- Prefix
   -> Version
   -> Spec
@@ -198,11 +207,11 @@ plan
   -> (TypeName -> Int) -- Mapping type to major version
   -> String -- JSON Spec
   -> Either PlanError Plan
-plan conv prefix version spec addons latest jsonSpec = do
+plan conv depGraph depFilter prefix version spec addons latest jsonSpec = do
   wraps <- traverse (applyLangType latest (wrap conv)) (filterWrapDecl spec.schema)
   hollows <- traverse (applyLangType latest (hollow conv)) (filterHollowDecl spec.schema)
-  structs <- traverse (applyLangType latest (struct conv)) (filterStructDecl spec.schema)
-  enumerations <- traverse (applyLangType latest (enumeration conv)) (filterEnumDecl spec.schema)
+  structs <- traverse (applyLangType latest (struct conv depGraph depFilter)) (filterStructDecl spec.schema)
+  enumerations <- traverse (applyLangType latest (enumeration conv depGraph depFilter)) (filterEnumDecl spec.schema)
   meta <- langTypeOr conv spec.pull.error (PlanError'NonGeneratableMeta spec.pull.meta)
   error <- langTypeOr conv spec.pull.error (PlanError'NonGeneratableError spec.pull.error)
   pure

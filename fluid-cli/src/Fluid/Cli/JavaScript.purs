@@ -16,8 +16,8 @@ import Fluid.Gen.Plan (Plan, PlanError, plan)
 import Fluid.Gen.JavaScript.Client as Client
 
 generateClient :: Generator
-generateClient conv args jsonSpec blueprints = lmap (map show) $ do
-  plans <- separate $ map (\bp -> planFrom conv args bp) blueprints
+generateClient conv args depFilter jsonSpec blueprints = lmap (map show) $ do
+  plans <- separate $ map (\bp -> planFrom conv args depFilter bp) blueprints
   case Array.head plans of
     Nothing -> pure []
     Just p -> do

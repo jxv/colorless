@@ -10,6 +10,7 @@ import Data.Tuple (Tuple(..))
 import Data.Either (Either(..))
 import Data.Path.Pathy (FileName(..), extension)
 import Data.Traversable (traverse_, traverse)
+import Data.Set (Set)
 import Node.Encoding (Encoding(..))
 import Node.FS.Aff (readTextFile, readdir, FS)
 
@@ -19,6 +20,7 @@ import Fluid.Gen.Spec (parseSpecs, parseSpec)
 import Fluid.Gen.Plan (Plan, PlanError, plan)
 import Fluid.Gen.History (createHistory)
 import Fluid.Gen.Blueprint (mkBlueprint, Blueprint)
+import Fluid.Gen.Dependency (DepFilter)
 
 import Fluid.Cli.Args
 import Fluid.Cli.Target (writeTarget, Target)
@@ -26,12 +28,13 @@ import Fluid.Cli.Target (writeTarget, Target)
 type Generator
   =  Conversion
   -> Args
+  -> DepFilter
   -> String -- All Specs as a stringified JSON
   -> Array Blueprint
   -> Either (Array String) (Array Target)
 
-generate :: forall eff. Conversion -> Args -> Generator -> Aff (fs :: FS, console :: CONSOLE | eff) Unit
-generate conv args generator =
+generate :: forall eff. Conversion -> Args -> DepFilter -> Generator -> Aff (fs :: FS, console :: CONSOLE | eff) Unit
+generate conv args depFilter generator =
   -- This function is fairly hairy,
   -- but it could be simplified with a single JSON library for reading, writing, and modifying.
   if hasJsonExtension args.src
@@ -61,7 +64,7 @@ generate conv args generator =
   where
     go (Tuple jsonSpecsAsOne jsonSpecs) histories = do
       let blueprints = Array.zipWith mkBlueprint histories jsonSpecs
-      case generator conv args jsonSpecsAsOne blueprints of
+      case generator conv args depFilter jsonSpecsAsOne blueprints of
         Left errors -> traverse_ log errors
         Right targets -> traverse_ writeTarget targets
 
@@ -79,12 +82,12 @@ separate xs = foldr go (Right []) xs
         Left l -> Left (Array.singleton l)
         Right r -> Right (Array.cons r rs)
 
-planFrom :: Conversion -> Args -> Blueprint -> Either PlanError Plan
-planFrom conv args bp = let
+planFrom :: Conversion -> Args -> DepFilter -> Blueprint -> Either PlanError Plan
+planFrom conv args depFilter bp = let
   major = bp.version.major
   prevMajor = major - 1
   typeVersionMapper typeName =
     if or [elem typeName bp.diff.addType, elem typeName bp.diff.removeType, elem typeName bp.diff.modifyType]
       then major
       else prevMajor
-  in plan conv args.prefix bp.version bp.spec args.addon typeVersionMapper bp.stringSpec
+  in plan conv bp.depGraph depFilter args.prefix bp.version bp.spec args.addon typeVersionMapper bp.stringSpec

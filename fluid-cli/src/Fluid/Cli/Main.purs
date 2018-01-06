@@ -5,6 +5,7 @@ import Control.Monad.Aff (Fiber, launchAff, liftEff')
 import Control.Monad.Aff.Console (CONSOLE)
 import Control.Monad.Eff (Eff)
 import Node.FS.Aff (FS)
+import Data.Set as Set
 
 import Fluid.Cli.Args
 import Fluid.Cli.Clojure (generateServer) as Clojure
@@ -37,28 +38,28 @@ main = launchAff do
   args <- liftEff' getArgs
 
   if args.lang == "clojure" && args.side == "server"
-    then generate Clojure.conversion args Clojure.generateServer else pure unit
+    then generate Clojure.conversion args Set.empty Clojure.generateServer else pure unit
   if args.lang == "java" && args.side == "server"
-    then generate Java.conversion args Java.generateServer else pure unit
+    then generate Java.conversion args Set.empty Java.generateServer else pure unit
   if args.lang == "javascript" && args.side == "client"
-    then generate JavaScript.conversion args JavaScript.generateClient else pure unit
+    then generate JavaScript.conversion args Set.empty JavaScript.generateClient else pure unit
   if args.lang == "haskell" && args.side == "server"
-    then generate Haskell.conversion args Haskell.generateServer else pure unit
+    then generate Haskell.conversion args Set.empty Haskell.generateServer else pure unit
   if args.lang == "haskell" && args.side == "client"
-    then generate Haskell.conversion args Haskell.generateClient else pure unit
+    then generate Haskell.conversion args Set.empty Haskell.generateClient else pure unit
   if args.lang == "node" && args.side == "server"
-    then generate Node.conversion args Node.generateServer else pure unit
+    then generate Node.conversion args Set.empty Node.generateServer else pure unit
   if args.lang == "python" && args.side == "server"
-    then generate Python.conversion args Python.generateServer else pure unit
+    then generate Python.conversion args Set.empty Python.generateServer else pure unit
   if args.lang == "ruby" && args.side == "server"
-    then generate Ruby.conversion args Ruby.generateServer else pure unit
+    then generate Ruby.conversion args Set.empty Ruby.generateServer else pure unit
   if args.lang == "rust" && args.side == "server"
-    then generate Rust.conversion args Rust.generateServer else pure unit
+    then generate Rust.conversion args Set.empty Rust.generateServer else pure unit
   if args.lang == "purescript" && args.side == "server"
-    then generate PureScript.conversion args PureScript.generateServer else pure unit
+    then generate PureScript.conversion args Set.empty PureScript.generateServer else pure unit
   if args.lang == "purescript" && args.side == "client"
-    then generate PureScript.conversion args PureScript.generateClient else pure unit
+    then generate PureScript.conversion args Set.empty PureScript.generateClient else pure unit
   if args.lang == "scala" && args.side == "server"
-    then generate Scala.conversion args Scala.generateServer else pure unit
+    then generate Scala.conversion args Set.empty Scala.generateServer else pure unit
   if args.lang == "swift" && args.side == "server"
-    then generate Swift.conversion args Swift.generateServer else pure unit
+    then generate Swift.conversion args Set.empty Swift.generateServer else pure unit
