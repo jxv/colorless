@@ -54,7 +54,6 @@ struct InsertPerson {
 }
 
 // Enumeration: State
-#[derive(Debug)]
 enum State {
     CA,
     NY,

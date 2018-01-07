@@ -33,6 +33,8 @@ import Fluid.Gen.Rust.Conversion (conversion) as Rust
 import Fluid.Gen.Scala.Conversion (conversion) as Scala
 import Fluid.Gen.Swift.Conversion (conversion) as Swift
 
+import Fluid.Gen.Swift.Dependency (depFilter) as Swift
+
 main :: forall eff. Eff (fs :: FS, console :: CONSOLE | eff) (Fiber (fs :: FS, console :: CONSOLE | eff) Unit)
 main = launchAff do
   args <- liftEff' getArgs
@@ -62,4 +64,4 @@ main = launchAff do
   if args.lang == "scala" && args.side == "server"
     then generate Scala.conversion args Set.empty Scala.generateServer else pure unit
   if args.lang == "swift" && args.side == "server"
-    then generate Swift.conversion args Set.empty Swift.generateServer else pure unit
+    then generate Swift.conversion args Swift.depFilter Swift.generateServer else pure unit

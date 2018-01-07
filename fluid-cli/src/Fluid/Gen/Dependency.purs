@@ -92,17 +92,25 @@ instance ordDepTag :: Ord DepTag where
   compare x y = invert (compare y x)
 
 requiresRecursiveIndirection :: DepGraph -> DepFilter -> TypeName -> Boolean
-requiresRecursiveIndirection depGraph depFilter name = go Set.empty
+requiresRecursiveIndirection depGraph depFilter topName = go topName Set.empty
   where
-    go explored = case StrMap.lookup name depGraph of
+    go name explored = case StrMap.lookup name depGraph of
       Nothing -> false
       Just deps -> let
         frontier = Set.difference deps explored
         explored' = explored <> deps
-        in Set.member name (namesOfDependencies frontier depFilter) || go explored'
+        frontierNames = Set.unions (Set.map noFilterDepNames frontier)
+        in Set.member topName (namesOfDependencies frontier depFilter) || (Set.member true $ Set.map (flip go explored') frontierNames)
 
 namesOfDependencies :: Set Dep -> DepFilter -> Set TypeName
 namesOfDependencies deps depFilter = Set.unions $ map (\dep -> nameOfDependency dep depFilter) (Set.toUnfoldable deps :: Array Dep)
+
+noFilterDepNames :: Dep -> Set TypeName
+noFilterDepNames dep = Set.fromFoldable $ case dep of
+  Dep'Direct x -> [x]
+  Dep'Option x -> [x]
+  Dep'List x -> [x]
+  Dep'Either x y -> [x, y]
 
 nameOfDependency :: Dep -> DepFilter -> Set TypeName
 nameOfDependency dep@(Dep'Direct x) depFilter = nameOfDependencyAux dep depFilter [x]

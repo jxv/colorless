@@ -24,12 +24,12 @@ genStruct {name, label, members} = do
   line "}"
 
 genEnumeration :: Enumeration -> Lines Unit
-genEnumeration {name, enumerals} = do
+genEnumeration {name, enumerals, indirection} = do
   line ""
   addLine ["// Enumeration: ", name]
-  line "#[derive(Debug)]"
-  addLine ["enum ", name, " {"]
-
+  addLine $
+    (if indirection then ["indirect "] else []) <>
+    ["enum ", name, " {"]
   flip traverse_ enumerals $ \enumeral ->
     addLine $
       ["    ", enumeral.tag] <>
