@@ -34,8 +34,8 @@ struct Address {
 struct Person {
     let name: Name
     let phone: Phone
-    let address: Option<Address>
-    let friends: Array<PersonId>
+    let address: Address?
+    let friends: [PersonId]
 }
 
 // Struct: LookupPerson
