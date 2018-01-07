@@ -1,16 +1,18 @@
 module Fluid.Cli.Generator where
 
-import Prelude (Unit, bind, map, (==), (<>), (-))
+import Prelude (Unit, bind, map, (==), (<>), (-), ($), show, pure)
 
 import Control.Monad.Aff (Aff)
 import Control.Monad.Aff.Console (log, CONSOLE)
 import Data.Array as Array
 import Data.Foldable (elem, or, foldr)
-import Data.Tuple (Tuple(..))
+import Data.Tuple (Tuple(..), fst, snd)
 import Data.Either (Either(..))
 import Data.Path.Pathy (FileName(..), extension)
 import Data.Traversable (traverse_, traverse)
 import Data.Set (Set)
+import Data.Bifunctor (lmap)
+import Data.Maybe (Maybe(..))
 import Node.Encoding (Encoding(..))
 import Node.FS.Aff (readTextFile, readdir, FS)
 
@@ -32,6 +34,25 @@ type Generator
   -> String -- All Specs as a stringified JSON
   -> Array Blueprint
   -> Either (Array String) (Array Target)
+
+generateServer
+  :: (Int -> String)
+  -> String
+  -> (Plan -> Array String -> String)
+  -> (Array Plan -> Array String -> String)
+  -> Generator
+generateServer buildPathMajor serverName genMajor genLatest conv args depFilter jsonSpec blueprints = lmap (map show) $ do
+  planTargets <- separate $ map
+    (\bp -> map
+      (\p -> Tuple p {path: buildPath (buildPathMajor bp.version.major), contents: genMajor p args.addon})
+      (planFrom conv args depFilter bp))
+    blueprints
+  let plans = map fst planTargets  :: Array Plan
+  let versionTargets = map snd planTargets :: Array Target
+  let latestTarget = { path: buildPath serverName, contents: genLatest plans args.addon }
+  pure $ Array.cons latestTarget versionTargets
+  where
+    buildPath path = args.dest <> "/" <> args.name <> "/" <> path
 
 generate :: forall eff. Conversion -> Args -> DepFilter -> Generator -> Aff (fs :: FS, console :: CONSOLE | eff) Unit
 generate conv args depFilter generator =

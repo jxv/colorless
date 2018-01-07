@@ -5,15 +5,12 @@ import Data.Array as Array
 import Data.Traversable (traverse_)
 
 import Fluid.Gen.Plan (Enumeral, Enumeration, Func, Plan, Struct, Wrap, lowercaseFirstLetter, uppercaseFirstLetter, PullPlan)
-import Fluid.Gen.Spec (Version)
+import Fluid.Gen.Spec (Version, filterVersion)
 import Fluid.Gen.Lines (linesContent, line, addLine)
 
 import Fluid.Gen.Swift.Common
 
 import Fluid.Gen.Plan (Plan)
-
-filterVersion :: forall a. Version -> Array { major :: Int | a } -> Array { major :: Int | a }
-filterVersion version = Array.filter (\ty -> ty.major == version.major)
 
 gen :: Plan -> Array String -> String
 gen plan addonNames = linesContent do

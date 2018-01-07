@@ -239,3 +239,6 @@ parseSpec s = lmap show $ readJSON s
 
 parseSpecs :: String -> Either String (Array Spec)
 parseSpecs s = lmap show $ readJSON s
+
+filterVersion :: forall a. Version -> Array { major :: Int | a } -> Array { major :: Int | a }
+filterVersion version = Array.filter (\ty -> ty.major == version.major)

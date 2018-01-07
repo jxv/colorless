@@ -7,7 +7,7 @@ import Data.Traversable (traverse_)
 import Fluid.Gen.Haskell.Common
 import Fluid.Gen.Plan (Enumeral, Enumeration, Func, Plan, Struct, Wrap, lowercaseFirstLetter, uppercaseFirstLetter, PullPlan)
 import Fluid.Gen.Lines (Lines, addLine, line, lines, linesContent, lineList)
-import Fluid.Gen.Spec (Version)
+import Fluid.Gen.Spec (Version, filterVersion)
 import Prelude (Unit, discard, flip, map, show, ($), (<>), (/=), (==), pure, unit)
 
 mkImportTypes :: Plan -> Array { name :: String, major :: Int }
@@ -274,9 +274,6 @@ createAddon :: Plan -> String -> Maybe Addon
 createAddon plan addon = case addon of
   "scotty" -> Just (scottyAddon plan)
   _ -> Nothing
-
-filterVersion :: forall a. Version -> Array { major :: Int | a } -> Array { major :: Int | a }
-filterVersion version = Array.filter (\ty -> ty.major == version.major)
 
 gen :: Plan -> Array String -> String
 gen plan addonNames = linesContent do

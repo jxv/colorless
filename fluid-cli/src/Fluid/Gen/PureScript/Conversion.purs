@@ -7,11 +7,11 @@ import Fluid.Gen.Conversion
 conversion :: Conversion
 conversion =
   { unit: "()"
-  , bool: "P.Bool"
+  , bool: "P.Boolean"
   , int: "P.Int"
-  , float: "P.Double"
+  , float: "P.Number"
   , char: "P.Char"
-  , string: "R.Text"
+  , string: "P.String"
   , list: \x -> "[" <> x <> "]"
   , option: \x -> "(P.Maybe " <> x <> ")"
   , either: \x y -> "(P.Either (" <> x <> ") (" <> y <> "))"

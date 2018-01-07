@@ -6,15 +6,15 @@ import Fluid.Gen.Conversion
 
 conversion :: Conversion
 conversion =
-  { unit: "()"
-  , bool: "P.Bool"
-  , int: "P.Int"
-  , float: "P.Double"
-  , char: "P.Char"
-  , string: "R.Text"
-  , list: \x -> "[" <> x <> "]"
-  , option: \x -> "(P.Maybe " <> x <> ")"
-  , either: \x y -> "(P.Either (" <> x <> ") (" <> y <> "))"
+  { unit: "void"
+  , bool: "Boolean"
+  , int: "Integer"
+  , float: "Double"
+  , char: "Char"
+  , string: "String"
+  , list: \x -> "ArrayList<" <> x <> ">"
+  , option: \x -> "Optional<" <> x <> ">"
+  , either: \x y -> "Either<" <> x <> "," <> y <> ">"
   , label: \x -> if x == "tag" then "_tag" else x
   , version: \major x -> "V" <> show major <> "." <> x
   }
