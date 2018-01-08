@@ -1,7 +1,7 @@
 
-////////////////////////////////////////////////////////
-// Types
-////////////////////////////////////////////////////////
+--------------------------------------------------------
+-- Types
+--------------------------------------------------------
 
 
 // Struct: Address
@@ -16,8 +16,8 @@ public class Address {
 public class Person {
     public Name name;
     public Phone phone;
-    public Optional<Address> address;
-    public ArrayList<PersonId> friends;
+    public (Maybe Address) address;
+    public (List PersonId) friends;
 }
 
 // Struct: LookupPerson

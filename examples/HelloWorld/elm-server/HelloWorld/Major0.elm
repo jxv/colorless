@@ -4,7 +4,7 @@
 --------------------------------------------------------
 
 
-// Struct: Hello
-public class Hello {
-    public String target;
-}
+-- Struct: Hello
+type Hello =
+  { target : String
+  }

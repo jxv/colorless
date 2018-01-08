@@ -25,6 +25,7 @@
 
 * C++
 * Clojure
+* Elm
 * Go
 * Java
 * JavaScript
