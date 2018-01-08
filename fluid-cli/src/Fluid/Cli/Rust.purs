@@ -6,4 +6,4 @@ import Fluid.Gen.Rust.ServerLatest as ServerLatest
 import Fluid.Cli.Generator as Gen
 
 generateServer :: Gen.Generator
-generateServer = Gen.generateServer (\major -> "major" <> show major <> ".rs") "server.rs" Server.gen ServerLatest.gen
+generateServer = Gen.generateServer (\major -> "major_" <> show major <> ".rs") "server.rs" Server.gen ServerLatest.gen

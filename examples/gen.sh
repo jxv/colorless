@@ -8,6 +8,7 @@ fluid -l javascript -s HelloWorld/specs -n helloWorld -m HelloWorld -d ./HelloWo
 fluid -l purescript -s HelloWorld/specs -m HelloWorld -n HelloWorld -d ./HelloWorld/purescript-server -e server
 fluid -l purescript -s HelloWorld/specs -m HelloWorld -n HelloWorld -d ./HelloWorld/purescript-client -e client
 fluid -l rust -s HelloWorld/specs -m hello_world -n hello_world -d ./HelloWorld/rust-server -e server
+fluid -l scala -s HelloWorld/specs -m HelloWorld -n HelloWorld -d ./HelloWorld/scala-server -e server
 fluid -l swift -s HelloWorld/specs -m HelloWorld -n HelloWorld -d ./HelloWorld/swift-server -e server
 
 # HelloWorld with public specs
@@ -17,6 +18,7 @@ fluid -l java -s HelloWorldPublic/specs.json -m HelloWorld -n HelloWorld -d ./He
 fluid -l javascript -s HelloWorldPublic/specs.json -m HelloWorld -n helloWorld -d ./HelloWorldPublic/javascript-client -e client
 fluid -l purescript -s HelloWorldPublic/specs.json -m HelloWorld -n HelloWorld -d ./HelloWorldPublic/purescript-server -e server
 fluid -l rust -s HelloWorldPublic/specs.json -m hello_world -n hello_world -d ./HelloWorldPublic/rust-server -e server
+fluid -l scala -s HelloWorldPublic/specs.json -m HelloWorld -n HelloWorld -d ./HelloWorldPublic/scala-server -e server
 fluid -l swift -s HelloWorldPublic/specs.json -m HelloWorld -n HelloWorld -d ./HelloWorldPublic/swift-server -e server
 
 # Phonebook
@@ -26,4 +28,5 @@ fluid -l java -s Phonebook/specs -m Phonebook -n Phonebook -d ./Phonebook/java-s
 fluid -l javascript -s Phonebook/specs -m Phonebook -n phonebook -d ./Phonebook/javascript-client -e client
 fluid -l purescript -s Phonebook/specs -m Phonebook -n Phonebook -d ./Phonebook/purescript-server -e server
 fluid -l rust -s Phonebook/specs -m hello_world -n hello_world -d ./Phonebook/rust-server -e server
+fluid -l scala -s Phonebook/specs -m HelloWorld -n HelloWorld -d ./Phonebook/scala-server -e server
 fluid -l swift -s Phonebook/specs -m HelloWorld -n HelloWorld -d ./Phonebook/swift-server -e server
