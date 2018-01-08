@@ -66,22 +66,22 @@ instance Phonebook'Service meta m => Phonebook'Service meta (M.ExceptT C.Respons
 --------------------------------------------------------
 
 -- Wrap: PersonId
-newtype PersonId = PersonId R.Text
+newtype PersonId = PersonId P.String
 
 -- Wrap: Name
-newtype Name = Name R.Text
+newtype Name = Name P.String
 
 -- Wrap: Phone
-newtype Phone = Phone R.Text
+newtype Phone = Phone P.String
 
 -- Wrap: Street
-newtype Street = Street R.Text
+newtype Street = Street P.String
 
 -- Wrap: City
-newtype City = City R.Text
+newtype City = City P.String
 
 -- Wrap: Zipcode
-newtype Zipcode = Zipcode R.Text
+newtype Zipcode = Zipcode P.String
 
 -- Struct: Address
 data Address = Address
@@ -122,7 +122,7 @@ data State
   | State'Other State'Other'Members
 
 data State'Other'Members = State'Other'Members
-  { state'OtherName :: R.Text
+  { state'OtherName :: P.String
   }
 
 --------------------------------------------------------

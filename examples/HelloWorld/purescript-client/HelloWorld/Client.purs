@@ -38,7 +38,7 @@ helloWorld'pull = C.Pull "http" "127.0.0.1" "/" 8080
 
 -- Struct: Hello
 data Hello = Hello
-  { target :: R.Text
+  { target :: P.String
   }
 
 --------------------------------------------------------
@@ -48,16 +48,16 @@ data Hello = Hello
 helloWorld'request :: (Ast.ToAst a, C.HasType a, R.FromJSON a) => () -> C.Expr a -> C.Request () a
 helloWorld'request _meta _query = C.Request (C.Version 0 0) helloWorld'version _meta _query
 
-helloWorld'Hello :: C.Expr Hello -> C.Expr R.Text
+helloWorld'Hello :: C.Expr Hello -> C.Expr P.String
 helloWorld'Hello = C.unsafeExpr P.. Ast.Ast'StructCall P.. Ast.StructCall "Hello" P.. Ast.toAst
 
-hello'Mk :: C.Expr (R.Text -> Hello)
+hello'Mk :: C.Expr (P.String -> Hello)
 hello'Mk = C.unsafeStructExpr ["target"]
 
 hello' :: Hello -> C.Expr Hello
 hello' = C.unsafeExpr P.. Ast.toAst
 
-hello'target :: C.Path (Hello -> R.Text)
+hello'target :: C.Path (Hello -> P.String)
 hello'target = C.unsafePath ["target"]
 
 --------------------------------------------------------

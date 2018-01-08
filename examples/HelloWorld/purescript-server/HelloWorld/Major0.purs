@@ -40,7 +40,7 @@ class C.ServiceThrower m <= HelloWorld'Thrower m where
 
 -- Service
 class P.Monad m <= HelloWorld'Service meta m where
-  helloWorld'Hello :: meta -> Hello -> m R.Text
+  helloWorld'Hello :: meta -> Hello -> m P.String
 
 instance HelloWorld'Service meta m => HelloWorld'Service meta (M.ExceptT C.Response m) where
   helloWorld'Hello _meta = M.lift P.. helloWorld'Hello _meta
@@ -51,7 +51,7 @@ instance HelloWorld'Service meta m => HelloWorld'Service meta (M.ExceptT C.Respo
 
 -- Struct: Hello
 data Hello = Hello
-  { target :: R.Text
+  { target :: P.String
   }
 
 --------------------------------------------------------
