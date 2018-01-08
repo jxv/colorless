@@ -11,6 +11,7 @@ import Fluid.Cli.Args
 import Fluid.Cli.Clojure (generateServer) as Clojure
 import Fluid.Cli.Cpp (generateServer) as Cpp
 import Fluid.Cli.Java (generateServer) as Java
+import Fluid.Cli.Go (generateServer) as Go
 import Fluid.Cli.JavaScript (generateClient) as JavaScript
 import Fluid.Cli.Haskell (generateServer, generateClient) as Haskell
 import Fluid.Cli.Node (generateServer) as Node
@@ -24,6 +25,7 @@ import Fluid.Cli.Generator (generate)
 
 import Fluid.Gen.Clojure.Conversion (conversion) as Clojure
 import Fluid.Gen.Cpp.Conversion (conversion) as Cpp
+import Fluid.Gen.Go.Conversion (conversion) as Go
 import Fluid.Gen.Java.Conversion (conversion) as Java
 import Fluid.Gen.JavaScript.Conversion (conversion) as JavaScript
 import Fluid.Gen.Haskell.Conversion (conversion) as Haskell
@@ -45,6 +47,8 @@ main = launchAff do
     then generate Clojure.conversion args Set.empty Clojure.generateServer else pure unit
   if args.lang == "cpp" && args.side == "server"
     then generate Cpp.conversion args Set.empty Cpp.generateServer else pure unit
+  if args.lang == "go" && args.side == "server"
+    then generate Go.conversion args Set.empty Go.generateServer else pure unit
   if args.lang == "java" && args.side == "server"
     then generate Java.conversion args Set.empty Java.generateServer else pure unit
   if args.lang == "javascript" && args.side == "client"

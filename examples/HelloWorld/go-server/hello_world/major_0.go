@@ -5,9 +5,6 @@
 
 
 // Struct: Hello
-struct Hello;
-
-// Struct: Hello
-struct Hello {
-   std::string target;
-};
+type Hello struct {
+    target string
+}

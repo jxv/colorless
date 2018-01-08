@@ -23,7 +23,9 @@
 
 ### Language repos
 
+* C++
 * Clojure
+* Go
 * Java
 * JavaScript
 * [Haskell](https://github.com/jxv/fluid-haskell)
