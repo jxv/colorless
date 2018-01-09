@@ -1,0 +1,15 @@
+
+////////////////////////////////////////////////////////
+// Types
+////////////////////////////////////////////////////////
+
+// Struct: Hello
+struct Hello
+{
+    std.string.String target;
+
+    this(std.string.String _target)
+    {
+        target = _target;
+    }
+}

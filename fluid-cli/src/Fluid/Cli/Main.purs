@@ -12,6 +12,7 @@ import Fluid.Cli.Clojure (generateServer) as Clojure
 import Fluid.Cli.Cpp (generateServer) as Cpp
 import Fluid.Cli.Crystal (generateServer) as Crystal
 import Fluid.Cli.CSharp (generateServer) as CSharp
+import Fluid.Cli.D (generateServer) as D
 import Fluid.Cli.Elm (generateServer) as Elm
 import Fluid.Cli.Go (generateServer) as Go
 import Fluid.Cli.Java (generateServer) as Java
@@ -33,6 +34,7 @@ main = launchAff do
   when (args.lang == "cpp" && args.side == "server") (Cpp.generateServer args)
   when (args.lang == "crystal" && args.side == "server") (Crystal.generateServer args)
   when (args.lang == "csharp" && args.side == "server") (CSharp.generateServer args)
+  when (args.lang == "d" && args.side == "server") (D.generateServer args)
   when (args.lang == "elm" && args.side == "server") (Elm.generateServer args)
   when (args.lang == "go" && args.side == "server") (Go.generateServer args)
   when (args.lang == "haskell" && args.side == "server") (Haskell.generateServer args)

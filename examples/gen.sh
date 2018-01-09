@@ -4,6 +4,7 @@
 fluid -l cpp -s HelloWorld/specs -m HelloWorld -n HelloWorld -d ./HelloWorld/cpp-server -e server
 fluid -l crystal -s HelloWorld/specs -m hello_world -n hello_world -d ./HelloWorld/crystal-server -e server
 fluid -l csharp -s HelloWorld/specs -m HelloWorld -n HelloWorld -d ./HelloWorld/csharp-server -e server
+fluid -l d -s HelloWorld/specs -m HelloWorld -n HelloWorld -d ./HelloWorld/d-server -e server
 fluid -l elm -s HelloWorld/specs -m HelloWorld -n HelloWorld -d ./HelloWorld/elm-server -e server
 fluid -l go -s HelloWorld/specs -m hello_world -n hello_world -d ./HelloWorld/go-server -e server
 fluid -l haskell -s HelloWorld/specs -m HelloWorld -n HelloWorld -d ./HelloWorld/haskell-server -e server -a scotty
@@ -24,6 +25,7 @@ fluid -l haskell -s HelloWorldPublic/specs.json -m HelloWorld -n HelloWorld -d .
 fluid -l cpp -s Phonebook/specs -m Phonebook -n Phonebook -d ./Phonebook/cpp-server -e server
 fluid -l crystal -s Phonebook/specs -m phonebook -n phonebook -d ./Phonebook/crystal-server -e server
 fluid -l csharp -s Phonebook/specs -m Phonebook -n Phonebook -d ./Phonebook/csharp-server -e server
+fluid -l d -s Phonebook/specs -m Phonebook -n Phonebook -d ./Phonebook/d-server -e server
 fluid -l elm -s Phonebook/specs -m Phonebook -n Phonebook -d ./Phonebook/elm-server -e server
 fluid -l go -s Phonebook/specs -m phonebook -n phonebook -d ./Phonebook/go-server -e server
 fluid -l haskell -s Phonebook/specs -m Phonebook -n Phonebook -d ./Phonebook/haskell-server -e server -a scotty
