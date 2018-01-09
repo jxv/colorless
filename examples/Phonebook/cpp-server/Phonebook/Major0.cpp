@@ -30,8 +30,8 @@ struct Address {
 struct Person {
    Name name;
    Phone phone;
-   (Address | Nil) address;
-   Array(PersonId) friends;
+   std::optional<Address> address;
+   std::vector<PersonId> friends;
 };
 
 // Struct: LookupPerson

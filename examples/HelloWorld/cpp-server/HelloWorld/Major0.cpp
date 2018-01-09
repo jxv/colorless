@@ -8,5 +8,5 @@ struct Hello;
 
 // Struct: Hello
 struct Hello {
-   String target;
+   std::string target;
 };

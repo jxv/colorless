@@ -1,4 +1,4 @@
-module Fluid.Gen.Go.Conversion where
+module Fluid.Gen.CSharp.Conversion where
 
 import Prelude ((<>), (==), show)
 
@@ -8,13 +8,13 @@ conversion :: Conversion
 conversion =
   { unit: "void"
   , bool: "bool"
-  , int: "int32"
-  , float: "float64"
+  , int: "int"
+  , float: "double"
   , char: "char"
   , string: "string"
-  , list: \_x -> "List"
-  , option: \x -> x <> "*"
-  , either: \_x _y -> "Either"
+  , list: \x -> "ArrayList<" <> x <> ">"
+  , option: \x -> "Option<" <> x <> ">"
+  , either: \x y -> "Either<" <> x <> "," <> y <> ">"
   , label: \x -> if x == "tag" then "_tag" else x
   , version: \major x -> "V" <> show major <> "." <> x
   }

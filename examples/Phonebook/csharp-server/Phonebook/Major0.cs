@@ -4,13 +4,15 @@
 ////////////////////////////////////////////////////////
 
 // Struct: Address
-public class Address {
+public struct Address
+{
     public Street street;
     public City city;
     public Zipcode zipcode;
     public State state;
 
-    public Address(Street _street, City _city, Zipcode _zipcode, State _state) {
+    public Address(Street _street, City _city, Zipcode _zipcode, State _state)
+    {
         street = _street;
         city = _city;
         zipcode = _zipcode;
@@ -19,13 +21,15 @@ public class Address {
 }
 
 // Struct: Person
-public class Person {
+public struct Person
+{
     public Name name;
     public Phone phone;
-    public (Maybe Address) address;
-    public (List PersonId) friends;
+    public Option<Address> address;
+    public ArrayList<PersonId> friends;
 
-    public Person(Name _name, Phone _phone, (Maybe Address) _address, (List PersonId) _friends) {
+    public Person(Name _name, Phone _phone, Option<Address> _address, ArrayList<PersonId> _friends)
+    {
         name = _name;
         phone = _phone;
         address = _address;
@@ -34,28 +38,34 @@ public class Person {
 }
 
 // Struct: LookupPerson
-public class LookupPerson {
+public struct LookupPerson
+{
     public PersonId id;
 
-    public LookupPerson(PersonId _id) {
+    public LookupPerson(PersonId _id)
+    {
         id = _id;
     }
 }
 
 // Struct: LookupPersonByName
-public class LookupPersonByName {
+public struct LookupPersonByName
+{
     public Name name;
 
-    public LookupPersonByName(Name _name) {
+    public LookupPersonByName(Name _name)
+    {
         name = _name;
     }
 }
 
 // Struct: InsertPerson
-public class InsertPerson {
+public struct InsertPerson
+{
     public Person person;
 
-    public InsertPerson(Person _person) {
+    public InsertPerson(Person _person)
+    {
         person = _person;
     }
 }

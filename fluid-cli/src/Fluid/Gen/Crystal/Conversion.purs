@@ -8,7 +8,7 @@ conversion :: Conversion
 conversion =
   { unit: "Void"
   , bool: "Bool"
-  , int: "Int64"
+  , int: "Int32"
   , float: "Float64"
   , char: "Char"
   , string: "String"

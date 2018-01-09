@@ -8,8 +8,8 @@ conversion :: Conversion
 conversion =
   { unit: "()"
   , bool: "bool"
-  , int: "int"
-  , float: "double"
+  , int: "i32"
+  , float: "f64"
   , char: "char"
   , string: "str"
   , list: \x -> "std::collections::LinkedList<" <> x <> ">"

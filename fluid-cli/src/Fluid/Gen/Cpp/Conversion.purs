@@ -8,7 +8,7 @@ conversion :: Conversion
 conversion =
   { unit: "void"
   , bool: "bool"
-  , int: "int64_t"
+  , int: "int32_t"
   , float: "double"
   , char: "char"
   , string: "std::string"

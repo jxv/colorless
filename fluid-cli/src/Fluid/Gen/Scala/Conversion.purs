@@ -8,7 +8,7 @@ conversion :: Conversion
 conversion =
   { unit: "scala.Unit"
   , bool: "scala.Boolean"
-  , int: "scala.Long"
+  , int: "scala.Int"
   , float: "scala.Double"
   , char: "scala.Char"
   , string: "String"

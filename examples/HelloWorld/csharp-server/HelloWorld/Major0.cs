@@ -4,10 +4,12 @@
 ////////////////////////////////////////////////////////
 
 // Struct: Hello
-public class Hello {
-    public String target;
+public struct Hello
+{
+    public string target;
 
-    public Hello(String _target) {
+    public Hello(string _target)
+    {
         target = _target;
     }
 }
