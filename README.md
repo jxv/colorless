@@ -23,14 +23,15 @@
 
 ### Language repos
 
-* C++
 * Clojure
 * Crystal
+* C++
+* C#
 * Elm
 * Go
+* [Haskell](https://github.com/jxv/fluid-haskell)
 * Java
 * JavaScript
-* [Haskell](https://github.com/jxv/fluid-haskell)
 * Node
 * [PureScript](https://github.com/jxv/fluid-purescript)
 * Python
