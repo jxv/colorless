@@ -16,7 +16,6 @@ gen plan addonNames = linesContent do
   line "////////////////////////////////////////////////////////"
   line "// Types"
   line "////////////////////////////////////////////////////////"
-  line ""
   traverse_ declareStruct currentStructs
   traverse_ genStruct currentStructs
   line ""

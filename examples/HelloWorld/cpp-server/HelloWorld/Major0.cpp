@@ -3,11 +3,10 @@
 // Types
 ////////////////////////////////////////////////////////
 
-
 // Struct: Hello
 struct Hello;
 
 // Struct: Hello
 struct Hello {
-   std::string target;
+   String target;
 };

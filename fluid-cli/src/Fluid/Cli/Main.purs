@@ -11,6 +11,7 @@ import Data.Set as Set
 import Fluid.Cli.Args
 import Fluid.Cli.Clojure (generateServer) as Clojure
 import Fluid.Cli.Cpp (generateServer) as Cpp
+import Fluid.Cli.Crystal (generateServer) as Crystal
 import Fluid.Cli.Elm (generateServer) as Elm
 import Fluid.Cli.Go (generateServer) as Go
 import Fluid.Cli.Java (generateServer) as Java
@@ -27,6 +28,7 @@ import Fluid.Cli.Generator (generate)
 
 import Fluid.Gen.Clojure.Conversion (conversion) as Clojure
 import Fluid.Gen.Cpp.Conversion (conversion) as Cpp
+import Fluid.Gen.Crystal.Conversion (conversion) as Crystal
 import Fluid.Gen.Elm.Conversion (conversion) as Elm
 import Fluid.Gen.Go.Conversion (conversion) as Go
 import Fluid.Gen.Java.Conversion (conversion) as Java
@@ -48,6 +50,7 @@ main = launchAff do
 
   when (args.lang == "clojure" && args.side == "server") (generate Clojure.conversion args Set.empty Clojure.generateServer)
   when (args.lang == "cpp" && args.side == "server") (generate Cpp.conversion args Set.empty Cpp.generateServer)
+  when (args.lang == "crystal" && args.side == "server") (generate Crystal.conversion args Set.empty Crystal.generateServer)
   when (args.lang == "elm" && args.side == "server") (generate Elm.conversion args Set.empty Elm.generateServer)
   when (args.lang == "go" && args.side == "server") (generate Go.conversion args Set.empty Go.generateServer)
   when (args.lang == "java" && args.side == "server") (generate Java.conversion args Set.empty Java.generateServer)

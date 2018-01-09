@@ -3,7 +3,6 @@
 // Types
 ////////////////////////////////////////////////////////
 
-
 // Struct: Address
 struct Address;
 
@@ -31,8 +30,8 @@ struct Address {
 struct Person {
    Name name;
    Phone phone;
-   std::optional<Address> address;
-   std::vector<PersonId> friends;
+   (Address | Nil) address;
+   Array(PersonId) friends;
 };
 
 // Struct: LookupPerson
