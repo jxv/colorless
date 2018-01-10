@@ -14,6 +14,7 @@ import Fluid.Cli.Crystal (generateServer) as Crystal
 import Fluid.Cli.CSharp (generateServer) as CSharp
 import Fluid.Cli.D (generateServer) as D
 import Fluid.Cli.Elm (generateServer) as Elm
+import Fluid.Cli.FSharp (generateServer) as FSharp
 import Fluid.Cli.Go (generateServer) as Go
 import Fluid.Cli.Java (generateServer) as Java
 import Fluid.Cli.JavaScript (generateClient) as JavaScript
@@ -36,6 +37,7 @@ main = launchAff do
   when (args.lang == "csharp" && args.side == "server") (CSharp.generateServer args)
   when (args.lang == "d" && args.side == "server") (D.generateServer args)
   when (args.lang == "elm" && args.side == "server") (Elm.generateServer args)
+  when (args.lang == "fsharp" && args.side == "server") (FSharp.generateServer args)
   when (args.lang == "go" && args.side == "server") (Go.generateServer args)
   when (args.lang == "haskell" && args.side == "server") (Haskell.generateServer args)
   when (args.lang == "haskell" && args.side == "client") (Haskell.generateClient args)

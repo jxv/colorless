@@ -3,7 +3,6 @@
 -- Types
 --------------------------------------------------------
 
-
 -- Struct: Address
 type Address =
   { street : Street
