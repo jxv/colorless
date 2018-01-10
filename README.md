@@ -28,6 +28,7 @@
 * C++
 * C#
 * Elm
+* F#
 * Go
 * [Haskell](https://github.com/jxv/fluid-haskell)
 * Java
