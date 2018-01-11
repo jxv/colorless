@@ -19,6 +19,7 @@ import Fluid.Cli.Go (generateServer) as Go
 import Fluid.Cli.Java (generateServer) as Java
 import Fluid.Cli.JavaScript (generateClient) as JavaScript
 import Fluid.Cli.Haskell (generateServer, generateClient) as Haskell
+import Fluid.Cli.Idris (generateServer) as Idris
 import Fluid.Cli.Node (generateServer) as Node
 import Fluid.Cli.PureScript (generateServer, generateClient) as PureScript
 import Fluid.Cli.Python (generateServer) as Python
@@ -41,6 +42,7 @@ main = launchAff do
   when (args.lang == "go" && args.side == "server") (Go.generateServer args)
   when (args.lang == "haskell" && args.side == "server") (Haskell.generateServer args)
   when (args.lang == "haskell" && args.side == "client") (Haskell.generateClient args)
+  when (args.lang == "idris" && args.side == "server") (Idris.generateServer args)
   when (args.lang == "java" && args.side == "server") (Java.generateServer args)
   when (args.lang == "javascript" && args.side == "client") (JavaScript.generateClient args)
   when (args.lang == "node" && args.side == "server") (Node.generateServer args)

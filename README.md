@@ -31,6 +31,7 @@
 * F#
 * Go
 * [Haskell](https://github.com/jxv/fluid-haskell)
+* Idris
 * Java
 * JavaScript
 * Node
