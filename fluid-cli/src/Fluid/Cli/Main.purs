@@ -19,6 +19,7 @@ import Fluid.Cli.Go (generateServer) as Go
 import Fluid.Cli.Java (generateServer) as Java
 import Fluid.Cli.JavaScript (generateClient) as JavaScript
 import Fluid.Cli.Kotlin (generateServer) as Kotlin
+import Fluid.Cli.OCaml (generateServer) as OCaml
 import Fluid.Cli.Haskell (generateServer, generateClient) as Haskell
 import Fluid.Cli.Idris (generateServer) as Idris
 import Fluid.Cli.Node (generateServer) as Node
@@ -47,6 +48,7 @@ main = launchAff do
   when (args.lang == "java" && args.side == "server") (Java.generateServer args)
   when (args.lang == "javascript" && args.side == "client") (JavaScript.generateClient args)
   when (args.lang == "kotlin" && args.side == "server") (Kotlin.generateServer args)
+  when (args.lang == "ocaml" && args.side == "server") (OCaml.generateServer args)
   when (args.lang == "node" && args.side == "server") (Node.generateServer args)
   when (args.lang == "python" && args.side == "server") (Python.generateServer args)
   when (args.lang == "ruby" && args.side == "server") (Ruby.generateServer args)

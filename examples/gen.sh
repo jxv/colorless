@@ -14,6 +14,7 @@ fluid -l idris -s HelloWorld/specs -m HelloWorld -n HelloWorld -d ./HelloWorld/i
 fluid -l java -s HelloWorld/specs -m HelloWorld -n HelloWorld -d ./HelloWorld/java-server -e server
 fluid -l javascript -s HelloWorld/specs -n helloWorld -m HelloWorld -d ./HelloWorld/javascript-client -e client
 fluid -l kotlin -s HelloWorld/specs -m HelloWorld -n HelloWorld -d ./HelloWorld/kotlin-server -e server
+fluid -l ocaml -s HelloWorld/specs -m HelloWorld -n HelloWorld -d ./HelloWorld/ocaml-server -e server
 fluid -l purescript -s HelloWorld/specs -m HelloWorld -n HelloWorld -d ./HelloWorld/purescript-server -e server
 fluid -l purescript -s HelloWorld/specs -m HelloWorld -n HelloWorld -d ./HelloWorld/purescript-client -e client
 fluid -l rust -s HelloWorld/specs -m hello_world -n hello_world -d ./HelloWorld/rust-server -e server
@@ -38,6 +39,7 @@ fluid -l idris -s Phonebook/specs -m Phonebook -n Phonebook -d ./Phonebook/idris
 fluid -l java -s Phonebook/specs -m Phonebook -n Phonebook -d ./Phonebook/java-server -e server
 fluid -l javascript -s Phonebook/specs -m Phonebook -n phonebook -d ./Phonebook/javascript-client -e client
 fluid -l kotlin -s Phonebook/specs -m Phonebook -n Phonebook -d ./Phonebook/kotlin-server -e server
+fluid -l ocaml -s Phonebook/specs -m Phonebook -n Phonebook -d ./Phonebook/ocaml-server -e server
 fluid -l purescript -s Phonebook/specs -m Phonebook -n Phonebook -d ./Phonebook/purescript-server -e server
 fluid -l rust -s Phonebook/specs -m hello_world -n hello_world -d ./Phonebook/rust-server -e server
 fluid -l scala -s Phonebook/specs -m HelloWorld -n HelloWorld -d ./Phonebook/scala-server -e server

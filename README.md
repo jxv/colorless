@@ -34,7 +34,9 @@
 * Idris
 * Java
 * JavaScript
+* Kotlin
 * Node
+* OCaml
 * [PureScript](https://github.com/jxv/fluid-purescript)
 * Python
 * Ruby
