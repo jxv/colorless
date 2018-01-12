@@ -12,4 +12,6 @@ type Conversion =
   , either :: String -> String -> String
   , label :: String -> String
   , version :: Int -> String -> String
+  , struct :: String -> String
+  , member :: String -> String
   }

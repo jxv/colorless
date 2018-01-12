@@ -17,4 +17,6 @@ conversion =
   , either: \x y -> "std::Result<" <> x <> "," <> y <> ">"
   , label: \x -> if x == "tag" then "_tag" else x
   , version: \major x -> "major" <> show major <> "::" <> x
+  , struct: \s -> s
+  , member: \m -> m
   }
