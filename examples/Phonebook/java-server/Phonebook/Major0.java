@@ -22,10 +22,10 @@ public class Address {
 public class Person {
     public Name name;
     public Phone phone;
-    public (Maybe Address) address;
-    public (List PersonId) friends;
+    public Address? address;
+    public List<PersonId> friends;
 
-    public Person(Name _name, Phone _phone, (Maybe Address) _address, (List PersonId) _friends) {
+    public Person(Name _name, Phone _phone, Address? _address, List<PersonId> _friends) {
         name = _name;
         phone = _phone;
         address = _address;
