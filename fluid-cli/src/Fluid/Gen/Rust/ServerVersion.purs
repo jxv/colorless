@@ -22,7 +22,6 @@ gen plan addonNames = linesContent do
   line "////////////////////////////////////////////////////////"
   line "// Types"
   line "////////////////////////////////////////////////////////"
-  line ""
   traverse_ genWrap currentWraps
   traverse_ genStruct currentStructs
   traverse_ genEnumeration currentEnumerations

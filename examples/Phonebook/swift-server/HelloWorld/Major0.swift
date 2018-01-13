@@ -33,7 +33,8 @@ struct Address {
 // Struct: Person
 struct Person {
     let name: Name
-    let phone: Phone
+    let homeNumber: Phone
+    let cellNumber: Phone
     let address: Address?
     let friends: [PersonId]
 }

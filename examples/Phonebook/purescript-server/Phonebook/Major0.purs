@@ -94,7 +94,8 @@ data Address = Address
 -- Struct: Person
 data Person = Person
   { name :: Name
-  , phone :: Phone
+  , homeNumber :: Phone
+  , cellNumber :: Phone
   , address :: (P.Maybe Address)
   , friends :: [PersonId]
   }
@@ -331,12 +332,14 @@ instance R.FromJSON Address where
 instance C.ToVal Person where
   toVal Person
     { name
-    , phone
+    , homeNumber
+    , cellNumber
     , address
     , friends
     } = C.Val'ApiVal P.$ C.ApiVal'Struct P.$ C.Struct P.$ R.fromList
     [ ("name", C.toVal name)
-    , ("phone", C.toVal phone)
+    , ("homeNumber", C.toVal homeNumber)
+    , ("cellNumber", C.toVal cellNumber)
     , ("address", C.toVal address)
     , ("friends", C.toVal friends)
     ]
@@ -345,7 +348,8 @@ instance C.FromVal Person where
   fromVal = \case
     C.Val'ApiVal (C.ApiVal'Struct (C.Struct _m)) -> Person
       P.<$> C.getMember _m "name"
-      P.<*> C.getMember _m "phone"
+      P.<*> C.getMember _m "homeNumber"
+      P.<*> C.getMember _m "cellNumber"
       P.<*> C.getMember _m "address"
       P.<*> C.getMember _m "friends"
     _ -> P.Nothing
@@ -468,4 +472,4 @@ instance R.FromJSON State where
 
 phonebook'spec :: R.Value
 phonebook'spec = v
-  where P.Just v = R.decode "{\"fluid\":{\"major\":0,\"minor\":0},\"schema\":{\"PersonId\":\"String\",\"Name\":\"String\",\"Phone\":\"String\",\"Street\":\"String\",\"City\":\"String\",\"State\":[\"CA\",\"NY\",\"TX\",{\"tag\":\"Other\",\"m\":[{\"name\":\"String\"}]}],\"Zipcode\":\"String\",\"Address\":{\"m\":[{\"street\":\"Street\"},{\"city\":\"City\"},{\"zipcode\":\"Zipcode\"},{\"state\":\"State\"}]},\"Person\":{\"m\":[{\"name\":\"Name\"},{\"phone\":\"Phone\"},{\"address\":{\"n\":\"Option\",\"p\":\"Address\"}},{\"friends\":{\"n\":\"List\",\"p\":\"PersonId\"}}]},\"LookupPerson\":{\"m\":[{\"id\":\"PersonId\"}],\"o\":{\"n\":\"Option\",\"p\":\"Person\"}},\"LookupPersonByName\":{\"m\":[{\"name\":\"Name\"}],\"o\":{\"n\":\"List\",\"p\":\"Person\"}},\"InsertPerson\":{\"m\":[{\"person\":\"Person\"}],\"o\":\"PersonId\"}},\"pull\":{\"protocol\":\"http\",\"name\":\"Phonebook\",\"host\":\"127.0.0.1\",\"path\":\"/\",\"port\":8000,\"error\":\"Unit\",\"meta\":\"Unit\"},\"version\":{\"major\":0,\"minor\":0}}"
+  where P.Just v = R.decode "{\"fluid\":{\"major\":0,\"minor\":0},\"schema\":{\"PersonId\":\"String\",\"Name\":\"String\",\"Phone\":\"String\",\"Street\":\"String\",\"City\":\"String\",\"State\":[\"CA\",\"NY\",\"TX\",{\"tag\":\"Other\",\"m\":[{\"name\":\"String\"}]}],\"Zipcode\":\"String\",\"Address\":{\"m\":[{\"street\":\"Street\"},{\"city\":\"City\"},{\"zipcode\":\"Zipcode\"},{\"state\":\"State\"}]},\"Person\":{\"m\":[{\"name\":\"Name\"},{\"homeNumber\":\"Phone\"},{\"cellNumber\":\"Phone\"},{\"address\":{\"n\":\"Option\",\"p\":\"Address\"}},{\"friends\":{\"n\":\"List\",\"p\":\"PersonId\"}}]},\"LookupPerson\":{\"m\":[{\"id\":\"PersonId\"}],\"o\":{\"n\":\"Option\",\"p\":\"Person\"}},\"LookupPersonByName\":{\"m\":[{\"name\":\"Name\"}],\"o\":{\"n\":\"List\",\"p\":\"Person\"}},\"InsertPerson\":{\"m\":[{\"person\":\"Person\"}],\"o\":\"PersonId\"}},\"pull\":{\"protocol\":\"http\",\"name\":\"Phonebook\",\"host\":\"127.0.0.1\",\"path\":\"/\",\"port\":8000,\"error\":\"Unit\",\"meta\":\"Unit\"},\"version\":{\"major\":0,\"minor\":0}}"

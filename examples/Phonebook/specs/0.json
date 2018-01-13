@@ -9,7 +9,7 @@
       "State": ["CA","NY","TX", {"tag":"Other","m":[{"name":"String"}]}],
       "Zipcode": "String",
       "Address": { "m": [ {"street":"Street"}, {"city":"City"}, {"zipcode":"Zipcode"}, {"state":"State"} ] },
-      "Person": { "m": [ {"name": "Name"}, {"phone": "Phone"}, {"address":{"n":"Option","p":"Address"}}, {"friends": {"n":"List", "p": "PersonId"}} ] },
+      "Person": { "m": [ {"name": "Name"}, {"homeNumber":"Phone"}, {"cellNumber": "Phone"}, {"address":{"n":"Option","p":"Address"}}, {"friends": {"n":"List", "p": "PersonId"}} ] },
       "LookupPerson": { "m": [{"id": "PersonId"}], "o": {"n":"Option","p":"Person"} },
       "LookupPersonByName": { "m": [{"name": "Name"}], "o": {"n":"List","p":"Person"} },
       "InsertPerson": { "m": [{"person":"Person"}], "o": "PersonId" }

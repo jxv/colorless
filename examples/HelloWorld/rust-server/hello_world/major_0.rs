@@ -4,7 +4,6 @@ mod hello_world::major_0 {
 // Types
 ////////////////////////////////////////////////////////
 
-
 // Struct: Hello
 #[derive(Debug)]
 struct Hello {

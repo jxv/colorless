@@ -12,8 +12,8 @@ end
 
 # Struct: Person
 struct Person
-  property name, phone, address, friends
-  def initialize(@name : Name, @phone : Phone, @address : (Address | Nil), @friends : Array(PersonId))
+  property name, home_number, cell_number, address, friends
+  def initialize(@name : Name, @home_number : Phone, @cell_number : Phone, @address : (Address | Nil), @friends : Array(PersonId))
   end
 end
 

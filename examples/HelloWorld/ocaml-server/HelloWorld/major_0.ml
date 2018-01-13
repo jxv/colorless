@@ -3,7 +3,7 @@
 // Types
 ////////////////////////////////////////////////////////
 
-// Struct: Hello
-type Hello = {
+// Struct: hello
+type hello = {
   target : string;
 }

@@ -29,7 +29,8 @@ struct Address {
 // Struct: Person
 struct Person {
    Name name;
-   Phone phone;
+   Phone home_number;
+   Phone cell_number;
    std::optional<Address> address;
    std::vector<PersonId> friends;
 };

@@ -24,14 +24,16 @@ public struct Address
 public struct Person
 {
     public Name name;
-    public Phone phone;
+    public Phone homeNumber;
+    public Phone cellNumber;
     public Option<Address> address;
     public ArrayList<PersonId> friends;
 
-    public Person(Name _name, Phone _phone, Option<Address> _address, ArrayList<PersonId> _friends)
+    public Person(Name _name, Phone _homeNumber, Phone _cellNumber, Option<Address> _address, ArrayList<PersonId> _friends)
     {
         name = _name;
-        phone = _phone;
+        homeNumber = _homeNumber;
+        cellNumber = _cellNumber;
         address = _address;
         friends = _friends;
     }

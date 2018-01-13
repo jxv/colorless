@@ -14,7 +14,8 @@ type Address =
 -- Struct: Person
 type Person =
   { name : Name
-  , phone : Phone
+  , homeNumber : Phone
+  , cellNumber : Phone
   , address : (Maybe Address)
   , friends : (List PersonId)
   }

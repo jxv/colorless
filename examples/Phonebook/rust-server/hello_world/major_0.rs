@@ -4,7 +4,6 @@ mod hello_world::major_0 {
 // Types
 ////////////////////////////////////////////////////////
 
-
 // Wrap: PersonId
 #[derive(Debug)]
 struct PersonId(str);
@@ -42,7 +41,8 @@ struct Address {
 #[derive(Debug)]
 struct Person {
     name: Name,
-    phone: Phone,
+    home_number: Phone,
+    cell_number: Phone,
     address: std::Option<Address>,
     friends: std::collections::LinkedList<PersonId>,
 }

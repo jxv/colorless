@@ -21,13 +21,15 @@ public class Address {
 // Struct: Person
 public class Person {
     public Name name;
-    public Phone phone;
+    public Phone homeNumber;
+    public Phone cellNumber;
     public Optional<Address> address;
     public ArrayList<PersonId> friends;
 
-    public Person(Name _name, Phone _phone, Optional<Address> _address, ArrayList<PersonId> _friends) {
+    public Person(Name _name, Phone _homeNumber, Phone _cellNumber, Optional<Address> _address, ArrayList<PersonId> _friends) {
         name = _name;
-        phone = _phone;
+        homeNumber = _homeNumber;
+        cellNumber = _cellNumber;
         address = _address;
         friends = _friends;
     }

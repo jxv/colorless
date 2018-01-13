@@ -24,14 +24,16 @@ struct Address
 struct Person
 {
     Name name;
-    Phone phone;
+    Phone homeNumber;
+    Phone cellNumber;
     std.typecons.Nullable!(Address) address;
     std.container.dlist.DList!(PersonId) friends;
 
-    this(Name _name, Phone _phone, std.typecons.Nullable!(Address) _address, std.container.dlist.DList!(PersonId) _friends)
+    this(Name _name, Phone _homeNumber, Phone _cellNumber, std.typecons.Nullable!(Address) _address, std.container.dlist.DList!(PersonId) _friends)
     {
         name = _name;
-        phone = _phone;
+        homeNumber = _homeNumber;
+        cellNumber = _cellNumber;
         address = _address;
         friends = _friends;
     }

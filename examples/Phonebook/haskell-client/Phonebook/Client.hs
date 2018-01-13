@@ -65,7 +65,8 @@ module Phonebook.Client
   , address'zipcode
   , address'state
   , person'name
-  , person'phone
+  , person'homeNumber
+  , person'cellNumber
   , person'address
   , person'friends
   , lookupPerson'id
@@ -136,7 +137,8 @@ data Address = Address
 -- Struct: Person
 data Person = Person
   { personName :: Name
-  , personPhone :: Phone
+  , personHomeNumber :: Phone
+  , personCellNumber :: Phone
   , personAddress :: (P.Maybe Address)
   , personFriends :: [PersonId]
   } deriving (P.Show, P.Eq)
@@ -238,8 +240,8 @@ address'zipcode = C.unsafePath ["zipcode"]
 address'state :: C.Path (Address -> State)
 address'state = C.unsafePath ["state"]
 
-person'Mk :: C.Expr (Name -> Phone -> (P.Maybe Address) -> [PersonId] -> Person)
-person'Mk = C.unsafeStructExpr ["name", "phone", "address", "friends"]
+person'Mk :: C.Expr (Name -> Phone -> Phone -> (P.Maybe Address) -> [PersonId] -> Person)
+person'Mk = C.unsafeStructExpr ["name", "homeNumber", "cellNumber", "address", "friends"]
 
 person' :: Person -> C.Expr Person
 person' = C.unsafeExpr P.. Ast.toAst
@@ -247,8 +249,11 @@ person' = C.unsafeExpr P.. Ast.toAst
 person'name :: C.Path (Person -> Name)
 person'name = C.unsafePath ["name"]
 
-person'phone :: C.Path (Person -> Phone)
-person'phone = C.unsafePath ["phone"]
+person'homeNumber :: C.Path (Person -> Phone)
+person'homeNumber = C.unsafePath ["homeNumber"]
+
+person'cellNumber :: C.Path (Person -> Phone)
+person'cellNumber = C.unsafePath ["cellNumber"]
 
 person'address :: C.Path (Person -> (P.Maybe Address))
 person'address = C.unsafePath ["address"]
@@ -518,12 +523,14 @@ instance C.HasType Person where
 instance C.ToVal Person where
   toVal Person
     { personName
-    , personPhone
+    , personHomeNumber
+    , personCellNumber
     , personAddress
     , personFriends
     } = C.Val'ApiVal P.$ C.ApiVal'Struct P.$ C.Struct P.$ R.fromList
     [ ("name", C.toVal personName)
-    , ("phone", C.toVal personPhone)
+    , ("homeNumber", C.toVal personHomeNumber)
+    , ("cellNumber", C.toVal personCellNumber)
     , ("address", C.toVal personAddress)
     , ("friends", C.toVal personFriends)
     ]
@@ -532,7 +539,8 @@ instance C.FromVal Person where
   fromVal = \case
     C.Val'ApiVal (C.ApiVal'Struct (C.Struct _m)) -> Person
       P.<$> C.getMember _m "name"
-      P.<*> C.getMember _m "phone"
+      P.<*> C.getMember _m "homeNumber"
+      P.<*> C.getMember _m "cellNumber"
       P.<*> C.getMember _m "address"
       P.<*> C.getMember _m "friends"
     _ -> P.Nothing
@@ -552,12 +560,14 @@ instance R.FromJSON Person where
 instance Ast.ToAst Person where
   toAst Person
     { personName
-    , personPhone
+    , personHomeNumber
+    , personCellNumber
     , personAddress
     , personFriends
     } = Ast.Ast'Struct P.. Ast.Struct P.$ R.fromList
     [ ("name", Ast.toAst personName)
-    , ("phone", Ast.toAst personPhone)
+    , ("homeNumber", Ast.toAst personHomeNumber)
+    , ("cellNumber", Ast.toAst personCellNumber)
     , ("address", Ast.toAst personAddress)
     , ("friends", Ast.toAst personFriends)
     ]

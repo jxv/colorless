@@ -15,7 +15,8 @@ type Address struct {
 // Struct: Person
 type Person struct {
     name Name
-    phone Phone
+    home_number Phone
+    cell_number Phone
     address Address*
     friends List
 }

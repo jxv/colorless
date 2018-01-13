@@ -15,7 +15,8 @@ record Address where
 record Person where
     constructor MkPerson
     name : Name
-    phone : Phone
+    homeNumber : Phone
+    cellNumber : Phone
     address : (Maybe Address)
     friends : (List PersonId)
 

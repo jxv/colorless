@@ -17,6 +17,6 @@ conversion =
   , either: \x y -> "std::variant<" <> x <> "," <> y <> ">"
   , label: \x -> if x == "tag" then "_tag" else x
   , version: \major x -> "V" <> show major <> "." <> x
-  , struct: \s -> s
-  , member: \m -> m
+  , ty: \s -> s
+  , member: snakecase
   }

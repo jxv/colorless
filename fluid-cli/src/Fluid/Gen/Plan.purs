@@ -119,12 +119,12 @@ wrap conv major (Tuple n {w: ty@(Type w), o}) = do
   type' <- langType conv ty
   func <- makeFunc conv lowercase o
   let instances = { text: isString w.n, number: isNumber w.n }
-  pure { name, label, lowercase: lowercase, type: type', func, instances, major }
+  pure { name: conv.ty name, label, lowercase: lowercase, type: type', func, instances, major }
 
 member :: Conversion -> MemberDecl -> Maybe Member
 member conv (MemberDecl m) = do
   ty <- langType conv m.ty
-  pure { name: langTypeName conv m.name, label: conv.label m.name, "type": ty }
+  pure { name: conv.member (langTypeName conv m.name), label: conv.label m.name, "type": ty }
 
 struct :: Conversion -> StrMap (Set Dep) -> Set DepTag -> Int -> Tuple TypeName StructDecl -> Maybe Struct
 struct conv depGraph depFilter major (Tuple n {m,o}) = do
@@ -134,7 +134,7 @@ struct conv depGraph depFilter major (Tuple n {m,o}) = do
   members <- traverse (member conv) m
   func <- makeFunc conv lowercase o
   let indirection = requiresRecursiveIndirection depGraph depFilter n
-  pure { name, label, lowercase, members, func, major, indirection }
+  pure { name: conv.ty name, label, lowercase, members, func, major, indirection }
 
 enumeral :: Conversion -> EnumDecl -> Maybe Enumeral
 enumeral conv (EnumDecl {tag,m}) = do
@@ -155,7 +155,7 @@ enumeration conv depGraph depFilter major (Tuple n {e,o}) = do
   enumerals <- traverse (enumeral conv) e
   func <- makeFunc conv lowercase o
   let indirection = requiresRecursiveIndirection depGraph depFilter n
-  pure { name, label, lowercase, enumerals, func, major, indirection }
+  pure { name: conv.ty name, label, lowercase, enumerals, func, major, indirection }
 
 makeFunc :: Conversion -> TypeName -> Maybe Type -> Maybe (Maybe { name :: TypeName, output :: String })
 makeFunc conv name output = case map (langType conv) output of
@@ -260,12 +260,12 @@ isNumber name = name == "Int" || name == "Float"
 
 langTypeName :: Conversion -> TypeName -> String
 langTypeName conv name = case primMap conv name of
-  Nothing -> name
+  Nothing -> conv.ty name
   Just name' -> name'
 
 langTypeNameVersion :: Conversion -> Int -> TypeName -> String
-langTypeNameVersion conv@{version} major name = case primMap conv name of
-  Nothing -> version major name
+langTypeNameVersion conv@{version, ty} major name = case primMap conv name of
+  Nothing -> version major (ty name)
   Just name' -> name'
 
 langTypeGeneric :: Conversion -> (TypeName -> String) -> Type -> Maybe String
