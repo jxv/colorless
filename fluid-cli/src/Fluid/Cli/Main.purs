@@ -29,6 +29,7 @@ import Fluid.Cli.Ruby (generateServer) as Ruby
 import Fluid.Cli.Rust (generateServer) as Rust
 import Fluid.Cli.Scala (generateServer) as Scala
 import Fluid.Cli.Swift (generateServer) as Swift
+import Fluid.Cli.TypeScript (generateServer) as TypeScript
 
 main :: forall eff. Eff (fs :: FS, console :: CONSOLE | eff) (Fiber (fs :: FS, console :: CONSOLE | eff) Unit)
 main = launchAff do
@@ -57,3 +58,4 @@ main = launchAff do
   when (args.lang == "purescript" && args.side == "client") (PureScript.generateClient args)
   when (args.lang == "scala" && args.side == "server") (Scala.generateServer args)
   when (args.lang == "swift" && args.side == "server") (Swift.generateServer args)
+  when (args.lang == "typescript" && args.side == "server") (TypeScript.generateServer args)

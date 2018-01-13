@@ -20,6 +20,7 @@ fluid -l purescript -s HelloWorld/specs -m HelloWorld -n HelloWorld -d ./HelloWo
 fluid -l rust -s HelloWorld/specs -m hello_world -n hello_world -d ./HelloWorld/rust-server -e server
 fluid -l scala -s HelloWorld/specs -m HelloWorld -n HelloWorld -d ./HelloWorld/scala-server -e server
 fluid -l swift -s HelloWorld/specs -m HelloWorld -n HelloWorld -d ./HelloWorld/swift-server -e server
+fluid -l typescript -s HelloWorld/specs -m hello_world -n hello_world -d ./HelloWorld/typescript-server -e server
 
 # HelloWorld with public specs
 fluid -l haskell -s HelloWorldPublic/specs.json -m HelloWorld -n HelloWorld -d ./HelloWorldPublic/haskell-server -e server -a scotty
@@ -44,3 +45,4 @@ fluid -l purescript -s Phonebook/specs -m Phonebook -n Phonebook -d ./Phonebook/
 fluid -l rust -s Phonebook/specs -m hello_world -n hello_world -d ./Phonebook/rust-server -e server
 fluid -l scala -s Phonebook/specs -m HelloWorld -n HelloWorld -d ./Phonebook/scala-server -e server
 fluid -l swift -s Phonebook/specs -m HelloWorld -n HelloWorld -d ./Phonebook/swift-server -e server
+fluid -l typescript -s Phonebook/specs -m hello_world -n hello_world -d ./Phonebook/typescript-server -e server

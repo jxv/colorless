@@ -43,4 +43,5 @@
 * Rust
 * Scala
 * Swift
+* TypeScript
 * [And more to come!](https://github.com/jxv/fluid/blob/master/targets.txt)
