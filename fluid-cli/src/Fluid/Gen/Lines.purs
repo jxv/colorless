@@ -30,3 +30,10 @@ lineList arr headPrefix tailPrefix f = case Array.uncons arr of
   Just {head,tail} -> do
     addLine $ [headPrefix] <> f head
     flip traverse_ tail $ \item -> addLine $ [tailPrefix] <> f item
+
+lineListPostfix :: forall a. Array a -> String -> String -> (a -> Array String) -> Lines Unit
+lineListPostfix arr initPostfix lastPostfix f = case Array.unsnoc arr of
+  Nothing -> pure unit
+  Just {init,last} -> do
+    flip traverse_ init $ \item -> addLine $ f item <> [initPostfix]
+    addLine $ f last <> [lastPostfix]

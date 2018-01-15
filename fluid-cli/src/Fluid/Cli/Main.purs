@@ -25,6 +25,7 @@ import Fluid.Cli.Idris (generateServer) as Idris
 import Fluid.Cli.Node (generateServer) as Node
 import Fluid.Cli.PureScript (generateServer, generateClient) as PureScript
 import Fluid.Cli.Python (generateServer) as Python
+import Fluid.Cli.Reason (generateServer) as Reason
 import Fluid.Cli.Ruby (generateServer) as Ruby
 import Fluid.Cli.Rust (generateServer) as Rust
 import Fluid.Cli.Scala (generateServer) as Scala
@@ -52,6 +53,7 @@ main = launchAff do
   when (args.lang == "ocaml" && args.side == "server") (OCaml.generateServer args)
   when (args.lang == "node" && args.side == "server") (Node.generateServer args)
   when (args.lang == "python" && args.side == "server") (Python.generateServer args)
+  when (args.lang == "reason" && args.side == "server") (Reason.generateServer args)
   when (args.lang == "ruby" && args.side == "server") (Ruby.generateServer args)
   when (args.lang == "rust" && args.side == "server") (Rust.generateServer args)
   when (args.lang == "purescript" && args.side == "server") (PureScript.generateServer args)
