@@ -10,6 +10,7 @@ fluid -l fsharp -s HelloWorld/specs -m HelloWorld -n HelloWorld -d ./HelloWorld/
 fluid -l go -s HelloWorld/specs -m hello_world -n hello_world -d ./HelloWorld/go-server -e server
 fluid -l haskell -s HelloWorld/specs -m HelloWorld -n HelloWorld -d ./HelloWorld/haskell-server -e server -a scotty
 fluid -l haskell -s HelloWorld/specs -m HelloWorld -n HelloWorld -d ./HelloWorld/haskell-client -e client -a http-client
+fluid -l haxe -s HelloWorld/specs -m HelloWorld -n HelloWorld -d ./HelloWorld/haxe-server -e server
 fluid -l idris -s HelloWorld/specs -m HelloWorld -n HelloWorld -d ./HelloWorld/idris-server -e server
 fluid -l java -s HelloWorld/specs -m HelloWorld -n HelloWorld -d ./HelloWorld/java-server -e server
 fluid -l javascript -s HelloWorld/specs -n helloWorld -m HelloWorld -d ./HelloWorld/javascript-client -e client
@@ -38,6 +39,7 @@ fluid -l fsharp -s Phonebook/specs -m Phonebook -n Phonebook -d ./Phonebook/fsha
 fluid -l go -s Phonebook/specs -m phonebook -n phonebook -d ./Phonebook/go-server -e server
 fluid -l haskell -s Phonebook/specs -m Phonebook -n Phonebook -d ./Phonebook/haskell-server -e server -a scotty
 fluid -l haskell -s Phonebook/specs -m Phonebook -n Phonebook -d ./Phonebook/haskell-client -e client -a http-client
+fluid -l haxe -s Phonebook/specs -m Phonebook -n Phonebook -d ./Phonebook/haxe-server -e server
 fluid -l idris -s Phonebook/specs -m Phonebook -n Phonebook -d ./Phonebook/idris-server -e server
 fluid -l java -s Phonebook/specs -m Phonebook -n Phonebook -d ./Phonebook/java-server -e server
 fluid -l javascript -s Phonebook/specs -m Phonebook -n phonebook -d ./Phonebook/javascript-client -e client

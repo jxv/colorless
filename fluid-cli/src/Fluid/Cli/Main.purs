@@ -16,12 +16,13 @@ import Fluid.Cli.D (generateServer) as D
 import Fluid.Cli.Elm (generateServer) as Elm
 import Fluid.Cli.FSharp (generateServer) as FSharp
 import Fluid.Cli.Go (generateServer) as Go
+import Fluid.Cli.Haskell (generateServer, generateClient) as Haskell
+import Fluid.Cli.Haxe (generateServer) as Haxe
+import Fluid.Cli.Idris (generateServer) as Idris
 import Fluid.Cli.Java (generateServer) as Java
 import Fluid.Cli.JavaScript (generateClient) as JavaScript
 import Fluid.Cli.Kotlin (generateServer) as Kotlin
 import Fluid.Cli.OCaml (generateServer) as OCaml
-import Fluid.Cli.Haskell (generateServer, generateClient) as Haskell
-import Fluid.Cli.Idris (generateServer) as Idris
 import Fluid.Cli.Node (generateServer) as Node
 import Fluid.Cli.Nim (generateServer) as Nim
 import Fluid.Cli.PureScript (generateServer, generateClient) as PureScript
@@ -47,6 +48,7 @@ main = launchAff do
   when (args.lang == "go" && args.side == "server") (Go.generateServer args)
   when (args.lang == "haskell" && args.side == "server") (Haskell.generateServer args)
   when (args.lang == "haskell" && args.side == "client") (Haskell.generateClient args)
+  when (args.lang == "haxe" && args.side == "server") (Haxe.generateServer args)
   when (args.lang == "idris" && args.side == "server") (Idris.generateServer args)
   when (args.lang == "java" && args.side == "server") (Java.generateServer args)
   when (args.lang == "javascript" && args.side == "client") (JavaScript.generateClient args)
