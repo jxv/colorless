@@ -35,6 +35,7 @@
 * Java
 * JavaScript
 * Kotlin
+* Nim
 * Node
 * OCaml
 * [PureScript](https://github.com/jxv/fluid-purescript)
