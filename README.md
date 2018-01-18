@@ -16,7 +16,7 @@
     Join the Slack
   </a>
   &nbsp;->&nbsp;
-  <a href="https://httpapis.slack.com/messages/C80SNUPMM">Channel!</a>
+  <a href="https://httpapis.slack.com/messages/C80SNUPMM">Channel</a>
 </p>
 
 <hr />
