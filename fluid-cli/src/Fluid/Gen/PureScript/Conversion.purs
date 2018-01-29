@@ -7,14 +7,14 @@ import Fluid.Gen.Conversion
 conversion :: Conversion
 conversion =
   { unit: "()"
-  , bool: "P.Boolean"
-  , int: "P.Int"
-  , float: "P.Number"
-  , char: "P.Char"
-  , string: "P.String"
+  , bool: "Boolean"
+  , int: "Int"
+  , float: "Number"
+  , char: "Char"
+  , string: "String"
   , list: \x -> "[" <> x <> "]"
-  , option: \x -> "(P.Maybe " <> x <> ")"
-  , either: \x y -> "(P.Either (" <> x <> ") (" <> y <> "))"
+  , option: \x -> "(Maybe.Maybe " <> x <> ")"
+  , either: \x y -> "(Either.Either (" <> x <> ") (" <> y <> "))"
   , label: \x -> if x == "tag" then "_tag" else x
   , version: \major x -> "V" <> show major <> "." <> x
   , ty: \s -> s

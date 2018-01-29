@@ -30,13 +30,8 @@ genImports {prefix, imports, importing} = do
   line ""
   lines
     [ "-- Imports"
-    , "import Prelude as P"
-    , "import Control.Monad as P"
-    , "import Control.Monad.Except as M"
-    , "import Data.IORef as IO"
-    , "import Data.String as P (IsString)"
-    , "import Fluid.Imports as R"
-    , "import Fluid.Server as C" ]
+    , "import Data.Maybe as Maybe"
+    , "import Data.Either as Either" ]
   traverse_ addLine $ map
     (\{name, major} -> ["import ", prefix, ".V", show major, " (", name, "(..))"])
     imports
@@ -290,18 +285,21 @@ gen plan addonNames = linesContent do
   line "-- Configs"
   line "--------------------------------------------------------"
 
+{-
   genVersion
     { lowercase: plan.lowercase
     , version: plan.version }
   genPull
     { lowercase: plan.lowercase
     , pull: plan.pull }
+-}
 
   line ""
   line "--------------------------------------------------------"
   line "-- Interfaces"
   line "--------------------------------------------------------"
 
+{-
   genThrower
     { name: plan.name
     , lowercase: plan.lowercase
@@ -310,6 +308,7 @@ gen plan addonNames = linesContent do
     { name: plan.name
     , lowercase: plan.lowercase
     , calls: serviceCalls }
+-}
 
   line ""
   line "--------------------------------------------------------"
@@ -325,13 +324,14 @@ gen plan addonNames = linesContent do
   line "-- Add-ons"
   line "--------------------------------------------------------"
 
-  traverse_ (\addon -> addon.gen) addons
+--  traverse_ (\addon -> addon.gen) addons
 
   line ""
   line "--------------------------------------------------------"
   line "-- Request handling"
   line "--------------------------------------------------------"
 
+{-
   genHandlerRequest
     { name: plan.name
     , lowercase: plan.lowercase
@@ -347,12 +347,14 @@ gen plan addonNames = linesContent do
   genApi
     { name: plan.name
     , calls: apiCalls }
+-}
 
   line ""
   line "--------------------------------------------------------"
   line "-- Type Instances"
   line "--------------------------------------------------------"
 
+  {-
   flip traverse_ currentWraps $ \ty -> do
     genWrapToVal ty
     genWrapFromVal ty
@@ -370,12 +372,13 @@ gen plan addonNames = linesContent do
     genEnumerationFromVal ty
     genToJson ty
     genFromJson ty
+  -}
 
   line ""
   line "--------------------------------------------------------"
   line "-- Spec"
   line "--------------------------------------------------------"
 
-  genSpec plan.lowercase plan.spec
+  -- genSpec plan.lowercase plan.spec
 
   line ""
