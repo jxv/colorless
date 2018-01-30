@@ -1,11 +1,6 @@
 -- Module
 module HelloWorld.Major0
   ( helloWorld'version
-  , helloWorld'pull
-  , helloWorld'handler
-  , helloWorld'spec
-  , HelloWorld'Thrower(..)
-  , HelloWorld'Service(..)
   , Hello(..)
   ) where
 
@@ -16,6 +11,10 @@ import Data.Either as Either
 --------------------------------------------------------
 -- Configs
 --------------------------------------------------------
+
+-- Version
+helloWorld'version :: { major :: Int, minor :: Int }
+helloWorld'version = { major: 0, minor: 0 }
 
 --------------------------------------------------------
 -- Interfaces

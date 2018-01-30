@@ -26,8 +26,8 @@ import qualified Fluid.Imports as R
 --------------------------------------------------------
 
 -- Version
-helloWorld'version :: C.Version
-helloWorld'version = C.Version 0 0
+helloWorld'version :: { major :: Int, minor :: Int }
+helloWorld'version = { major: 0, minor: 0 }
 
 helloWorld'pull :: C.Pull
 helloWorld'pull = C.Pull "http" "127.0.0.1" "/" 8080

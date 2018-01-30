@@ -1,11 +1,6 @@
 -- Module
 module Phonebook.Major0
   ( phonebook'version
-  , phonebook'pull
-  , phonebook'handler
-  , phonebook'spec
-  , Phonebook'Thrower(..)
-  , Phonebook'Service(..)
   , PersonId(..)
   , Name(..)
   , Phone(..)
@@ -28,6 +23,10 @@ import Data.Either as Either
 --------------------------------------------------------
 -- Configs
 --------------------------------------------------------
+
+-- Version
+phonebook'version :: { major :: Int, minor :: Int }
+phonebook'version = { major: 0, minor: 0 }
 
 --------------------------------------------------------
 -- Interfaces

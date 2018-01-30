@@ -31,8 +31,8 @@ genVersion :: { lowercase :: String, version :: Version } -> Lines Unit
 genVersion {lowercase, version} = do
   line ""
   line "-- Version"
-  addLine [lowercase, "'version :: C.Version"]
-  addLine [lowercase, "'version = C.Version ", show version.major, " ", show version.minor]
+  addLine [lowercase, "'version :: { major :: Int, minor :: Int }"]
+  addLine [lowercase, "'version = { major: ", show version.major, ", minor: ", show version.minor, " }"]
 
 genPull :: { lowercase :: String, pull :: PullPlan } -> Lines Unit
 genPull {lowercase, pull: {protocol, host, path, port}} = do

@@ -18,6 +18,7 @@ genModule { prefix, name, lowercase, major, exportTypes, values } = do
   line ""
   line "-- Module"
   addLine ["module ", prefix, ".Server"]
+{-
   addLine ["  ( ", lowercase, "'handlerMap"]
   addLine ["  , ", lowercase, "'spec"]
   flip traverse_ values $ \value -> do
@@ -28,6 +29,8 @@ genModule { prefix, name, lowercase, major, exportTypes, values } = do
   addLine ["  , V", show major, ".", name, "'Thrower(..)"]
   addLine ["  , V", show major, ".", lowercase, "'pull"]
   line "  ) where"
+-}
+  line "  where"
 
 genImporting :: { importing :: Array (Lines Unit) } -> Lines Unit
 genImporting {importing} = do
@@ -117,9 +120,11 @@ gen plans addons = case Array.head plans of
       , major: p.version.major
       , exportTypes
       , values: exporting }
+    {-
     genImporting { importing }
     flip traverse_ plans $ \p' -> genVersionImports { plan: p', values: mkExportTypes p' }
     genHandlerMap p.lowercase plans
     genPublicSpec { lowercase: p.lowercase, plans }
     sequence_ addonGen
+    -}
     line ""

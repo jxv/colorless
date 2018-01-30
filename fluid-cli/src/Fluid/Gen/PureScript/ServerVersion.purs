@@ -225,11 +225,13 @@ genModule {name, lowercase, prefix, version, types, values} = do
   line "-- Module"
   addLine ["module ", prefix, ".Major", show version.major]
   addLine ["  ( ", lowercase, "'version"]
+  {-
   addLine ["  , ", lowercase, "'pull"]
   addLine ["  , ", lowercase, "'handler"]
   addLine ["  , ", lowercase, "'spec"]
   addLine ["  , ", name, "'Thrower(..)"]
   addLine ["  , ", name, "'Service(..)"]
+  -}
   traverse_ addLine $ map (\ty -> ["  , ", ty, "(..)"]) types
   traverse_ addLine $ map (\value -> ["  , ", value]) values
   line "  ) where"
@@ -285,10 +287,10 @@ gen plan addonNames = linesContent do
   line "-- Configs"
   line "--------------------------------------------------------"
 
-{-
   genVersion
     { lowercase: plan.lowercase
     , version: plan.version }
+{-
   genPull
     { lowercase: plan.lowercase
     , pull: plan.pull }
