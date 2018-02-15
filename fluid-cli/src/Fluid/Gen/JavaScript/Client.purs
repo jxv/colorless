@@ -72,6 +72,7 @@ gen p _ = linesContent do
       line "  return {"
       addLine ["    n: '", label,"',"]
       addLine ["    e: e,"]
+      line "  };"
       line "};"
     else pure unit
   line ""
