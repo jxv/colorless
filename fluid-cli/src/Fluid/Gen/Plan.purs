@@ -212,7 +212,7 @@ plan conv depGraph depFilter prefix version spec addons latest jsonSpec = do
   hollows <- traverse (applyLangType latest (hollow conv)) (filterHollowDecl spec.schema)
   structs <- traverse (applyLangType latest (struct conv depGraph depFilter)) (filterStructDecl spec.schema)
   enumerations <- traverse (applyLangType latest (enumeration conv depGraph depFilter)) (filterEnumDecl spec.schema)
-  meta <- langTypeOr conv spec.pull.error (PlanError'NonGeneratableMeta spec.pull.meta)
+  meta <- langTypeOr conv spec.pull.meta (PlanError'NonGeneratableMeta spec.pull.meta)
   error <- langTypeOr conv spec.pull.error (PlanError'NonGeneratableError spec.pull.error)
   pure
     { prefix

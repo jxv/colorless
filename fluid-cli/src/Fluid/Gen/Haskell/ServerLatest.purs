@@ -63,7 +63,7 @@ genHandlerMap lowercase plans = do
   lineList plans
     "  => (xtra -> C.Hooks m "
     "  -> C.Hooks m "
-    (\p -> [p.pull.meta, " meta", show p.version.major, ")"])
+    (\p -> ["V", show p.version.major, ".", p.pull.meta, " meta", show p.version.major, ")"])
   line "  -> xtra"
   line "  -> R.Map C.Major (C.Minor, C.Request -> m (P.Either C.Response C.Response))"
   addLine $
@@ -107,7 +107,7 @@ scottyAddon head plans =
       line "    )"
       line "  => C.Pull"
       flip traverse_ plans $ \p ->
-        addLine ["  -> ([(Scotty.LazyText, Scotty.LazyText)] -> C.Hooks m ", p.pull.meta, " meta", show p.version.major, ")"]
+        addLine ["  -> ([(Scotty.LazyText, Scotty.LazyText)] -> C.Hooks m V", show p.version.major, ".", p.pull.meta, " meta", show p.version.major, ")"]
       addLine ["  -> Scotty.ScottyT e m ()"]
       addLine $
         [head.lowercase, "'Scotty'Post pull"] <>
