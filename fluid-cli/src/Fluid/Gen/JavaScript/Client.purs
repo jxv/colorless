@@ -67,7 +67,7 @@ gen p _ = linesContent do
           Nothing -> pure unit
           Just members ->
             flip traverse_ members $ \member ->
-              addLine ["  assert(e.", member.name, " !== undefined, \"`", name, "` with tag `", enumeral.tag, "` missing member `", member.name, "`\");"]
+              addLine ["    assert(e.", member.name, " !== undefined, \"`", name, "` with tag `", enumeral.tag, "` missing member `", member.name, "`\");"]
         addLine ["  }"]
       line "  return {"
       addLine ["    n: '", label,"',"]
@@ -75,4 +75,17 @@ gen p _ = linesContent do
       line "  };"
       line "};"
     else pure unit
+  line ""
+  line "export default {"
+  flip traverse_ p.hollows $ \{name} -> addLine ["  ", name, ","]
+  flip traverse_ p.wraps $ \{name,func} -> if isJust func
+    then addLine ["  ", name, ","]
+    else pure unit
+  flip traverse_ p.structs $ \{name,func} -> if isJust func
+    then addLine ["  ", name, ","]
+    else pure unit
+  flip traverse_ p.enumerations $ \{name,func} -> if isJust func
+    then addLine ["  ", name, ","]
+    else pure unit
+  line "};"
   line ""
