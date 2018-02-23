@@ -38,3 +38,13 @@ genEnumeration {name, enumerals, indirection} = do
         Just _ -> ["(", name, "_", enumeral.tag, ")"]) <>
       [","]
   line "}"
+
+  flip traverse_ enumerals $ \enumeral -> case enumeral.members of
+    Nothing -> pure unit
+    Just members -> do
+      line ""
+      addLine ["// Enumeration: ", name, ", Tag: ", enumeral.tag]
+      addLine ["struct ", name, "_", enumeral.tag, " {"]
+      flip traverse_ members $ \member ->
+        addLine ["    let ", member.name, ": ", member.type]
+      line "}"

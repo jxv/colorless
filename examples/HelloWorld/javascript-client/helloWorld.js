@@ -15,3 +15,7 @@ export const Hello = (m) => {
     },
   };
 };
+
+export default {
+  Hello,
+};

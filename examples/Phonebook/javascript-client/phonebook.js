@@ -37,3 +37,9 @@ export const InsertPerson = (m) => {
     },
   };
 };
+
+export default {
+  LookupPerson,
+  LookupPersonByName,
+  InsertPerson,
+};

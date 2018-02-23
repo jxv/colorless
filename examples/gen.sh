@@ -47,8 +47,8 @@ fluid -l kotlin -s Phonebook/specs -m Phonebook -n Phonebook -d ./Phonebook/kotl
 fluid -l ocaml -s Phonebook/specs -m Phonebook -n Phonebook -d ./Phonebook/ocaml-server -e server
 fluid -l nim -s Phonebook/specs -m phonebook -n phonebook -d ./Phonebook/nim-server -e server
 fluid -l purescript -s Phonebook/specs -m Phonebook -n Phonebook -d ./Phonebook/purescript-server/src -e server
-fluid -l reason -s Phonebook/specs -m HelloWorld -n HelloWorld -d ./Phonebook/reason-server -e server
-fluid -l rust -s Phonebook/specs -m hello_world -n hello_world -d ./Phonebook/rust-server -e server
-fluid -l scala -s Phonebook/specs -m HelloWorld -n HelloWorld -d ./Phonebook/scala-server -e server
-fluid -l swift -s Phonebook/specs -m HelloWorld -n HelloWorld -d ./Phonebook/swift-server -e server
-fluid -l typescript -s Phonebook/specs -m hello_world -n hello_world -d ./Phonebook/typescript-server -e server
+fluid -l reason -s Phonebook/specs -m Phonebook -n PHonebook -d ./Phonebook/reason-server -e server
+fluid -l rust -s Phonebook/specs -m Phonebook -n phonebook -d ./Phonebook/rust-server -e server
+fluid -l scala -s Phonebook/specs -m Phonebook -n Phonebook -d ./Phonebook/scala-server -e server
+fluid -l swift -s Phonebook/specs -m Phonebook -n Phonebook -d ./Phonebook/swift-server -e server
+fluid -l typescript -s Phonebook/specs -m phonebook -n phonebook -d ./Phonebook/typescript-server -e server

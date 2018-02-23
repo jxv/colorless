@@ -61,3 +61,8 @@ enum State {
     TX,
     Other(State_Other),
 }
+
+// Enumeration: State, Tag: Other
+struct State_Other {
+    let name: String
+}

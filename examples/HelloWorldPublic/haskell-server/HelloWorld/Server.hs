@@ -43,7 +43,7 @@ helloWorld'handlerMap
     , R.MonadCatch m
     , V0.HelloWorld'Service meta0 m
     )
-  => (xtra -> C.Hooks m () meta0)
+  => (xtra -> C.Hooks m V0.() meta0)
   -> xtra
   -> R.Map C.Major (C.Minor, C.Request -> m (P.Either C.Response C.Response))
 helloWorld'handlerMap hooks0 xtra = R.fromList
@@ -63,7 +63,7 @@ helloWorld'Scotty'Post
     , V0.HelloWorld'Service meta0 m
     )
   => C.Pull
-  -> ([(Scotty.LazyText, Scotty.LazyText)] -> C.Hooks m () meta0)
+  -> ([(Scotty.LazyText, Scotty.LazyText)] -> C.Hooks m V0.() meta0)
   -> Scotty.ScottyT e m ()
 helloWorld'Scotty'Post pull hooks0 = Scotty.respond pull (helloWorld'handlerMap hooks0)
 
