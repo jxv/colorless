@@ -32,11 +32,10 @@ genEnumeration {name, enumerals, indirection} = do
     ["enum ", name, " {"]
   flip traverse_ enumerals $ \enumeral ->
     addLine $
-      ["    ", enumeral.tag] <>
+      ["    case ", enumeral.tag] <>
       (case enumeral.members of
         Nothing -> [""]
-        Just _ -> ["(", name, "_", enumeral.tag, ")"]) <>
-      [","]
+        Just _ -> ["(", name, "_", enumeral.tag, ")"])
   line "}"
 
   flip traverse_ enumerals $ \enumeral -> case enumeral.members of

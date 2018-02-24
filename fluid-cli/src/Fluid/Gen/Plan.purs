@@ -138,7 +138,7 @@ struct conv depGraph depFilter major (Tuple n {m,o}) = do
 
 enumeral :: Conversion -> EnumDecl -> Maybe Enumeral
 enumeral conv (EnumDecl {tag,m}) = do
-  let tag' = langTypeName conv tag
+  let tag' = langTypeName conv (conv.tag tag)
   let label = conv.label tag
   members <- case m of
     Nothing -> pure Nothing

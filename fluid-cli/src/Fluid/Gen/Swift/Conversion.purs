@@ -19,4 +19,5 @@ conversion =
   , version: \major x -> "V" <> show major <> "." <> x
   , ty: \s -> s
   , member: \m -> m
+  , tag: lowerFirst
   }

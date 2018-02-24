@@ -21,6 +21,7 @@ type Conversion =
   , version :: Int -> String -> String
   , ty :: String -> String
   , member :: String -> String
+  , tag :: String -> String
   }
 
 snakecase :: String -> String
@@ -35,3 +36,8 @@ screamingSnakecase s = String.toUpper (snakecase s)
 
 isUpper :: Char -> Boolean
 isUpper c = c /= toLower c && c == toUpper c
+
+lowerFirst :: String -> String
+lowerFirst s = case uncons s of
+  Nothing -> ""
+  Just {head,tail} -> fromCharArray [toLower head] <> tail

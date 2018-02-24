@@ -19,4 +19,5 @@ conversion =
   , version: \major x -> "major" <> show major <> "::" <> x
   , ty: \s -> s
   , member: snakecase
+  , tag: \t -> t
   }

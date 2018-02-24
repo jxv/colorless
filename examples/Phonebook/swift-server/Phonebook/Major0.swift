@@ -56,13 +56,13 @@ struct InsertPerson {
 
 // Enumeration: State
 enum State {
-    CA,
-    NY,
-    TX,
-    Other(State_Other),
+    case cA
+    case nY
+    case tX
+    case other(State_other)
 }
 
-// Enumeration: State, Tag: Other
-struct State_Other {
+// Enumeration: State, Tag: other
+struct State_other {
     let name: String
 }
