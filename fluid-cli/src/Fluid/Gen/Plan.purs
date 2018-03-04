@@ -66,7 +66,7 @@ type Wrap =
   , lowercase :: String
   , type :: String
   , func :: Maybe Func
-  , instances :: { text :: Boolean, number :: Boolean }
+  , instances :: { text :: Boolean, number :: Boolean, float :: Boolean }
   , major :: Int
   }
 
@@ -118,7 +118,7 @@ wrap conv major (Tuple n {w: ty@(Type w), o}) = do
   let lowercase = lowercaseFirstLetter name
   type' <- langType conv ty
   func <- makeFunc conv lowercase o
-  let instances = { text: isString w.n, number: isNumber w.n }
+  let instances = { text: isString w.n, number: isNumber w.n, float: isFloat w.n }
   pure { name: conv.ty name, label, lowercase: lowercase, type: type', func, instances, major }
 
 member :: Conversion -> MemberDecl -> Maybe Member
@@ -257,6 +257,9 @@ isString name = name == "String"
 
 isNumber :: TypeName -> Boolean
 isNumber name = name == "Int" || name == "Float"
+
+isFloat :: TypeName -> Boolean
+isFloat name = name == "Float"
 
 langTypeName :: Conversion -> TypeName -> String
 langTypeName conv name = case primMap conv name of

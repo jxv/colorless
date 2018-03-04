@@ -73,11 +73,17 @@ genFromJson {name} = do
     , "      P.Just _y -> P.return _y" ]
 
 genWrap :: Wrap -> Lines Unit
-genWrap {name, type: type', label, instances: {text, number}} = do
+genWrap {name, type: type', label, instances: {text, number, float}} = do
   line ""
   addLine ["-- Wrap: ", name]
   addLine ["newtype ", name, " = ", name, " ", type']
-  addLine ["  deriving (P.Eq, P.Ord, ", if text then "P.IsString, R.ToText, " else "", if number then "P.Num, " else "", " P.Show)"]
+  addLine
+    [ "  deriving (P.Eq, P.Ord, "
+    , if text then "P.IsString, R.ToText, " else ""
+    , if number then "P.Num, P.Enum, " else ""
+    , if float then "P.Floating, P.Fractional, P.Real, " else ""
+    , "P.Show)"
+    ]
 
 genWrapToVal :: Wrap -> Lines Unit
 genWrapToVal {name} = do
