@@ -6,7 +6,7 @@
 
 
 <p align="center">
-  <b>The Programmatic IDL</b>
+  <b>Code-generated, Auto-versioned, & Smart Web APIs</b>
 </p>
 
 <hr />
@@ -23,7 +23,7 @@
 
 ### Language repos
 
-* Clojure
+* [Clojure](https://github.com/jxv/fluid-clojure)
 * Crystal
 * C++
 * C#
@@ -33,17 +33,17 @@
 * [Haskell](https://github.com/jxv/fluid-haskell)
 * Haxe
 * Idris
-* Java
-* JavaScript
+* [Java](https://github.com/jxv/fluid-java)
+* [JavaScript](https://github.com/jxv/fluid-javascript)
 * Kotlin
 * Nim
-* Node
+* [Node](https://github.com/jxv/fluid-node)
 * OCaml
 * [PureScript](https://github.com/jxv/fluid-purescript)
-* Python
-* Ruby
+* [Python](https://github.com/jxv/fluid-python)
+* [Ruby](https://github.com/jxv/fluid-ruby)
 * Rust
-* Scala
+* [Scala](https://github.com/jxv/fluid-scala)
 * [Swift](https://github.com/jxv/fluid-swift)
 * TypeScript
 * [And more to come!](https://github.com/jxv/fluid/blob/master/targets.txt)
