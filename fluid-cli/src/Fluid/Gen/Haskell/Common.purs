@@ -73,9 +73,12 @@ genFromJson {name} = do
     , "      P.Just _y -> P.return _y" ]
 
 genWrap :: Wrap -> Lines Unit
-genWrap {name, type: type', label, instances: {text, number, float}} = do
+genWrap {name, type: type', label, instances: {text, number, float}, comment} = do
   line ""
   addLine ["-- Wrap: ", name]
+  case comment of
+    Nothing -> pure unit
+    Just c -> addLine ["-- | ", c ]
   addLine ["newtype ", name, " = ", name, " ", type']
   addLine
     [ "  deriving (P.Eq, P.Ord, "
@@ -98,9 +101,12 @@ genWrapFromVal {name} = do
   addLine ["  fromVal _v = ", name, " P.<$> C.fromVal _v"]
 
 genStruct :: Struct -> Lines Unit
-genStruct {name, label, members} = do
+genStruct {name, label, members, comment} = do
   line ""
   addLine ["-- Struct: ", name]
+  case comment of
+    Nothing -> pure unit
+    Just c -> addLine ["-- | ", c ]
   addLine ["data ", name, " = ", name]
   lineList members
     "  { "
@@ -137,9 +143,12 @@ genStructFromVal {name,members} = do
   line "    _ -> P.Nothing"
 
 genEnumeration :: Enumeration -> Lines Unit
-genEnumeration {name, enumerals} = do
+genEnumeration {name, enumerals, comment} = do
   line ""
   addLine ["-- Enumeration: ", name]
+  case comment of
+    Nothing -> pure unit
+    Just c -> addLine ["-- |", c ]
   addLine ["data ", name]
   lineList enumerals "  = " "  | " (\e -> [name, "'", e.tag, if isJust e.members then " " <> name <> "'" <> e.tag <> "'Members" else ""])
   addLine ["  deriving (P.Show, P.Eq)"]

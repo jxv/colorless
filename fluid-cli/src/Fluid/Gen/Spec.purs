@@ -103,10 +103,10 @@ type Spec =
   , schema :: Schema
   }
 
-type HollowDecl = { o :: Type }
-type WrapDecl = { w :: Type, o :: Maybe Type }
-type EnumerationDecl = { e :: Array EnumDecl, o :: Maybe Type }
-type StructDecl = { m :: Array MemberDecl, o :: Maybe Type }
+type HollowDecl = { o :: Type, c :: Maybe String }
+type WrapDecl = { w :: Type, o :: Maybe Type, c :: Maybe String }
+type EnumerationDecl = { e :: Array EnumDecl, o :: Maybe Type, c :: Maybe String }
+type StructDecl = { m :: Array MemberDecl, o :: Maybe Type, c :: Maybe String }
 
 data TypeDecl
   = TypeDecl'Hollow HollowDecl
@@ -134,7 +134,16 @@ readTypeDecl value =
 readTypeDeclHollow :: Foreign -> F TypeDecl
 readTypeDeclHollow value = do
   o <- value ! "o" >>= readImpl
-  pure $ TypeDecl'Hollow { o: o }
+  c <- readMaybeComment value
+  pure $ TypeDecl'Hollow { o: o, c: c }
+
+readMaybeComment :: Foreign -> F (Maybe String)
+readMaybeComment value = do
+  if hasProperty "c" value
+    then do
+      o <- value ! "c" >>= readImpl
+      pure (Just o)
+    else pure Nothing
 
 readMaybeOutput :: Foreign -> F (Maybe Type)
 readMaybeOutput value = do
@@ -150,13 +159,14 @@ readTypeDeclWrap value = readTypeDeclWrapString value <|> readTypeDeclWrapObject
 readTypeDeclWrapString :: Foreign -> F TypeDecl
 readTypeDeclWrapString value = do
   w <- readTypeString value
-  pure $ TypeDecl'Wrap { w: w, o: Nothing }
+  pure $ TypeDecl'Wrap { w: w, o: Nothing, c: Nothing }
 
 readTypeDeclWrapObject :: Foreign -> F TypeDecl
 readTypeDeclWrapObject value = do
   w <- value ! "w" >>= readTypeString
   o <- readMaybeOutput value
-  pure $ TypeDecl'Wrap { w: w, o: o }
+  c <- readMaybeComment value
+  pure $ TypeDecl'Wrap { w: w, o: o, c: c }
 
 readTypeDeclEnum :: Foreign -> F TypeDecl
 readTypeDeclEnum value =
@@ -167,21 +177,23 @@ readTypeDeclEnumArray :: Foreign -> F TypeDecl
 readTypeDeclEnumArray value = do
   e <- readArray value
   e' <- traverse readImpl e
-  pure $ TypeDecl'Enum { e: e', o: Nothing }
+  pure $ TypeDecl'Enum { e: e', o: Nothing, c: Nothing }
 
 readTypeDeclEnumObject :: Foreign -> F TypeDecl
 readTypeDeclEnumObject value = do
   e <- value ! "e" >>= readArray
   e' <- traverse readImpl e
   o <- readMaybeOutput value
-  pure $ TypeDecl'Enum { e: e', o: o }
+  c <- readMaybeComment value
+  pure $ TypeDecl'Enum { e: e', o: o, c: c }
 
 readTypeDeclStruct :: Foreign -> F TypeDecl
 readTypeDeclStruct value = do
   m <- value ! "m" >>= readArray
   m' <- traverse readImpl m
   o <- readMaybeOutput value
-  pure $ TypeDecl'Struct { m: m', o: o }
+  c <- readMaybeComment value
+  pure $ TypeDecl'Struct { m: m', o: o, c: c }
 
 type TagName = String
 

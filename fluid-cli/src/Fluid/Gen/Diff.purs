@@ -48,17 +48,17 @@ typeDeclChange (TypeDecl'Enum e) (TypeDecl'Enum e') = enumChange e e'
 typeDeclChange (TypeDecl'Struct s) (TypeDecl'Struct s') = structChange s s'
 typeDeclChange _ _ = true
 
-hollowChange :: { o :: Type } -> { o :: Type } -> Boolean
+hollowChange :: forall a. { o :: Type | a } -> { o :: Type | a } -> Boolean
 hollowChange a b = a.o /= b.o
 
-wrapChange :: { w :: Type, o :: Maybe Type } -> { w :: Type, o :: Maybe Type } -> Boolean
+wrapChange :: forall a. { w :: Type, o :: Maybe Type | a } -> { w :: Type, o :: Maybe Type | a } -> Boolean
 wrapChange {w: aW, o: Nothing} {w: bW, o: _} = aW /= bW
 wrapChange {w: aW, o: aO@(Just _)} {w: bW, o: bO} = not $ aW == bW && aO == bO
 
-enumChange :: { e :: Array EnumDecl, o :: Maybe Type } -> { e :: Array EnumDecl, o :: Maybe Type } -> Boolean
+enumChange :: forall a. { e :: Array EnumDecl, o :: Maybe Type | a } -> { e :: Array EnumDecl, o :: Maybe Type | a } -> Boolean
 enumChange {e: aE, o: Nothing} {e: bE, o: _} = aE /= bE
 enumChange {e: aE, o: aO@(Just _)} {e: bE, o: bO} = not $ aE == bE && aO == bO
 
-structChange :: { m :: Array MemberDecl, o :: Maybe Type } -> { m :: Array MemberDecl, o :: Maybe Type } -> Boolean
+structChange :: forall a. { m :: Array MemberDecl, o :: Maybe Type | a } -> { m :: Array MemberDecl, o :: Maybe Type | a } -> Boolean
 structChange {m: aM, o: Nothing} {m: bM, o: _} = aM /= bM
 structChange {m: aM, o: aO@(Just _)} {m: bM, o: bO} = not $ aM == bM && aO == bO

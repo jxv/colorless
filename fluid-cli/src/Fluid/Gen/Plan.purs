@@ -61,6 +61,7 @@ type Hollow =
   , lowercase :: String
   , func :: Func
   , decl :: Tuple TypeName HollowDecl
+  , comment :: Maybe String
   }
 
 type Wrap =
@@ -72,6 +73,7 @@ type Wrap =
   , instances :: { text :: Boolean, number :: Boolean, float :: Boolean }
   , major :: Int
   , decl :: Tuple TypeName WrapDecl
+  , comment :: Maybe String
   }
 
 type Member =
@@ -89,6 +91,7 @@ type Struct =
   , major :: Int
   , indirection :: Boolean
   , decl :: Tuple TypeName StructDecl
+  , comment :: Maybe String
   }
 
 type Enumeral =
@@ -106,26 +109,27 @@ type Enumeration =
   , major :: Int
   , indirection :: Boolean
   , decl :: Tuple TypeName EnumerationDecl
+  , comment :: Maybe String
   }
 
 hollow :: Conversion -> Int -> Tuple TypeName HollowDecl -> Maybe Hollow
-hollow conv _ decl@(Tuple n {o}) = do
+hollow conv _ decl@(Tuple n {o,c}) = do
   let name = langTypeName conv n
   let label = conv.label n
   let lowercase = lowercaseFirstLetter name
   output <- langType conv o
   let func = { name: lowercase, output }
-  pure { name, label, lowercase, func, decl }
+  pure { name, label, lowercase, func, decl, comment: c }
 
 wrap :: Conversion -> Int -> Tuple TypeName WrapDecl -> Maybe Wrap
-wrap conv major decl@(Tuple n {w: ty@(Type w), o}) = do
+wrap conv major decl@(Tuple n {w: ty@(Type w), o,c}) = do
   let name = langTypeName conv n
   let label = conv.label n
   let lowercase = lowercaseFirstLetter name
   type' <- langType conv ty
   func <- makeFunc conv lowercase o
   let instances = { text: isString w.n, number: isNumber w.n, float: isFloat w.n }
-  pure { name: conv.ty name, label, lowercase: lowercase, type: type', func, instances, major, decl}
+  pure { name: conv.ty name, label, lowercase: lowercase, type: type', func, instances, major, decl, comment: c }
 
 member :: Conversion -> MemberDecl -> Maybe Member
 member conv (MemberDecl m) = do
@@ -133,14 +137,14 @@ member conv (MemberDecl m) = do
   pure { name: conv.member (langTypeName conv m.name), label: conv.label m.name, "type": ty }
 
 struct :: Conversion -> StrMap (Set Dep) -> Set DepTag -> Int -> Tuple TypeName StructDecl -> Maybe Struct
-struct conv depGraph depFilter major decl@(Tuple n {m,o}) = do
+struct conv depGraph depFilter major decl@(Tuple n {m,o,c}) = do
   let name = langTypeName conv n
   let label = conv.label n
   let lowercase = lowercaseFirstLetter name
   members <- traverse (member conv) m
   func <- makeFunc conv lowercase o
   let indirection = requiresRecursiveIndirection depGraph depFilter n
-  pure { name: conv.ty name, label, lowercase, members, func, major, indirection, decl }
+  pure { name: conv.ty name, label, lowercase, members, func, major, indirection, decl, comment: c }
 
 enumeral :: Conversion -> EnumDecl -> Maybe Enumeral
 enumeral conv (EnumDecl {tag,m}) = do
@@ -154,14 +158,14 @@ enumeral conv (EnumDecl {tag,m}) = do
   pure { tag: tag', label, members }
 
 enumeration :: Conversion -> StrMap (Set Dep) -> Set DepTag -> Int -> Tuple TypeName EnumerationDecl -> Maybe Enumeration
-enumeration conv depGraph depFilter major decl@(Tuple n {e,o}) = do
+enumeration conv depGraph depFilter major decl@(Tuple n {e,o,c}) = do
   let name = langTypeName conv n
   let label = conv.label n
   let lowercase = lowercaseFirstLetter name
   enumerals <- traverse (enumeral conv) e
   func <- makeFunc conv lowercase o
   let indirection = requiresRecursiveIndirection depGraph depFilter n
-  pure { name: conv.ty name, label, lowercase, enumerals, func, major, indirection, decl }
+  pure { name: conv.ty name, label, lowercase, enumerals, func, major, indirection, decl, comment: c }
 
 makeFunc :: Conversion -> TypeName -> Maybe Type -> Maybe (Maybe { name :: TypeName, output :: String })
 makeFunc conv name output = case map (langType conv) output of
