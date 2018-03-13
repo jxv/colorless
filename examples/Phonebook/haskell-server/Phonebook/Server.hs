@@ -67,7 +67,7 @@ phonebook'handlerMap
     , R.MonadCatch m
     , V0.Phonebook'Service meta0 m
     )
-  => (xtra -> C.Hooks m V0.() meta0)
+  => (xtra -> C.Hooks m () meta0)
   -> xtra
   -> R.Map C.Major (C.Minor, C.Request -> m (P.Either C.Response C.Response))
 phonebook'handlerMap hooks0 xtra = R.fromList

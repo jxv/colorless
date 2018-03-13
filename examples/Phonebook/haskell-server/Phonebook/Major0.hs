@@ -83,27 +83,27 @@ instance Phonebook'Service meta m => Phonebook'Service meta (M.ExceptT C.Respons
 
 -- Wrap: PersonId
 newtype PersonId = PersonId R.Text
-  deriving (P.Eq, P.Ord, P.IsString, R.ToText,  P.Show)
+  deriving (P.Eq, P.Ord, P.IsString, R.ToText, P.Show)
 
 -- Wrap: Name
 newtype Name = Name R.Text
-  deriving (P.Eq, P.Ord, P.IsString, R.ToText,  P.Show)
+  deriving (P.Eq, P.Ord, P.IsString, R.ToText, P.Show)
 
 -- Wrap: Phone
 newtype Phone = Phone R.Text
-  deriving (P.Eq, P.Ord, P.IsString, R.ToText,  P.Show)
+  deriving (P.Eq, P.Ord, P.IsString, R.ToText, P.Show)
 
 -- Wrap: Street
 newtype Street = Street R.Text
-  deriving (P.Eq, P.Ord, P.IsString, R.ToText,  P.Show)
+  deriving (P.Eq, P.Ord, P.IsString, R.ToText, P.Show)
 
 -- Wrap: City
 newtype City = City R.Text
-  deriving (P.Eq, P.Ord, P.IsString, R.ToText,  P.Show)
+  deriving (P.Eq, P.Ord, P.IsString, R.ToText, P.Show)
 
 -- Wrap: Zipcode
 newtype Zipcode = Zipcode R.Text
-  deriving (P.Eq, P.Ord, P.IsString, R.ToText,  P.Show)
+  deriving (P.Eq, P.Ord, P.IsString, R.ToText, P.Show)
 
 -- Struct: Address
 data Address = Address
