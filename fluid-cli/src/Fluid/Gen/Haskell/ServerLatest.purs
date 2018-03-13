@@ -3,6 +3,7 @@ module Fluid.Gen.Haskell.ServerLatest where
 import Data.Foldable
 import Fluid.Gen.Haskell.Common
 import Fluid.Gen.Plan
+import Fluid.Gen.Spec (isBuiltIn)
 import Fluid.Gen.Lines
 
 import Data.Array as Array
@@ -63,7 +64,7 @@ genHandlerMap lowercase plans = do
   lineList plans
     "  => (xtra -> C.Hooks m "
     "  -> C.Hooks m "
-    (\p -> ["V", show p.version.major, ".", p.pull.meta, " meta", show p.version.major, ")"])
+    (\p -> (if isBuiltIn p.pull.metaType then [p.pull.meta] else ["V", show p.version.major, ".", p.pull.meta]) <> [" meta", show p.version.major, ")"])
   line "  -> xtra"
   line "  -> R.Map C.Major (C.Minor, C.Request -> m (P.Either C.Response C.Response))"
   addLine $

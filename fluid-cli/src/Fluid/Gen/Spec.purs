@@ -242,3 +242,16 @@ parseSpecs s = lmap show $ readJSON s
 
 filterVersion :: forall a. Version -> Array { major :: Int | a } -> Array { major :: Int | a }
 filterVersion version = Array.filter (\ty -> ty.major == version.major)
+
+isBuiltIn :: Type -> Boolean
+isBuiltIn (Type {n}) = case n of
+  "Unit" -> true
+  "Bool" -> true
+  "Int" -> true
+  "Float" -> true
+  "Char" -> true
+  "String" -> true
+  "List" -> true
+  "Option" -> true
+  "Either" -> true
+  _ -> false
