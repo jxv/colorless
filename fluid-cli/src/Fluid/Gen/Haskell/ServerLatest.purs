@@ -51,6 +51,9 @@ genVersionImports {plan: p, values} = do
     addLine ["  , ", ty, "(..)"]
   line "  )"
 
+sanitizeMeta :: Plan -> Array String
+sanitizeMeta p = if isBuiltIn p.pull.metaType then [p.pull.meta] else ["V", show p.version.major, ".", p.pull.meta]
+
 genHandlerMap :: String -> Array Plan -> Lines Unit
 genHandlerMap lowercase plans = do
   line ""
@@ -64,7 +67,7 @@ genHandlerMap lowercase plans = do
   lineList plans
     "  => (xtra -> C.Hooks m "
     "  -> C.Hooks m "
-    (\p -> (if isBuiltIn p.pull.metaType then [p.pull.meta] else ["V", show p.version.major, ".", p.pull.meta]) <> [" meta", show p.version.major, ")"])
+    (\p -> sanitizeMeta p <> [" meta", show p.version.major, ")"])
   line "  -> xtra"
   line "  -> R.Map C.Major (C.Minor, C.Request -> m (P.Either C.Response C.Response))"
   addLine $
@@ -108,7 +111,7 @@ scottyAddon head plans =
       line "    )"
       line "  => C.Pull"
       flip traverse_ plans $ \p ->
-        addLine ["  -> ([(Scotty.LazyText, Scotty.LazyText)] -> C.Hooks m V", show p.version.major, ".", p.pull.meta, " meta", show p.version.major, ")"]
+        addLine $ ["  -> ([(Scotty.LazyText, Scotty.LazyText)] -> C.Hooks m "] <> sanitizeMeta p <> [" meta", show p.version.major, ")"]
       addLine ["  -> Scotty.ScottyT e m ()"]
       addLine $
         [head.lowercase, "'Scotty'Post pull"] <>

@@ -87,7 +87,7 @@ phonebook'Scotty'Post
     , V0.Phonebook'Service meta0 m
     )
   => C.Pull
-  -> ([(Scotty.LazyText, Scotty.LazyText)] -> C.Hooks m V0.() meta0)
+  -> ([(Scotty.LazyText, Scotty.LazyText)] -> C.Hooks m () meta0)
   -> Scotty.ScottyT e m ()
 phonebook'Scotty'Post pull hooks0 = Scotty.respond pull (phonebook'handlerMap hooks0)
 
