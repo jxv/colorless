@@ -66,7 +66,7 @@ genHandlerMap lowercase plans = do
   line "    )"
   lineList plans
     "  => (xtra -> C.Hooks m "
-    "  -> C.Hooks m "
+    "  -> (xtra -> C.Hooks m "
     (\p -> sanitizeMeta p <> [" meta", show p.version.major, ")"])
   line "  -> xtra"
   line "  -> R.Map C.Major (C.Minor, C.Request -> m (P.Either C.Response C.Response))"
@@ -117,7 +117,8 @@ scottyAddon head plans =
         [head.lowercase, "'Scotty'Post pull"] <>
         map (\p -> " hooks" <> show p.version.major) plans <>
         [" = Scotty.respond pull (", head.lowercase, "'handlerMap"] <>
-        map (\p -> " hooks" <> show p.version.major <> ")") plans
+        map (\p -> " hooks" <> show p.version.major) plans <>
+        [")"]
       line ""
       addLine [head.lowercase, "'Scotty'Get :: (Scotty.ScottyError e, R.MonadIO m) => C.Pull -> Scotty.ScottyT e m ()"]
       addLine [head.lowercase, "'Scotty'Get = Scotty.getSpec ", head.lowercase, "'spec"]
