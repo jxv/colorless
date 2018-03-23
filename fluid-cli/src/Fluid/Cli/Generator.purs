@@ -19,7 +19,7 @@ import Node.FS.Aff (readTextFile, readdir, FS)
 import Fluid.Gen.Conversion (Conversion)
 import Fluid.Gen.Version (applyVersionsFromSpec, applyVersionsFromSpecs)
 import Fluid.Gen.Spec (parseSpecs, parseSpec)
-import Fluid.Gen.Plan (Plan, PlanError, plan)
+import Fluid.Gen.Plan (Plan, PlanError, plan, onlyMajorVersions)
 import Fluid.Gen.History (createHistory)
 import Fluid.Gen.Blueprint (mkBlueprint, Blueprint)
 import Fluid.Gen.Dependency (DepFilter)
@@ -47,7 +47,7 @@ generateServer buildPathMajor serverName genMajor genLatest conv args depFilter 
       (\p -> Tuple p {path: buildPath (buildPathMajor bp.version.major), contents: genMajor p args.addon})
       (planFrom conv args depFilter bp))
     blueprints
-  let plans = map fst planTargets  :: Array Plan
+  let plans = onlyMajorVersions $ map fst planTargets :: Array Plan
   let versionTargets = map snd planTargets :: Array Target
   let latestTarget = { path: buildPath serverName, contents: genLatest plans args.addon }
   pure $ Array.cons latestTarget versionTargets
@@ -106,7 +106,10 @@ separate xs = foldr go (Right []) xs
 planFrom :: Conversion -> Args -> DepFilter -> Blueprint -> Either PlanError Plan
 planFrom conv args depFilter bp = let
   major = bp.version.major
-  prevMajor = major - 1
+  prevMajor =
+    if bp.version.minor == 0
+      then major - 1
+      else major
   typeVersionMapper typeName =
     if or [elem typeName bp.diff.addType, elem typeName bp.diff.removeType, elem typeName bp.diff.modifyType]
       then major

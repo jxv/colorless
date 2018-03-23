@@ -2,6 +2,7 @@ module Fluid.Gen.Plan where
 
 import Prelude
 
+import Data.Foldable (foldl)
 import Data.Array as Array
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
@@ -303,3 +304,28 @@ langType conv = langTypeGeneric conv (langTypeName conv)
 
 langTypeVersion :: Conversion -> Int -> Type -> Maybe String
 langTypeVersion conv major = langTypeGeneric conv (langTypeNameVersion conv major)
+
+onlyMajorVersions :: Array Plan -> Array Plan
+onlyMajorVersions arr = collapsePlanAccum $ foldl planAccumlator (Tuple [] Nothing) arr
+  where
+    planAccumlator :: Tuple (Array Plan) (Maybe Plan) -> Plan -> Tuple (Array Plan) (Maybe Plan)
+    planAccumlator (Tuple accum last') next = case last' of
+      Nothing -> Tuple accum (Just next)
+      Just last -> if samePlanMajor last next
+        then Tuple accum (Just $ greaterVersion last next)
+        else Tuple (Array.cons last accum) (Just next)
+
+    collapsePlanAccum :: Tuple (Array Plan) (Maybe Plan) -> Array Plan
+    collapsePlanAccum (Tuple accum bp) = case bp of
+      Nothing -> accum
+      Just bp' -> Array.cons bp' accum
+
+    samePlanMajor :: Plan -> Plan -> Boolean
+    samePlanMajor a b = a.version.major == b.version.major
+
+    greaterVersion :: Plan -> Plan -> Plan
+    greaterVersion a b
+      | a.version.major > b.version.major = a
+      | b.version.major > a.version.major = b
+      | a.version.minor > b.version.minor = a
+      | otherwise = b

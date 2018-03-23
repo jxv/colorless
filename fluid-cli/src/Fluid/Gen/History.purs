@@ -36,7 +36,7 @@ createHistory specs = case Array.head specs of
       (\(Tuple diff delta) spec -> {diff, delta, spec})
       (Array.cons diff'delta diffs'deltas)
       specs
-    in snd $ foldl specVersion (Tuple initVersion []) asdf
+    in Array.reverse $ snd $ foldl specVersion (Tuple initVersion []) asdf
 
 specVersion
   :: Tuple Version (Array History)
@@ -60,11 +60,12 @@ typeChanges d =
   }
 
 nextVersion :: Version -> Delta -> Version
-nextVersion {major,minor} Delta'Major = { major: major + 1, minor }
+nextVersion {major,minor} Delta'Major = { major: major + 1, minor: 0 }
 nextVersion {major,minor} Delta'Minor = { major, minor: minor + 1 }
 nextVersion version Delta'None = version
 
 versionChange :: SchemaDiff -> Delta
 versionChange d
-  | Array.null d.addType && Array.null d.removeType && Array.null d.modifyType = Delta'Minor
+  | Array.null d.addType && Array.null d.removeType && Array.null d.modifyType = Delta'None
+  | Array.null d.removeType && Array.null d.modifyType = Delta'Minor
   | otherwise = Delta'Major
