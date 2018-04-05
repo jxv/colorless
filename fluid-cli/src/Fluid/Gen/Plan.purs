@@ -262,7 +262,7 @@ lowercaseFirstLetter s = case Str.splitAt 1 s of
 
 uppercaseFirstLetter :: String -> String
 uppercaseFirstLetter s = case Str.splitAt 1 s of
-  Nothing -> s
+  Nothing -> Str.toUpper s
   Just s' -> Str.toUpper s'.before <> s'.after
 
 isString :: TypeName -> Boolean
