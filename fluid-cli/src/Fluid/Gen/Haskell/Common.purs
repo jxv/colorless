@@ -81,7 +81,7 @@ genWrap {name, type: type', label, instances: {text, number, float}, comment} = 
     Just c -> addLine ["-- | ", c ]
   addLine ["newtype ", name, " = ", name, " ", type']
   addLine
-    [ "  deriving (P.Eq, P.Ord, "
+    [ "  deriving (P.Eq, P.Ord, R.ToMarkup, "
     , if text then "P.IsString, R.ToText, " else ""
     , if number then "P.Num, P.Enum, " else ""
     , if float then "P.Floating, P.Fractional, P.Real, " else ""
